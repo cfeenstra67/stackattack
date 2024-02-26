@@ -1,0 +1,7 @@
+name: stackattack
+main: stack.ts
+runtime:
+  name: nodejs
+  options:
+    nodeargs: "--loader ts-node/esm --no-warnings"
+description: StackAttack
