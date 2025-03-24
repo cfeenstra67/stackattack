@@ -55,6 +55,7 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
         },
       },
       image: args.image,
+      command: args.command,
       healthCheck: args.healthcheck
         ? {
             command: ["CMD-SHELL", args.healthcheck.command],
@@ -108,6 +109,8 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
     ];
   }
 
+  const memory = args.memory ?? 256;
+
   const taskDefinition = new awsNative.ecs.TaskDefinition(
     ctx.id(),
     {
@@ -115,7 +118,7 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
       networkMode: "awsvpc",
       taskRoleArn: args.role,
       cpu: args.cpu ? pulumi.interpolate`${args.cpu}` : undefined,
-      memory: args.memory ? pulumi.interpolate`${args.memory}` : undefined,
+      memory: pulumi.interpolate`${memory}`,
       containerDefinitions: containers,
       tags: Object.entries(ctx.tags()).map(([key, value]) => ({ key, value })),
     },
@@ -163,14 +166,14 @@ export function service(ctx: Context, args: ServiceArgs) {
       orderedPlacementStrategies: [
         {
           type: "binpack",
-          field: "cpu",
+          field: "memory",
         },
       ],
       capacityProviderStrategies: [
         {
           capacityProvider: getCapacityProviderId(cluster.capacityProvider),
           weight: 1,
-          base: finalReplicas,
+          base: 1,
         },
       ],
     },

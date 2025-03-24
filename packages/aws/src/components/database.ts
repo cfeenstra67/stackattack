@@ -79,13 +79,6 @@ export function database(ctx: Context, args: DatabaseArgs) {
     },
   ];
 
-  const parameterGroup = new aws.rds.ParameterGroup(ctx.id("params"), {
-    family: "postgres13",
-    namePrefix: ctx.id("params"),
-    parameters: params,
-    tags: ctx.tags(),
-  });
-
   const username = args.username ?? "root";
 
   let password: pulumi.Output<string>;
@@ -116,6 +109,16 @@ export function database(ctx: Context, args: DatabaseArgs) {
 
   const name = args.name ?? "main";
 
+  const engine = args.engine ?? "postgres";
+
+  const version = args.version ?? "17";
+
+  const parameterGroup = new aws.rds.ParameterGroup(ctx.id("params"), {
+    family: pulumi.interpolate`${engine}${version}`,
+    parameters: params,
+    tags: ctx.tags(),
+  });
+
   const instance = new aws.rds.Instance(ctx.id(), {
     allocatedStorage: 30,
     applyImmediately: true,
@@ -125,13 +128,13 @@ export function database(ctx: Context, args: DatabaseArgs) {
     dbName: name,
     dbSubnetGroupName: subnetGroup.name,
     deletionProtection: !args.noDeletionProtection,
-    engine: args.engine,
-    engineVersion: args.version,
+    engine,
+    engineVersion: version,
     skipFinalSnapshot: false,
     finalSnapshotIdentifier: ctx.id("instance-snapshot"),
     deleteAutomatedBackups: false,
     caCertIdentifier: "rds-ca-rsa2048-g1",
-    instanceClass: args.instanceType ?? "t3.micro",
+    instanceClass: args.instanceType ?? "db.t4g.micro",
     port,
     username,
     password,
@@ -142,7 +145,7 @@ export function database(ctx: Context, args: DatabaseArgs) {
     tags: ctx.tags(),
   });
 
-  const url = pulumi.interpolate`${args.engine}://${username}:${password}@${instance.address}:${instance.port}/${name}`;
+  const url = pulumi.interpolate`${engine}://${username}:${password}@${instance.address}:${instance.port}/${name}`;
 
   return { instance, url };
 }

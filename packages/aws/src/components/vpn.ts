@@ -1,4 +1,5 @@
 import * as path from "node:path";
+import * as url from "node:url";
 import * as aws from "@pulumi/aws";
 import * as command from "@pulumi/command";
 import * as pulumi from "@pulumi/pulumi";
@@ -10,7 +11,9 @@ import {
   getVpcDnsServer,
 } from "./vpc.js";
 
-const scriptsDir = path.normalize(path.join(__dirname, "../../scripts"));
+const dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+const scriptsDir = path.normalize(path.join(dirname, "../../scripts"));
 
 const easyRsaGeneratePath = path.join(scriptsDir, "easy-rsa-generate.sh");
 
@@ -76,7 +79,7 @@ export function clientConfigFile({
     .all([hostname, name])
     .apply(([h, name]) => h.replace("*", name));
 
-  return pulumi.interpolate`client
+  const config = pulumi.interpolate`client
 dev tun
 proto udp
 remote ${remote} 443
@@ -99,6 +102,8 @@ ${clientPrivateKey}
 reneg-sec 0
 
 verify-x509-name server name`;
+
+  return pulumi.secret(config);
 }
 
 interface VpnArgs {
@@ -196,7 +201,7 @@ export function vpn(ctx: Context, args: VpnArgs) {
     connectionLogOptions,
   });
 
-  const subnetIdx = 0;
+  let subnetIdx = 0;
   for (const subnetId of args.privateSubnetIds) {
     new aws.ec2clientvpn.NetworkAssociation(
       ctx.id(`association-${subnetIdx}`),
@@ -205,6 +210,7 @@ export function vpn(ctx: Context, args: VpnArgs) {
         subnetId,
       },
     );
+    subnetIdx++;
   }
 
   new aws.ec2clientvpn.AuthorizationRule(ctx.id("network-authorization-rule"), {

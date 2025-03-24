@@ -50,7 +50,7 @@ export function getCapacityProviderId(
     if (typeof value === "string") {
       return pulumi.output(value);
     }
-    return value.id;
+    return value.name;
   });
 }
 
@@ -262,26 +262,36 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
     tags: ctx.tags(),
   });
 
-  const launchConfig = new aws.ec2.LaunchConfiguration(
-    ctx.id("launch-config"),
+  const initScript = clusterInstanceInitScript({
+    cluster: cluster.id,
+    paramName: cloudWatchConfigParam.name,
+  });
+
+  const launchTemplate = new aws.ec2.LaunchTemplate(
+    ctx.id("launch-template"),
     {
       imageId: ami.id,
       instanceType,
-      iamInstanceProfile: profile,
-      userData: clusterInstanceInitScript({
-        cluster: cluster.id,
-        paramName: cloudWatchConfigParam.name,
-      }),
-      securityGroups: [securityGroup.id],
-      rootBlockDevice: {
-        deleteOnTermination: true,
-        encrypted: true,
-        volumeSize: args.diskSize ?? 50,
+      iamInstanceProfile: {
+        arn: profile.arn,
       },
+      userData: initScript.apply((s) => Buffer.from(s).toString("base64")),
+      vpcSecurityGroupIds: [securityGroup.id],
+      blockDeviceMappings: [
+        {
+          deviceName: ami.rootDeviceName,
+          ebs: {
+            deleteOnTermination: "true",
+            encrypted: "true",
+            volumeSize: args.diskSize ?? 50,
+          },
+        },
+      ],
       metadataOptions: {
         httpEndpoint: "enabled",
         httpTokens: "required",
       },
+      tags: ctx.tags(),
     },
     {
       ignoreChanges: ["imageId"],
@@ -302,7 +312,10 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
     ctx.id("auto-scaling"),
     {
       vpcZoneIdentifiers: args.network.subnetIds,
-      launchConfiguration: launchConfig.name,
+      launchTemplate: {
+        id: launchTemplate.id,
+        version: "$Latest",
+      },
       minSize: sizes.min,
       maxSize: sizes.max,
       enabledMetrics: [
@@ -329,8 +342,8 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
   const capacityProvider = new aws.ecs.CapacityProvider(ctx.id(), {
     autoScalingGroupProvider: {
       autoScalingGroupArn: autoScalingGroup.arn,
-      managedTerminationProtection: "ENABLED",
-      // TODO: managed draining
+      managedTerminationProtection: "DISABLED",
+      managedDraining: "ENABLED",
       managedScaling: {
         status: "ENABLED",
         targetCapacity: 100,
@@ -376,6 +389,17 @@ export function cluster(ctx: Context, args: ClusterArgs): ClusterOutput {
     network: args.network,
     ...args.capacity,
   });
+
+  new aws.ecs.ClusterCapacityProviders(
+    ctx.id("capacity-providers"),
+    {
+      clusterName: cluster.name,
+      capacityProviders: [capacity.capacityProvider.name],
+    },
+    {
+      dependsOn: [capacity.autoScalingGroup],
+    },
+  );
 
   return {
     cluster,

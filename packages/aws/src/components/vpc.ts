@@ -144,7 +144,7 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
     new aws.ec2.Route(ctx.id("nat-route"), {
       routeTableId: privateRouteTable.id,
       destinationCidrBlock: "0.0.0.0/0",
-      gatewayId: natGateway.id,
+      natGatewayId: natGateway.id,
     });
   }
 
@@ -176,7 +176,7 @@ function availabilityZones(
 
   const allZones = aws.getAvailabilityZonesOutput();
 
-  const zoneIds = allZones.zoneIds.apply((zoneValues) => {
+  const zoneIds = allZones.names.apply((zoneValues) => {
     const results = zoneValues.sort().slice(0, zones);
     if (results.length < zones) {
       throw new Error(
@@ -222,13 +222,20 @@ function parseCidrBlock(block: string) {
 function cidrAllocator(cidrBlock: pulumi.Input<string>): CidrAllocator {
   const parsedCidr = pulumi.output(cidrBlock).apply(parseCidrBlock);
 
-  let counter = 4;
+  // https://docs.aws.amazon.com/vpc/latest/userguide/subnet-sizing.html
+  let counter = 256;
 
   return (subnetMask) =>
     parsedCidr.apply(({ block, ip, netmask }) => {
-      const maxIps = 1 << netmask;
-      const requestedIps = 1 << subnetMask;
-      const currentIp = ip + counter;
+      const maxIps = ip + (1 << (32 - netmask));
+      const requestedIps = 1 << (32 - subnetMask);
+      const nextIp = ip + counter;
+      let remainder = nextIp % requestedIps;
+      if (remainder > 0) {
+        remainder = requestedIps - remainder;
+      }
+      const currentIp = nextIp + remainder;
+
       if (currentIp + requestedIps > maxIps) {
         const remaining = maxIps - currentIp;
         throw new Error(
@@ -237,7 +244,7 @@ function cidrAllocator(cidrBlock: pulumi.Input<string>): CidrAllocator {
         );
       }
 
-      counter += requestedIps;
+      counter += requestedIps + remainder;
 
       return `${numberToIp(currentIp)}/${subnetMask}`;
     });
@@ -348,7 +355,7 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("vpc");
   }
-  const cidrBlock = args?.cidrBlock ?? "10.0.0.0";
+  const cidrBlock = args?.cidrBlock ?? "10.0.0.0/16";
 
   const vpc = new aws.ec2.Vpc(
     ctx.id(),
@@ -370,7 +377,7 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
 
   let publicSubnetIds: pulumi.Output<string>[] = [];
   let privateSubnetIds: pulumi.Output<string>[] = [];
-  const zones = availabilityZones(args?.availabilityZones ?? 1);
+  const zones = availabilityZones(args?.availabilityZones ?? 2);
   if (zones.length > 0) {
     const results = subnets(ctx, {
       vpc,

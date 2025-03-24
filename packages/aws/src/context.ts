@@ -1,4 +1,5 @@
 import * as crypto from "node:crypto";
+import * as pulumi from "@pulumi/pulumi";
 
 export interface Context {
   id: (value?: string) => string;
@@ -14,7 +15,14 @@ export interface ContextOpts {
 }
 
 export function context(opts?: ContextOpts): Context {
-  const prefix = opts?.prefix ?? "";
+  let prefix: string;
+  if (opts?.prefix !== undefined) {
+    prefix = opts.prefix;
+  } else {
+    prefix = pulumi.getStack();
+  }
+
+  // const prefix = opts?.prefix ?? "";
   const tagsObj = opts?.tags ?? {};
 
   const id = (value?: string) => [prefix, value].filter(Boolean).join("-");
