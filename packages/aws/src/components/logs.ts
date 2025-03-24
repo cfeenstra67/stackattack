@@ -1,9 +1,16 @@
 import * as aws from "@pulumi/aws";
-import { resourceIdGetter } from "../helpers.js";
+import * as pulumi from "@pulumi/pulumi";
 
-export const getLogGroupId = resourceIdGetter<
-  aws.cloudwatch.LogGroup,
-  aws.cloudwatch.GetLogGroupResult
->();
+export type LogGroupInput =
+  | pulumi.Input<string>
+  | pulumi.Input<aws.cloudwatch.LogGroup>
+  | pulumi.Input<aws.cloudwatch.GetLogGroupResult>;
 
-export type LogGroupInput = typeof getLogGroupId.$input;
+export function getLogGroupId(input: LogGroupInput): pulumi.Output<string> {
+  return pulumi.output(input).apply((value) => {
+    if (typeof value === "string") {
+      return pulumi.output(value);
+    }
+    return pulumi.output(value.id);
+  });
+}

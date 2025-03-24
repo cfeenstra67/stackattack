@@ -1,8 +1,8 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
+import { getEc2InstanceConnectCidr } from "../functions/ec2-instance-connect-cidr.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
-import { getEc2InstanceConnectCidr } from "./ec2-instance-connect-cidr.js";
 import { NetworkInput, VpcInput, getVpcId } from "./vpc.js";
 
 export type ClusterInput =
