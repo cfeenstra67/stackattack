@@ -1,5 +1,5 @@
-import { resourceIdGetter } from "@/helpers.js";
-import * as aws from '@pulumi/aws';
+import * as aws from "@pulumi/aws";
+import { resourceIdGetter } from "../helpers.js";
 
 export const getLogGroupId = resourceIdGetter<
   aws.cloudwatch.LogGroup,

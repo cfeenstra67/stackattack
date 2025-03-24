@@ -1,13 +1,18 @@
-import { Context } from "@/context.js";
-import { CidrAllocator, getVpcAttributes, getVpcDnsServer, getVpcId, VpcInput } from "./vpc.js";
-import * as aws from '@pulumi/aws';
-import * as pulumi from '@pulumi/pulumi';
-import * as command from '@pulumi/command';
-import * as path from 'node:path';
+import * as path from "node:path";
+import * as aws from "@pulumi/aws";
+import * as command from "@pulumi/command";
+import * as pulumi from "@pulumi/pulumi";
+import { Context } from "../context.js";
+import {
+  CidrAllocator,
+  VpcInput,
+  getVpcAttributes,
+  getVpcDnsServer,
+} from "./vpc.js";
 
-const scriptsDir = path.normalize(path.join(__dirname, '../../scripts'));
+const scriptsDir = path.normalize(path.join(__dirname, "../../scripts"));
 
-const easyRsaGeneratePath = path.join(scriptsDir, 'easy-rsa-generate.sh');
+const easyRsaGeneratePath = path.join(scriptsDir, "easy-rsa-generate.sh");
 
 export interface VPNCertificateArgs {
   commonName?: pulumi.Input<string>;
@@ -24,28 +29,27 @@ export interface VPNCertificateOutput {
   clientPrivateKey: string;
 }
 
-export function vpnCertificate(ctx: Context, args?: VPNCertificateArgs): pulumi.Output<VPNCertificateOutput> {
+export function vpnCertificate(
+  ctx: Context,
+  args?: VPNCertificateArgs,
+): pulumi.Output<VPNCertificateOutput> {
   if (!args?.noPrefix) {
-    ctx = ctx.prefix('certificate');
+    ctx = ctx.prefix("certificate");
   }
   const cmd = new command.local.Command(ctx.id(), {
     create: easyRsaGeneratePath,
-    triggers: [
-      args?.clientName,
-      args?.commonName,
-      args?.serverName
-    ],
+    triggers: [args?.clientName, args?.commonName, args?.serverName],
     environment: {
       ...(args?.clientName && {
-        CLIENT_NAME: args.clientName
+        CLIENT_NAME: args.clientName,
       }),
       ...(args?.commonName && {
-        COMMON_NAME: args.commonName
+        COMMON_NAME: args.commonName,
       }),
       ...(args?.serverName && {
-        SERVER_NAME: args.serverName
-      })
-    }
+        SERVER_NAME: args.serverName,
+      }),
+    },
   });
 
   return cmd.stdout.apply((data): VPNCertificateOutput => {
@@ -66,11 +70,11 @@ export function clientConfigFile({
   hostname,
   certificateChain,
   clientCertificate,
-  clientPrivateKey
+  clientPrivateKey,
 }: GenerateClientConfigArgs): pulumi.Output<string> {
-  const remote = pulumi.all([hostname, name]).apply(([h, name]) =>
-    h.replace('*', name)
-  );
+  const remote = pulumi
+    .all([hostname, name])
+    .apply(([h, name]) => h.replace("*", name));
 
   return pulumi.interpolate`client
 dev tun
@@ -110,7 +114,7 @@ interface VpnArgs {
 
 export function vpn(ctx: Context, args: VpnArgs) {
   if (!args.noPrefix) {
-    ctx = ctx.prefix('vpn');
+    ctx = ctx.prefix("vpn");
   }
   const vpc = getVpcAttributes(args.vpc);
 
@@ -120,7 +124,7 @@ export function vpn(ctx: Context, args: VpnArgs) {
   } else if (args.cidrAllocator) {
     cidrBlock = args.cidrAllocator(22);
   } else {
-    throw new Error(`cidrBlock or cidrAllocator must be provided`);
+    throw new Error("cidrBlock or cidrAllocator must be provided");
   }
 
   let certificate: pulumi.Output<VPNCertificateOutput>;
@@ -130,42 +134,49 @@ export function vpn(ctx: Context, args: VpnArgs) {
     certificate = vpnCertificate(ctx);
   }
 
-  const clientCertificate = new aws.acm.Certificate(ctx.id('client-certificate'), {
-    privateKey: certificate.clientPrivateKey,
-    certificateChain: certificate.ca,
-    certificateBody: certificate.clientCrt,
-  });
+  const clientCertificate = new aws.acm.Certificate(
+    ctx.id("client-certificate"),
+    {
+      privateKey: certificate.clientPrivateKey,
+      certificateChain: certificate.ca,
+      certificateBody: certificate.clientCrt,
+    },
+  );
 
-  const serverCertificate = new aws.acm.Certificate(ctx.id('server-certificate'), {
-    privateKey: certificate.serverPrivateKey,
-    certificateChain: certificate.ca,
-    certificateBody: certificate.serverCrt
-  });
-  
-  let connectionLogOptions: aws.ec2clientvpn.EndpointArgs['connectionLogOptions'] = {
-    enabled: false
-  };
+  const serverCertificate = new aws.acm.Certificate(
+    ctx.id("server-certificate"),
+    {
+      privateKey: certificate.serverPrivateKey,
+      certificateChain: certificate.ca,
+      certificateBody: certificate.serverCrt,
+    },
+  );
+
+  let connectionLogOptions: aws.ec2clientvpn.EndpointArgs["connectionLogOptions"] =
+    {
+      enabled: false,
+    };
   const enableConnectionLogs = args.enableConnectionLogs ?? true;
   if (enableConnectionLogs) {
     const connectionLogsGroup = new aws.cloudwatch.LogGroup(
-      ctx.id('connection-logs'),
+      ctx.id("connection-logs"),
       {
         tags: ctx.tags(),
-      }
+      },
     );
-  
+
     const connectionLogsStream = new aws.cloudwatch.LogStream(
-      ctx.id('connection-logs-stream'),
+      ctx.id("connection-logs-stream"),
       {
         logGroupName: connectionLogsGroup.name,
-      }
+      },
     );
 
     connectionLogOptions = {
       enabled: true,
       cloudwatchLogGroup: connectionLogsGroup.name,
       cloudwatchLogStream: connectionLogsStream.name,
-    }
+    };
   }
 
   const dnsServer = vpc.cidrBlock.apply(getVpcDnsServer);
@@ -175,30 +186,30 @@ export function vpn(ctx: Context, args: VpnArgs) {
     clientCidrBlock: cidrBlock,
     authenticationOptions: [
       {
-        type: 'certificate-authentication',
-        rootCertificateChainArn: clientCertificate.arn
-      }
+        type: "certificate-authentication",
+        rootCertificateChainArn: clientCertificate.arn,
+      },
     ],
-    selfServicePortal: 'disabled',
+    selfServicePortal: "disabled",
     dnsServers: [dnsServer],
     splitTunnel: true,
-    connectionLogOptions
+    connectionLogOptions,
   });
 
-  let subnetIdx = 0;
+  const subnetIdx = 0;
   for (const subnetId of args.privateSubnetIds) {
     new aws.ec2clientvpn.NetworkAssociation(
       ctx.id(`association-${subnetIdx}`),
       {
         clientVpnEndpointId: vpnEndpoint.id,
-        subnetId
-      }
+        subnetId,
+      },
     );
   }
 
-  new aws.ec2clientvpn.AuthorizationRule(ctx.id('network-authorization-rule'), {
+  new aws.ec2clientvpn.AuthorizationRule(ctx.id("network-authorization-rule"), {
     clientVpnEndpointId: vpnEndpoint.id,
-    targetNetworkCidr: '0.0.0.0/0',
+    targetNetworkCidr: "0.0.0.0/0",
     authorizeAllGroups: true,
   });
 
@@ -207,7 +218,7 @@ export function vpn(ctx: Context, args: VpnArgs) {
     hostname: vpnEndpoint.dnsName,
     certificateChain: certificate.ca,
     clientCertificate: certificate.clientCrt,
-    clientPrivateKey: certificate.clientPrivateKey
+    clientPrivateKey: certificate.clientPrivateKey,
   });
 
   return {

@@ -1,31 +1,37 @@
-import { Context } from "@/context.js";
-import { serviceAssumeRolePolicy } from "@/policies.js";
-import * as aws from '@pulumi/aws';
-import * as pulumi from '@pulumi/pulumi';
-import { getLogGroupId, LogGroupInput } from "./logs.js";
+import * as aws from "@pulumi/aws";
+import * as pulumi from "@pulumi/pulumi";
+import { Context } from "../context.js";
+import { serviceAssumeRolePolicy } from "../policies.js";
+import { LogGroupInput, getLogGroupId } from "./logs.js";
 
-export type VpcInput = pulumi.Input<string> | aws.ec2.Vpc | pulumi.Input<aws.ec2.GetVpcResult> | VpcOutput;
+export type VpcInput =
+  | pulumi.Input<string>
+  | aws.ec2.Vpc
+  | pulumi.Input<aws.ec2.GetVpcResult>
+  | VpcOutput;
 
 export function getVpcId(input: VpcInput): pulumi.Output<string> {
   return pulumi.output(input).apply((value) => {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return pulumi.output(value);
     }
-    if ('vpc' in value) {
+    if ("vpc" in value) {
       return value.vpc.id;
     }
     return pulumi.output(value.id);
   });
 }
 
-export function getVpcAttributes(input: VpcInput): pulumi.Output<aws.ec2.Vpc | aws.ec2.GetVpcResult> {
+export function getVpcAttributes(
+  input: VpcInput,
+): pulumi.Output<aws.ec2.Vpc | aws.ec2.GetVpcResult> {
   return pulumi.output(input).apply((value) => {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       return aws.ec2.getVpcOutput({
-        id: value
+        id: value,
       });
     }
-    if ('vpc' in value) {
+    if ("vpc" in value) {
       return pulumi.output(value.vpc);
     }
     return pulumi.output(value);
@@ -39,48 +45,54 @@ export interface InternetGatewayArgs {
 
 export function internetGateway(ctx: Context, args: InternetGatewayArgs) {
   if (!args.noPrefix) {
-    ctx = ctx.prefix('internet-gateway');
+    ctx = ctx.prefix("internet-gateway");
   }
   return new aws.ec2.InternetGateway(ctx.id(), {
     vpcId: getVpcId(args.vpc),
-    tags: { ...ctx.tags(), Name: ctx.id() }
+    tags: { ...ctx.tags(), Name: ctx.id() },
   });
 }
 
 interface SubnetsArgs {
   vpc: VpcInput;
   cidrAllocator: CidrAllocator;
-  nat?: 'single' | 'none';
+  nat?: "single" | "none";
   availabilityZones: number | pulumi.Input<string>[];
   noPrefix?: boolean;
 }
 
 export function subnets(ctx: Context, args: SubnetsArgs) {
   if (!args.noPrefix) {
-    ctx = ctx.prefix('subnets');
+    ctx = ctx.prefix("subnets");
   }
   const vpcId = getVpcId(args.vpc);
 
   const publicSubnetIds: pulumi.Output<string>[] = [];
   const privateSubnetIds: pulumi.Output<string>[] = [];
 
-  const publicRouteTable = new aws.ec2.RouteTable(ctx.id('public-route-table'), {
-    vpcId,
-    tags: { ...ctx.tags(), Name: ctx.id('public-route-table') }
-  });
+  const publicRouteTable = new aws.ec2.RouteTable(
+    ctx.id("public-route-table"),
+    {
+      vpcId,
+      tags: { ...ctx.tags(), Name: ctx.id("public-route-table") },
+    },
+  );
 
   const gateway = internetGateway(ctx, { vpc: args.vpc });
 
-  new aws.ec2.Route(ctx.id('gateway-route'), {
+  new aws.ec2.Route(ctx.id("gateway-route"), {
     routeTableId: publicRouteTable.id,
-    destinationCidrBlock: '0.0.0.0/0',
-    gatewayId: gateway.id
+    destinationCidrBlock: "0.0.0.0/0",
+    gatewayId: gateway.id,
   });
 
-  const privateRouteTable = new aws.ec2.RouteTable(ctx.id('private-route-table'), {
-    vpcId,
-    tags: { ...ctx.tags(), Name: ctx.id('private-route-table') }
-  });
+  const privateRouteTable = new aws.ec2.RouteTable(
+    ctx.id("private-route-table"),
+    {
+      vpcId,
+      tags: { ...ctx.tags(), Name: ctx.id("private-route-table") },
+    },
+  );
 
   let idx = 0;
   for (const zoneId of availabilityZones(args.availabilityZones)) {
@@ -88,52 +100,60 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
       vpcId,
       cidrBlock: args.cidrAllocator(24),
       availabilityZone: zoneId,
-      tags: { ...ctx.tags(), Name: ctx.id(`private-${idx}`) }
+      tags: { ...ctx.tags(), Name: ctx.id(`private-${idx}`) },
     });
     privateSubnetIds.push(privateSubnet.id);
 
-    new aws.ec2.RouteTableAssociation(ctx.id(`private-route-table-association-${idx}`), {
-      routeTableId: privateRouteTable.id,
-      subnetId: privateSubnet.id
-    });
-  
+    new aws.ec2.RouteTableAssociation(
+      ctx.id(`private-route-table-association-${idx}`),
+      {
+        routeTableId: privateRouteTable.id,
+        subnetId: privateSubnet.id,
+      },
+    );
+
     const publicSubnet = new aws.ec2.Subnet(ctx.id(`public-${idx}`), {
       vpcId,
       cidrBlock: args.cidrAllocator(24),
       availabilityZone: zoneId,
-      tags: { ...ctx.tags(), Name: ctx.id(`public-${idx}`) }
+      tags: { ...ctx.tags(), Name: ctx.id(`public-${idx}`) },
     });
     publicSubnetIds.push(publicSubnet.id);
 
-    new aws.ec2.RouteTableAssociation(ctx.id(`public-route-table-association-${idx}`), {
-      routeTableId: publicRouteTable.id,
-      subnetId: publicSubnet.id
-    });
+    new aws.ec2.RouteTableAssociation(
+      ctx.id(`public-route-table-association-${idx}`),
+      {
+        routeTableId: publicRouteTable.id,
+        subnetId: publicSubnet.id,
+      },
+    );
 
     idx++;
   }
 
-  const nat = args.nat ?? 'single';
-  if (nat === 'single') {
-    const elasticIp = new aws.ec2.Eip(ctx.id('nat-ip'));
+  const nat = args.nat ?? "single";
+  if (nat === "single") {
+    const elasticIp = new aws.ec2.Eip(ctx.id("nat-ip"));
 
-    const natGateway = new aws.ec2.NatGateway(ctx.id('nat-gateway'), {
+    const natGateway = new aws.ec2.NatGateway(ctx.id("nat-gateway"), {
       allocationId: elasticIp.id,
       subnetId: publicSubnetIds[0],
-      tags: ctx.tags()
+      tags: ctx.tags(),
     });
 
-    new aws.ec2.Route(ctx.id('nat-route'), {
+    new aws.ec2.Route(ctx.id("nat-route"), {
       routeTableId: privateRouteTable.id,
-      destinationCidrBlock: '0.0.0.0/0',
-      gatewayId: natGateway.id
+      destinationCidrBlock: "0.0.0.0/0",
+      gatewayId: natGateway.id,
     });
   }
 
   return { publicSubnetIds, privateSubnetIds };
 }
 
-function availabilityZones(zones: number | pulumi.Input<string>[]): pulumi.Output<string>[] {
+function availabilityZones(
+  zones: number | pulumi.Input<string>[],
+): pulumi.Output<string>[] {
   if (zones === 0 || (Array.isArray(zones) && zones.length === 0)) {
     return [];
   }
@@ -141,14 +161,16 @@ function availabilityZones(zones: number | pulumi.Input<string>[]): pulumi.Outpu
     const region = aws.getRegionOutput();
     const out: pulumi.Output<string>[] = [];
     for (const item of zones.sort()) {
-      out.push(pulumi.output(item).apply((val) => {
-        if (val.length === 1) {
-          return pulumi.interpolate`${region.name}${item}`
-        }
-        return pulumi.output(val);
-      }));
+      out.push(
+        pulumi.output(item).apply((val) => {
+          if (val.length === 1) {
+            return pulumi.interpolate`${region.name}${item}`;
+          }
+          return pulumi.output(val);
+        }),
+      );
     }
-  
+
     return out;
   }
 
@@ -157,21 +179,25 @@ function availabilityZones(zones: number | pulumi.Input<string>[]): pulumi.Outpu
   const zoneIds = allZones.zoneIds.apply((zoneValues) => {
     const results = zoneValues.sort().slice(0, zones);
     if (results.length < zones) {
-      throw new Error(`There are only ${zoneValues} < ${zones} AZs available in the current region`);
+      throw new Error(
+        `There are only ${zoneValues} < ${zones} AZs available in the current region`,
+      );
     }
     return results;
   });
 
   const out: pulumi.Output<string>[] = [];
   for (let i = 0; i < zones; i++) {
-    out.push(zoneIds.apply((ids) => ids[i]))
+    out.push(zoneIds.apply((ids) => ids[i]));
   }
 
   return out;
 }
 
 function ipToNumber(ip: string): number {
-  return ip.split('.').reduce((acc, octet) => (acc << 8) + Number(octet), 0) >>> 0;
+  return (
+    ip.split(".").reduce((acc, octet) => (acc << 8) + Number(octet), 0) >>> 0
+  );
 }
 
 function numberToIp(num: number): string {
@@ -179,18 +205,18 @@ function numberToIp(num: number): string {
     (num >>> 24) & 255,
     (num >>> 16) & 255,
     (num >>> 8) & 255,
-    num & 255
-  ].join('.');
+    num & 255,
+  ].join(".");
 }
 
 export type CidrAllocator = (netmask: number) => pulumi.Output<string>;
 
 function parseCidrBlock(block: string) {
-  const [cidrIp, netmask] = block.split('/');
-  if (!netmask || cidrIp.split('.').length !== 4) {
+  const [cidrIp, netmask] = block.split("/");
+  if (!netmask || cidrIp.split(".").length !== 4) {
     throw new Error(`Invalid cidr block: ${block}`);
   }
-  return { block, ip: ipToNumber(cidrIp), netmask: Number(netmask) }
+  return { block, ip: ipToNumber(cidrIp), netmask: Number(netmask) };
 }
 
 function cidrAllocator(cidrBlock: pulumi.Input<string>): CidrAllocator {
@@ -198,29 +224,32 @@ function cidrAllocator(cidrBlock: pulumi.Input<string>): CidrAllocator {
 
   let counter = 4;
 
-  return (subnetMask) => parsedCidr.apply(({ block, ip, netmask }) => {
-    const maxIps = 1 << netmask;
-    const requestedIps = 1 << subnetMask;
-    const currentIp = ip + counter;
-    if (currentIp + requestedIps > maxIps) {
-      const remaining = maxIps - currentIp;
-      throw new Error(
-        `Not enough addresses left (/${subnetMask}: ` +
-        `${requestedIps} > ${block}: ${remaining})`
-      );
-    }
+  return (subnetMask) =>
+    parsedCidr.apply(({ block, ip, netmask }) => {
+      const maxIps = 1 << netmask;
+      const requestedIps = 1 << subnetMask;
+      const currentIp = ip + counter;
+      if (currentIp + requestedIps > maxIps) {
+        const remaining = maxIps - currentIp;
+        throw new Error(
+          `Not enough addresses left (/${subnetMask}: ` +
+            `${requestedIps} > ${block}: ${remaining})`,
+        );
+      }
 
-    counter += requestedIps;
+      counter += requestedIps;
 
-    return `${numberToIp(currentIp)}/${subnetMask}`;
-  })
+      return `${numberToIp(currentIp)}/${subnetMask}`;
+    });
 }
 
-export function getVpcDnsServer(cidrBlock: pulumi.Input<string>): pulumi.Output<string> {
+export function getVpcDnsServer(
+  cidrBlock: pulumi.Input<string>,
+): pulumi.Output<string> {
   return pulumi.output(cidrBlock).apply((block) => {
     const parsedCidr = parseCidrBlock(block);
     return numberToIp(parsedCidr.ip + 2);
-  })
+  });
 }
 
 export interface VPCFlowLogsRoleArgs {
@@ -230,30 +259,37 @@ export interface VPCFlowLogsRoleArgs {
 
 export function vpcFlowLogsRole(ctx: Context, args: VPCFlowLogsRoleArgs) {
   if (!args.noPrefix) {
-    ctx = ctx.prefix('role');
+    ctx = ctx.prefix("role");
   }
   const logGroupId = getLogGroupId(args.logGroup);
   const logGroupOutput = aws.cloudwatch.getLogGroupOutput({ name: logGroupId });
   return new aws.iam.Role(ctx.id(), {
-    assumeRolePolicy: serviceAssumeRolePolicy('vpc-flow-logs').json,
+    assumeRolePolicy: serviceAssumeRolePolicy("vpc-flow-logs").json,
     tags: ctx.tags(),
     inlinePolicies: [
       {
-        name: 'vpc-flow-logs-policy',
+        name: "vpc-flow-logs-policy",
         policy: aws.iam.getPolicyDocumentOutput({
           statements: [
             {
-              actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
-              resources: [logGroupOutput.arn, pulumi.interpolate`${logGroupOutput.arn}:log-stream:*`]
+              actions: [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              resources: [
+                logGroupOutput.arn,
+                pulumi.interpolate`${logGroupOutput.arn}:log-stream:*`,
+              ],
             },
             {
-              actions: ['logs:DescribeLogGroups', 'logs:DescribeLogStream'],
-              resources: ['*']
-            }
-          ]
-        }).json
+              actions: ["logs:DescribeLogGroups", "logs:DescribeLogStream"],
+              resources: ["*"],
+            },
+          ],
+        }).json,
       },
-    ]
+    ],
   });
 }
 
@@ -264,20 +300,20 @@ export interface VPCFlowLogsArgs {
 
 export function vpcFlowLogs(ctx: Context, args: VPCFlowLogsArgs) {
   if (!args.noPrefix) {
-    ctx = ctx.prefix('flow-logs');
+    ctx = ctx.prefix("flow-logs");
   }
-  const logGroup = new aws.cloudwatch.LogGroup(ctx.id('log-group'), {
-    tags: ctx.tags()
+  const logGroup = new aws.cloudwatch.LogGroup(ctx.id("log-group"), {
+    tags: ctx.tags(),
   });
 
-  const role = vpcFlowLogsRole(ctx, { logGroup });
+  const role = vpcFlowLogsRole(ctx, { logGroup });
 
   new aws.ec2.FlowLog(ctx.id(), {
     iamRoleArn: role.arn,
     logDestination: logGroup.arn,
-    trafficType: 'ALL',
+    trafficType: "ALL",
     vpcId: getVpcId(args.vpc),
-    tags: ctx.tags()
+    tags: ctx.tags(),
   });
 }
 
@@ -291,6 +327,11 @@ interface VpcArgs {
 }
 
 export interface Network {
+  vpc: aws.ec2.Vpc;
+  subnetIds: pulumi.Output<string>[];
+}
+
+export interface NetworkInput {
   vpc: VpcInput;
   subnetIds: pulumi.Input<string>[];
 }
@@ -299,27 +340,31 @@ interface VpcOutput {
   vpc: aws.ec2.Vpc;
   publicSubnetIds: pulumi.Output<string>[];
   privateSubnetIds: pulumi.Output<string>[];
-  network: (type?: 'public' | 'private') => Network;
+  network: (type?: "public" | "private") => Network;
   cidrAllocator: CidrAllocator;
 }
 
 export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
   if (!args?.noPrefix) {
-    ctx = ctx.prefix('vpc');
+    ctx = ctx.prefix("vpc");
   }
-  const cidrBlock = args?.cidrBlock ?? '10.0.0.0';
+  const cidrBlock = args?.cidrBlock ?? "10.0.0.0";
 
-  const vpc = new aws.ec2.Vpc(ctx.id(), {
-    cidrBlock,
-    enableDnsHostnames: true,
-    enableDnsSupport: true,
-    tags: {
-      ...ctx.tags(),
-      Name: ctx.id()
-    }
-  }, {
-    protect: !args?.noProtect
-  });
+  const vpc = new aws.ec2.Vpc(
+    ctx.id(),
+    {
+      cidrBlock,
+      enableDnsHostnames: true,
+      enableDnsSupport: true,
+      tags: {
+        ...ctx.tags(),
+        Name: ctx.id(),
+      },
+    },
+    {
+      protect: !args?.noProtect,
+    },
+  );
 
   const allocator = cidrAllocator(cidrBlock);
 
@@ -330,7 +375,7 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
     const results = subnets(ctx, {
       vpc,
       cidrAllocator: allocator,
-      availabilityZones: zones
+      availabilityZones: zones,
     });
     publicSubnetIds = results.publicSubnetIds;
     privateSubnetIds = results.privateSubnetIds;
@@ -347,12 +392,12 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
     cidrAllocator: allocator,
     network: (type) => {
       if (type === undefined) {
-        type = 'private'
+        type = "private";
       }
       return {
         vpc,
-        subnetIds: type === 'private' ? privateSubnetIds : publicSubnetIds,
-      }
-    }
+        subnetIds: type === "private" ? privateSubnetIds : publicSubnetIds,
+      };
+    },
   };
 }

@@ -1,5 +1,5 @@
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 export function* walkFiles(dir: string): Generator<string> {
   if (!fs.existsSync(dir)) {

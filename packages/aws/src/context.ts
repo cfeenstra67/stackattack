@@ -1,4 +1,4 @@
-import * as crypto from 'node:crypto';
+import * as crypto from "node:crypto";
 
 export interface Context {
   id: (value?: string) => string;
@@ -14,23 +14,27 @@ export interface ContextOpts {
 }
 
 export function context(opts?: ContextOpts): Context {
-  const prefix = opts?.prefix ?? '';
+  const prefix = opts?.prefix ?? "";
   const tagsObj = opts?.tags ?? {};
 
-  const id = (value?: string) => [prefix, value].filter(Boolean).join('-');
+  const id = (value?: string) => [prefix, value].filter(Boolean).join("-");
 
   const shortId = (value: string) => {
-    const hashVal = crypto.createHash('sha1').update(id(value)).digest('hex').slice(0, 6);
+    const hashVal = crypto
+      .createHash("sha1")
+      .update(id(value))
+      .digest("hex")
+      .slice(0, 6);
     return `${value}-${hashVal}`;
   };
 
-  const tags: Context['tags'] = (others) => ({ ...tagsObj, ...others });
+  const tags: Context["tags"] = (others) => ({ ...tagsObj, ...others });
 
   return {
     id,
     shortId,
     tags,
     prefix: (value) => context({ prefix: id(value), tags: tagsObj }),
-    withTags: (others) => context({ prefix, tags: tags(others) })
+    withTags: (others) => context({ prefix, tags: tags(others) }),
   };
 }
