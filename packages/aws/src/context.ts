@@ -1,53 +1,36 @@
+import * as crypto from 'node:crypto';
 
-type ContextWithPrefix<S extends string, P extends string> =
-  S extends ''
-  ? Context<P>
-  : Context<`${S}-${P}`>;
+export interface Context {
+  id: (value?: string) => string;
+  shortId: (value: string) => string;
+  tags: (others?: Record<string, string>) => Record<string, string>;
+  prefix: (value: string) => Context;
+  withTags: (others: Record<string, string>) => Context;
+}
 
-type ContextId<S extends string, P extends string> =
-  S extends ''
-  ? P
-  : P extends ''
-  ? S
-  : `${S}-${P}`;
+export interface ContextOpts {
+  prefix?: string;
+  tags?: Record<string, string>;
+}
 
-export class Context<S extends string = ''> {
-  private readonly currentPrefix: S;
-  private readonly currentTags: Record<string, string>;
+export function context(opts?: ContextOpts): Context {
+  const prefix = opts?.prefix ?? '';
+  const tagsObj = opts?.tags ?? {};
 
-  constructor(
-    prefix?: S,
-    tags?: Record<string, string>
-  ) {
-    this.currentPrefix = prefix ?? '' as S;
-    this.currentTags = tags ?? {};
-  }
+  const id = (value?: string) => [prefix, value].filter(Boolean).join('-');
 
-  withPrefix<P extends string>(prefix: P): ContextWithPrefix<S, P> {
-    if (this.currentPrefix) {
-      return new Context(`${this.currentPrefix}-${prefix}`) as ContextWithPrefix<S, P>;
-    }
-    return new Context(prefix) as ContextWithPrefix<S, P>;
-  }
+  const shortId = (value: string) => {
+    const hashVal = crypto.createHash('sha1').update(id(value)).digest('hex').slice(0, 6);
+    return `${value}-${hashVal}`;
+  };
 
-  withTags(tags: Record<string, string>): Context<S> {
-    return new Context(
-      this.currentPrefix,
-      { ...this.currentTags, ...tags }
-    );
-  }
+  const tags: Context['tags'] = (others) => ({ ...tagsObj, ...others });
 
-  tags(tags?: Record<string, string>): Record<string, string> {
-    return { ...this.currentTags, ...tags };
-  }
-
-  id<N extends string = ''>(name?: N): ContextId<S, N> {
-    if (!this.currentPrefix) {
-      return (name ?? '') as ContextId<S, N>;
-    }
-    if (!name) {
-      return this.currentPrefix as ContextId<S, N>;
-    }
-    return [this.currentPrefix, name].join('-') as ContextId<S, N>;
-  }
+  return {
+    id,
+    shortId,
+    tags,
+    prefix: (value) => context({ prefix: id(value), tags: tagsObj }),
+    withTags: (others) => context({ prefix, tags: tags(others) })
+  };
 }
