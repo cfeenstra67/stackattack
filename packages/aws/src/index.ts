@@ -6,3 +6,5 @@ export * from "./components/service.js";
 export * from "./components/vpc.js";
 export * from "./components/vpn.js";
 export * from "./context.js";
+export * from "./components/certificate.js";
+export * from "./components/load-balancer.js";

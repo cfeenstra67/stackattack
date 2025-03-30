@@ -347,7 +347,7 @@ interface VpcOutput {
   vpc: aws.ec2.Vpc;
   publicSubnetIds: pulumi.Output<string>[];
   privateSubnetIds: pulumi.Output<string>[];
-  network: (type?: "public" | "private") => Network;
+  network: (type: "public" | "private") => Network;
   cidrAllocator: CidrAllocator;
 }
 
@@ -398,9 +398,6 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
     privateSubnetIds,
     cidrAllocator: allocator,
     network: (type) => {
-      if (type === undefined) {
-        type = "private";
-      }
       return {
         vpc,
         subnetIds: type === "private" ? privateSubnetIds : publicSubnetIds,

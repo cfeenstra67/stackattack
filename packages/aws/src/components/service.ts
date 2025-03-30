@@ -2,23 +2,32 @@ import * as aws from "@pulumi/aws";
 import * as awsNative from "@pulumi/aws-native";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
+import { getZoneFromDomain } from "./certificate.js";
 import {
-  ClusterWithCapacityProvider,
+  ClusterResourcesInput,
   getCapacityProviderId,
   getClusterAttributes,
+  getHttpNamespaceId,
 } from "./cluster.js";
-import { NetworkInput } from "./vpc.js";
+import {
+  LoadBalancerWithListener,
+  getListenerId,
+  getLoadBalancerAttributes,
+} from "./load-balancer.js";
+import { NetworkInput, getVpcId } from "./vpc.js";
 
 export interface TaskDefinitionArgs {
   name: pulumi.Input<string>;
   image: pulumi.Input<string>;
   command?: pulumi.Input<string[]>;
   healthcheck?: {
-    command: pulumi.Input<string>;
+    command?: pulumi.Input<string>;
+    path?: pulumi.Input<string>;
     interval?: pulumi.Input<number>;
     startPeriod?: pulumi.Input<number>;
     retries?: pulumi.Input<number>;
   };
+  port?: pulumi.Input<number>;
   role?: pulumi.Input<string>;
   memory?: pulumi.Input<number>;
   cpu?: pulumi.Input<number>;
@@ -43,6 +52,37 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
     retentionInDays: args.logRetention ?? 30,
   });
 
+  let healthCheck:
+    | awsNative.types.input.ecs.TaskDefinitionHealthCheckArgs
+    | undefined = undefined;
+  const healthInterval = args.healthcheck?.interval ?? 10;
+  const healthStartPeriod = args.healthcheck?.startPeriod ?? 30;
+  const healthRetries = args.healthcheck?.retries ?? 3;
+  if (args.healthcheck?.command) {
+    healthCheck = {
+      command: ["CMD-SHELL", args.healthcheck.command],
+      interval: healthInterval,
+      startPeriod: healthStartPeriod,
+      retries: healthRetries,
+    };
+  } else if (args.healthcheck?.path) {
+    const url = pulumi
+      .all([args.port, args.healthcheck.path])
+      .apply(([port, path]) => {
+        const baseUrl = port ? `http://localhost:${port}` : "http://localhost";
+        return new URL(path, baseUrl).href;
+      });
+    healthCheck = {
+      command: [
+        "CMD-SHELL",
+        pulumi.interpolate`wget -q "${url}" -O - &> /dev/null`,
+      ],
+      interval: healthInterval,
+      startPeriod: healthStartPeriod,
+      retries: healthRetries,
+    };
+  }
+
   const appContainer: awsNative.types.input.ecs.TaskDefinitionContainerDefinitionArgs =
     {
       name: args.name,
@@ -56,14 +96,16 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
       },
       image: args.image,
       command: args.command,
-      healthCheck: args.healthcheck
-        ? {
-            command: ["CMD-SHELL", args.healthcheck.command],
-            interval: args.healthcheck.interval ?? 10,
-            startPeriod: args.healthcheck.startPeriod ?? 30,
-            retries: args.healthcheck.retries ?? 3,
-          }
-        : undefined,
+      healthCheck,
+      portMappings: args.port
+        ? [
+            {
+              name: args.name,
+              appProtocol: "http",
+              containerPort: args.port,
+            },
+          ]
+        : [],
       environment: pulumi
         .output(args.env ?? {})
         .apply((env) =>
@@ -133,20 +175,109 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
 export type ServiceArgs = TaskDefinitionArgs & {
   network: NetworkInput;
   replicas?: pulumi.Input<number>;
-  cluster: ClusterWithCapacityProvider;
+  cluster: ClusterResourcesInput;
+  domain?: pulumi.Input<string>;
+  zone?: pulumi.Input<string>;
+  loadBalancer?: LoadBalancerWithListener;
 };
 
-export function service(ctx: Context, args: ServiceArgs) {
-  const { network, cluster, replicas, noPrefix, ...taskArgs } = args;
+export interface ServiceOutput {
+  service: aws.ecs.Service;
+}
+
+export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
+  const {
+    network,
+    cluster,
+    replicas,
+    noPrefix,
+    port: portArg,
+    ...taskArgs
+  } = args;
   if (!noPrefix) {
     ctx = ctx.prefix("service");
   }
+  const port = portArg ? portArg : args.domain ? 80 : undefined;
 
-  const definition = taskDefinition(ctx, taskArgs);
+  const definition = taskDefinition(ctx, { ...taskArgs, port });
 
   const clusterAttrs = getClusterAttributes(cluster.cluster);
 
   const finalReplicas = args.replicas ?? 1;
+
+  const loadBalancers: aws.types.input.ecs.ServiceLoadBalancer[] = [];
+  const dependsOn: pulumi.Input<pulumi.Resource>[] = [];
+
+  if (args.domain && !args.loadBalancer) {
+    throw new Error("loadBalancer must be specified with domain");
+  }
+  if (args.domain) {
+    const targetGroup = new aws.lb.TargetGroup(ctx.id("target-group"), {
+      namePrefix: pulumi.output(args.name).apply((name) => name.slice(0, 6)),
+      healthCheck: args.healthcheck?.path
+        ? {
+            path: args.healthcheck.path,
+            matcher: "200",
+          }
+        : undefined,
+      targetType: "ip",
+      port,
+      protocol: "HTTP",
+      deregistrationDelay: 30,
+      tags: ctx.tags(),
+      vpcId: getVpcId(args.network.vpc),
+    });
+
+    const rule = new aws.lb.ListenerRule(
+      ctx.id("rule"),
+      {
+        listenerArn: getListenerId(args.loadBalancer!.listener),
+        actions: [
+          {
+            type: "forward",
+            targetGroupArn: targetGroup.arn,
+          },
+        ],
+        conditions: [
+          {
+            hostHeader: {
+              values: [args.domain],
+            },
+          },
+        ],
+        tags: ctx.tags(),
+      },
+      {
+        deleteBeforeReplace: true,
+      },
+    );
+
+    const zone = args.zone ?? getZoneFromDomain(args.domain);
+
+    const loadBalancer = getLoadBalancerAttributes(
+      args.loadBalancer!.loadBalancer,
+    );
+
+    new aws.route53.Record(ctx.id("dns-record-api"), {
+      zoneId: zone,
+      name: args.domain,
+      type: "A",
+      aliases: [
+        {
+          name: pulumi.interpolate`dualstack.${loadBalancer.dnsName}`,
+          zoneId: loadBalancer.zoneId,
+          evaluateTargetHealth: true,
+        },
+      ],
+    });
+
+    loadBalancers.push({
+      targetGroupArn: targetGroup.arn,
+      containerName: args.name,
+      containerPort: port!,
+    });
+    dependsOn.push(rule);
+  }
 
   const service = new aws.ecs.Service(
     ctx.id(),
@@ -162,6 +293,20 @@ export function service(ctx: Context, args: ServiceArgs) {
       deploymentCircuitBreaker: {
         enable: true,
         rollback: true,
+      },
+      loadBalancers,
+      serviceConnectConfiguration: {
+        enabled: true,
+        namespace: cluster.httpNamespace
+          ? getHttpNamespaceId(cluster.httpNamespace)
+          : undefined,
+        services: args.port
+          ? [
+              {
+                portName: args.name,
+              },
+            ]
+          : [],
       },
       orderedPlacementStrategies: [
         {
@@ -179,6 +324,7 @@ export function service(ctx: Context, args: ServiceArgs) {
     },
     {
       ignoreChanges: replicas ? [] : ["desiredCount"],
+      dependsOn,
     },
   );
 

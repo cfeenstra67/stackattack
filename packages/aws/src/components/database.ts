@@ -120,6 +120,7 @@ export function database(ctx: Context, args: DatabaseArgs) {
   });
 
   const instance = new aws.rds.Instance(ctx.id(), {
+    identifierPrefix: ctx.id(""),
     allocatedStorage: 30,
     applyImmediately: true,
     availabilityZone,

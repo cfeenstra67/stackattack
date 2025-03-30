@@ -54,6 +54,22 @@ export function getCapacityProviderId(
   });
 }
 
+export type HttpNamespaceInput =
+  | pulumi.Input<string>
+  | pulumi.Input<aws.servicediscovery.HttpNamespace>
+  | pulumi.Input<aws.servicediscovery.GetHttpNamespaceResult>;
+
+export function getHttpNamespaceId(
+  input: HttpNamespaceInput,
+): pulumi.Output<string> {
+  return pulumi.output(input).apply((value) => {
+    if (typeof value === "string") {
+      return pulumi.output(value);
+    }
+    return pulumi.output(value.arn);
+  });
+}
+
 export interface ClusterInstanceRoleArgs {
   noPrefix?: boolean;
 }
@@ -358,36 +374,56 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
   return { capacityProvider, autoScalingGroup };
 }
 
-export interface ClusterArgs {
+export interface ClusterArgs extends ClusterCapacityConfig {
   network: NetworkInput;
   noPrefix?: boolean;
-  capacity?: ClusterCapacityConfig;
 }
 
-export interface ClusterWithCapacityProvider {
+export interface ClusterResourcesInput {
   cluster: ClusterInput;
   capacityProvider: CapacityProviderInput;
+  httpNamespace?: HttpNamespaceInput;
 }
 
 export interface ClusterOutput {
   cluster: aws.ecs.Cluster;
   capacityProvider: aws.ecs.CapacityProvider;
   autoScalingGroup: aws.autoscaling.Group;
+  httpNamespace: aws.servicediscovery.HttpNamespace;
+}
+
+export function clusterToIds(cluster: ClusterOutput): ClusterResourcesInput {
+  return {
+    cluster: cluster.cluster.id,
+    capacityProvider: cluster.capacityProvider.id,
+    httpNamespace: cluster.httpNamespace.arn,
+  };
 }
 
 export function cluster(ctx: Context, args: ClusterArgs): ClusterOutput {
-  if (!args.noPrefix) {
+  const { network, noPrefix, ...capacityArgs } = args;
+  if (!noPrefix) {
     ctx = ctx.prefix("cluster");
   }
 
+  const namespace = new aws.servicediscovery.HttpNamespace(
+    ctx.id("http-namespace"),
+    {
+      tags: ctx.tags(),
+    },
+  );
+
   const cluster = new aws.ecs.Cluster(ctx.id(), {
+    serviceConnectDefaults: {
+      namespace: namespace.arn,
+    },
     tags: ctx.tags(),
   });
 
   const capacity = clusterCapacity(ctx, {
     cluster,
-    network: args.network,
-    ...args.capacity,
+    network,
+    ...capacityArgs,
   });
 
   new aws.ecs.ClusterCapacityProviders(
@@ -405,5 +441,6 @@ export function cluster(ctx: Context, args: ClusterArgs): ClusterOutput {
     cluster,
     capacityProvider: capacity.capacityProvider,
     autoScalingGroup: capacity.autoScalingGroup,
+    httpNamespace: namespace,
   };
 }

@@ -14,18 +14,24 @@ export interface ContextOpts {
   tags?: Record<string, string>;
 }
 
+function defaultContextPrefix(): string {
+  const project = pulumi.getProject();
+  const stack = pulumi.getStack();
+  return stack.startsWith(project) ? stack : `${project}-${stack}`;
+}
+
 export function context(opts?: ContextOpts): Context {
   let prefix: string;
   if (opts?.prefix !== undefined) {
     prefix = opts.prefix;
   } else {
-    prefix = pulumi.getStack();
+    prefix = defaultContextPrefix();
   }
 
-  // const prefix = opts?.prefix ?? "";
   const tagsObj = opts?.tags ?? {};
 
-  const id = (value?: string) => [prefix, value].filter(Boolean).join("-");
+  const id = (value?: string) =>
+    [prefix, value].filter((v) => v !== undefined).join("-");
 
   const shortId = (value: string) => {
     const hashVal = crypto

@@ -1,76 +1,47 @@
-import { bucket } from '@/components/bucket.js';
-import { cluster } from '@/components/cluster.js';
-import { database } from '@/components/database.js';
-import { service } from '@/components/service.js';
-import { vpc } from '@/components/vpc.js';
-import { vpn } from '@/components/vpn.js';
-import { Context, context } from '@/context.js';
+import * as saws from './src/index.js';
 
-// type APIFunctions = Record<string, (ctx: Context, args: never) => unknown>;
+const ctx = saws.context();
 
-const aws = {
-  bucket,
-  vpc,
-  vpn,
-  cluster,
-  database,
-  service,
-};
+const bucket = saws.bucket(ctx);
+const vpc = saws.vpc(ctx);
+const vpn = saws.vpn(ctx, vpc);
 
-// type API<F extends APIFunctions> = {
-//   [key in keyof F]: 
-//     undefined extends Parameters<F[key]>[1]
-//     ? (args?: Parameters<F[key]>[1]) => ReturnType<F[key]>
-//     : (args: Parameters<F[key]>[1]) => ReturnType<F[key]>
-// };
+const domain = 'sa-test.singlesock.co';
 
-// function api<F extends APIFunctions>(funcs: F): (ctx: Context) => API<F> {
-//   return (ctx) => {
-//     const out = {} as API<F>;
-//     for (const [key, value] of Object.entries(funcs)) {
-//       out[key as keyof F] = ((args) => value(ctx, args as never)) as never;
-//     }
-//     return out;
-//   };
-// }
+const certificate = saws.certificate(ctx, { domain });
+const loadBalancer = saws.loadBalancer(ctx, {
+  network: vpc.network('public'),
+  certificate,
+});
 
-// type B = API<typeof apiFunctions>;
+const cluster = saws.cluster(ctx, {
+  network: vpc.network('private'),
+  instanceType: 't4g.micro',
+  maxSize: 3
+});
+const database = saws.database(ctx, { network: vpc.network('private') });
 
-// const apis = {
-//   aws: api({
-//     bucket,
-//     vpc,
-//     vpn,
-//     cluster,
-//     database,
-//   })
-// };
+const nginx = saws.service(ctx, {
+  name: 'nginx',
+  image: 'nginx:latest',
+  env: {
+    DATABASE_URL: database.url
+  },
+  healthcheck: {
+    path: '/'
+  },
+  domain,
+  loadBalancer,
+  network: vpc.network('private'),
+  cluster
+});
 
-function main() {
-  const ctx = context();
+export const bucketName = bucket.bucket;
 
-  const bucket = aws.bucket(ctx);
-  const vpc = aws.vpc(ctx);
-  const vpn = aws.vpn(ctx, vpc);
-  const network = vpc.network();
+export const clientConfig = vpn.clientConfig;
 
-  const cluster = aws.cluster(ctx, { network });
-  const database = aws.database(ctx, { network });
-  const service = aws.service(ctx, {
-    name: 'my-nginx',
-    image: 'nginx:latest',
-    env: {
-      DATABASE_URL: database.url
-    },
-    network,
-    cluster
-  });
+export const clusterOutput = saws.clusterToIds(cluster);
 
-  return {
-    bucketName: bucket.bucket,
-    clientConfig: vpn.clientConfig,
-    clusterName: cluster.cluster.name,
-  };
-}
+export const databaseUrl = database.url;
 
-main();
+export const loadBalancerOutput = saws.loadBalancerToIds(loadBalancer);
