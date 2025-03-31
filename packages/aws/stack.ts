@@ -2,7 +2,7 @@ import * as saws from './src/index.js';
 
 const ctx = saws.context();
 
-const bucket = saws.bucket(ctx);
+// const bucket = saws.bucket(ctx);
 const vpc = saws.vpc(ctx);
 const vpn = saws.vpn(ctx, vpc);
 
@@ -18,7 +18,7 @@ const cluster = saws.cluster(ctx, {
   network: vpc.network('private'),
   instanceType: 'a1.medium',
 });
-const database = saws.database(ctx, { network: vpc.network('private') });
+// const database = saws.database(ctx, { network: vpc.network('private') });
 
 const nginx = saws.service(ctx, {
   name: 'nginx',
@@ -26,9 +26,9 @@ const nginx = saws.service(ctx, {
   memory: 256,
   cpu: 256,
   replicas: 1,
-  env: {
-    DATABASE_URL: database.url
-  },
+  // env: {
+  //   DATABASE_URL: database.url
+  // },
   healthcheck: {
     path: '/'
   },
@@ -38,12 +38,12 @@ const nginx = saws.service(ctx, {
   cluster
 });
 
-export const bucketName = bucket.bucket;
+// export const bucketName = bucket.bucket;
 
 export const clientConfig = vpn.clientConfig;
 
 export const clusterOutput = saws.clusterToIds(cluster);
 
-export const databaseUrl = database.url;
+// export const databaseUrl = database.url;
 
 export const loadBalancerOutput = saws.loadBalancerToIds(loadBalancer);

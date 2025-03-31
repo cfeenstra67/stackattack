@@ -12,7 +12,8 @@
 		"rules": {
 			"recommended": true,
 			"style": {
-				"noNonNullAssertion": "off"
+				"noNonNullAssertion": "off",
+				"noParameterAssign": "off"
 			},
 			"nursery": {
 				"noUnusedImports": "error"
