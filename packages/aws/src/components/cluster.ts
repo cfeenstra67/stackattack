@@ -3,7 +3,7 @@ import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
 import { getEc2InstanceConnectCidr } from "../functions/ec2-instance-connect-cidr.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
-import { NetworkInput, VpcInput, getVpcId } from "./vpc.js";
+import { NetworkInput, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
 
 export type ClusterInput =
   | pulumi.Input<string>
@@ -67,6 +67,21 @@ export function getHttpNamespaceId(
       return pulumi.output(value);
     }
     return pulumi.output(value.arn);
+  });
+}
+
+export type PrivateDnsNamespaceInput =
+  | pulumi.Input<string>
+  | pulumi.Input<aws.servicediscovery.PrivateDnsNamespace>;
+
+export function getPrivateDnsNamespaceId(
+  input: PrivateDnsNamespaceInput,
+): pulumi.Output<string> {
+  return pulumi.output(input).apply((value) => {
+    if (typeof value === "string") {
+      return pulumi.output(value);
+    }
+    return pulumi.output(value.id);
   });
 }
 
@@ -161,8 +176,11 @@ export function clusterSecurityGroup(
     tags: ctx.tags(),
   });
 
+  const vpcAttrs = getVpcAttributes(args.vpc);
+
   const extraAccessCidrs: pulumi.Input<string>[] = [
     getEc2InstanceConnectCidr(),
+    vpcAttrs.cidrBlock,
   ];
   new aws.ec2.SecurityGroupRule(
     ctx.id("ingress-ssh"),
@@ -382,21 +400,21 @@ export interface ClusterArgs extends ClusterCapacityConfig {
 export interface ClusterResourcesInput {
   cluster: ClusterInput;
   capacityProvider: CapacityProviderInput;
-  httpNamespace?: HttpNamespaceInput;
+  privateNamespace?: PrivateDnsNamespaceInput;
 }
 
 export interface ClusterOutput {
   cluster: aws.ecs.Cluster;
   capacityProvider: aws.ecs.CapacityProvider;
   autoScalingGroup: aws.autoscaling.Group;
-  httpNamespace: aws.servicediscovery.HttpNamespace;
+  privateNamespace: aws.servicediscovery.PrivateDnsNamespace;
 }
 
 export function clusterToIds(cluster: ClusterOutput): ClusterResourcesInput {
   return {
     cluster: cluster.cluster.id,
     capacityProvider: cluster.capacityProvider.id,
-    httpNamespace: cluster.httpNamespace.arn,
+    privateNamespace: cluster.privateNamespace.id,
   };
 }
 
@@ -406,19 +424,33 @@ export function cluster(ctx: Context, args: ClusterArgs): ClusterOutput {
     ctx = ctx.prefix("cluster");
   }
 
-  const namespace = new aws.servicediscovery.HttpNamespace(
-    ctx.id("http-namespace"),
+  const vpcTrunkingSetting = new aws.ecs.AccountSettingDefault(
+    ctx.id("vpc-trunking-setting"),
     {
-      tags: ctx.tags(),
+      name: "awsvpcTrunking",
+      value: "enabled",
     },
   );
 
-  const cluster = new aws.ecs.Cluster(ctx.id(), {
-    serviceConnectDefaults: {
-      namespace: namespace.arn,
+  const cluster = new aws.ecs.Cluster(
+    ctx.id(),
+    {
+      tags: ctx.tags(),
     },
-    tags: ctx.tags(),
-  });
+    { dependsOn: [vpcTrunkingSetting] },
+  );
+
+  const privateNamespace = new aws.servicediscovery.PrivateDnsNamespace(
+    ctx.id("private-namespace"),
+    {
+      vpc: getVpcId(args.network.vpc),
+      name: cluster.name,
+      tags: ctx.tags(),
+    },
+    {
+      deleteBeforeReplace: true,
+    },
+  );
 
   const capacity = clusterCapacity(ctx, {
     cluster,
@@ -441,6 +473,6 @@ export function cluster(ctx: Context, args: ClusterArgs): ClusterOutput {
     cluster,
     capacityProvider: capacity.capacityProvider,
     autoScalingGroup: capacity.autoScalingGroup,
-    httpNamespace: namespace,
+    privateNamespace,
   };
 }

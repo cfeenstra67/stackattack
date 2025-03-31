@@ -16,14 +16,16 @@ const loadBalancer = saws.loadBalancer(ctx, {
 
 const cluster = saws.cluster(ctx, {
   network: vpc.network('private'),
-  instanceType: 't4g.micro',
-  maxSize: 3
+  instanceType: 'a1.medium',
 });
 const database = saws.database(ctx, { network: vpc.network('private') });
 
 const nginx = saws.service(ctx, {
   name: 'nginx',
   image: 'nginx:latest',
+  memory: 256,
+  cpu: 256,
+  replicas: 1,
   env: {
     DATABASE_URL: database.url
   },

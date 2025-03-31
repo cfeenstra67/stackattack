@@ -7,14 +7,14 @@ import {
   ClusterResourcesInput,
   getCapacityProviderId,
   getClusterAttributes,
-  getHttpNamespaceId,
+  getPrivateDnsNamespaceId,
 } from "./cluster.js";
 import {
   LoadBalancerWithListener,
   getListenerId,
   getLoadBalancerAttributes,
 } from "./load-balancer.js";
-import { NetworkInput, getVpcId } from "./vpc.js";
+import { NetworkInput, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
 
 export interface TaskDefinitionArgs {
   name: pulumi.Input<string>;
@@ -151,7 +151,8 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
     ];
   }
 
-  const memory = args.memory ?? 256;
+  const memory = args.memory ?? 512;
+  const cpu = args.cpu ?? 512;
 
   const taskDefinition = new awsNative.ecs.TaskDefinition(
     ctx.id(),
@@ -159,7 +160,7 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
       family: args.name,
       networkMode: "awsvpc",
       taskRoleArn: args.role,
-      cpu: args.cpu ? pulumi.interpolate`${args.cpu}` : undefined,
+      cpu: pulumi.interpolate`${cpu}`,
       memory: pulumi.interpolate`${memory}`,
       containerDefinitions: containers,
       tags: Object.entries(ctx.tags()).map(([key, value]) => ({ key, value })),
@@ -170,6 +171,58 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
   );
 
   return taskDefinition;
+}
+
+export interface ServiceSecurityGroupArgs {
+  vpc: VpcInput;
+  port: pulumi.Input<number>;
+  noPrefix?: boolean;
+}
+
+export function serviceSecurityGroup(
+  ctx: Context,
+  args: ServiceSecurityGroupArgs,
+) {
+  if (!args.noPrefix) {
+    ctx = ctx.prefix("security-group");
+  }
+
+  const vpcAttrs = getVpcAttributes(args.vpc);
+  const group = new aws.ec2.SecurityGroup(ctx.id(), {
+    vpcId: getVpcId(vpcAttrs.id),
+    tags: ctx.tags(),
+  });
+  new aws.ec2.SecurityGroupRule(
+    ctx.id("ingress"),
+    {
+      type: "ingress",
+      securityGroupId: group.id,
+      protocol: "tcp",
+      fromPort: args.port,
+      toPort: args.port,
+      cidrBlocks: [vpcAttrs.cidrBlock],
+      ipv6CidrBlocks: vpcAttrs.ipv6CidrBlock.apply((v) => (v ? [v] : [])),
+    },
+    {
+      deleteBeforeReplace: true,
+    },
+  );
+  new aws.ec2.SecurityGroupRule(
+    ctx.id("egress"),
+    {
+      type: "egress",
+      securityGroupId: group.id,
+      protocol: "-1",
+      fromPort: 0,
+      toPort: 0,
+      cidrBlocks: ["0.0.0.0/0"],
+      ipv6CidrBlocks: ["::/0"],
+    },
+    {
+      deleteBeforeReplace: true,
+    },
+  );
+  return group;
 }
 
 export type ServiceArgs = TaskDefinitionArgs & {
@@ -279,6 +332,41 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
     dependsOn.push(rule);
   }
 
+  const securityGroups: pulumi.Output<string>[] = [];
+  if (port) {
+    const group = serviceSecurityGroup(ctx, {
+      vpc: args.network.vpc,
+      port,
+    });
+
+    securityGroups.push(group.id);
+  }
+
+  let serviceDiscovery: aws.servicediscovery.Service | undefined = undefined;
+  if (args.cluster.privateNamespace && port) {
+    serviceDiscovery = new aws.servicediscovery.Service(
+      ctx.id("service-discovery"),
+      {
+        name: ctx.id(),
+        dnsConfig: {
+          namespaceId: getPrivateDnsNamespaceId(args.cluster.privateNamespace),
+          dnsRecords: [
+            {
+              ttl: 10,
+              type: "A",
+            },
+          ],
+          routingPolicy: "MULTIVALUE",
+        },
+        forceDestroy: true,
+        tags: ctx.tags(),
+      },
+      {
+        deleteBeforeReplace: true,
+      },
+    );
+  }
+
   const service = new aws.ecs.Service(
     ctx.id(),
     {
@@ -287,6 +375,7 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
       taskDefinition: definition.taskDefinitionArn,
       networkConfiguration: {
         subnets: network.subnetIds,
+        securityGroups,
       },
       waitForSteadyState: true,
       tags: ctx.tags(),
@@ -295,23 +384,16 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
         rollback: true,
       },
       loadBalancers,
-      serviceConnectConfiguration: {
-        enabled: true,
-        namespace: cluster.httpNamespace
-          ? getHttpNamespaceId(cluster.httpNamespace)
-          : undefined,
-        services: args.port
-          ? [
-              {
-                portName: args.name,
-              },
-            ]
-          : [],
-      },
+      serviceRegistries: serviceDiscovery
+        ? {
+            registryArn: serviceDiscovery.arn,
+            containerName: args.name,
+          }
+        : undefined,
       orderedPlacementStrategies: [
         {
           type: "binpack",
-          field: "memory",
+          field: "cpu",
         },
       ],
       capacityProviderStrategies: [
