@@ -1,5 +1,5 @@
 {
-  "mode": "exit",
+  "mode": "pre",
   "tag": "dev",
   "initialVersions": {
     "@stackattack/metabase-example": "0.0.1",
