@@ -5,7 +5,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "check": "pnpm run -r check"
+    "check": "pnpm run -r check",
+    "prerelease-enter": "changeset pre enter dev",
+    "prerelease-exit": "changeset pre exit"
   },
   "keywords": [],
   "author": "",
