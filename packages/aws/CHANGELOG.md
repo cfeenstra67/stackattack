@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.0.2-dev.1
+
+### Patch Changes
+
+- 418bb3e: Include compiled JS in bundle
+
 ## 0.0.2-dev.0
 
 ### Patch Changes
