@@ -120,9 +120,12 @@ export interface LoadBalancerListenerArgs {
   noPrefix?: boolean;
 }
 
-export function loadBalancerListener(ctx: Context, args: LoadBalancerListenerArgs) {
+export function loadBalancerListener(
+  ctx: Context,
+  args: LoadBalancerListenerArgs,
+) {
   if (!args.noPrefix) {
-    ctx = ctx.prefix('listener');
+    ctx = ctx.prefix("listener");
   }
 
   let listener: aws.lb.Listener;
@@ -228,7 +231,7 @@ export function loadBalancer(
 
   const listener = loadBalancerListener(ctx, {
     loadBalancer,
-    certificate: args.certificate
+    certificate: args.certificate,
   });
 
   return { loadBalancer, listener };
