@@ -4,6 +4,12 @@
   "version": "0.0.2-dev.0",
   "description": "",
   "main": "src/index.ts",
+  "files": [
+    "dist/**",
+    "src/**",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
