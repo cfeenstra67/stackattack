@@ -114,6 +114,73 @@ export function loadBalancerSecurityGroup(
   return group;
 }
 
+export interface LoadBalancerListenerArgs {
+  loadBalancer: LoadBalancerInput;
+  certificate?: pulumi.Input<string>;
+  noPrefix?: boolean;
+}
+
+export function loadBalancerListener(ctx: Context, args: LoadBalancerListenerArgs) {
+  if (!args.noPrefix) {
+    ctx = ctx.prefix('listener');
+  }
+
+  let listener: aws.lb.Listener;
+  if (args.certificate) {
+    new aws.lb.Listener(ctx.id("http"), {
+      port: 80,
+      protocol: "HTTP",
+      loadBalancerArn: getLoadBalancerId(args.loadBalancer),
+      defaultActions: [
+        {
+          type: "redirect",
+          redirect: {
+            port: "443",
+            protocol: "HTTPS",
+            statusCode: "HTTP_301",
+          },
+        },
+      ],
+    });
+
+    listener = new aws.lb.Listener(ctx.id("https"), {
+      port: 443,
+      protocol: "HTTPS",
+      certificateArn: args.certificate,
+      loadBalancerArn: getLoadBalancerId(args.loadBalancer),
+      sslPolicy: "ELBSecurityPolicy-2016-08",
+      defaultActions: [
+        {
+          type: "fixed-response",
+          fixedResponse: {
+            contentType: "text/plain",
+            messageBody: "Not found",
+            statusCode: "404",
+          },
+        },
+      ],
+    });
+  } else {
+    listener = new aws.lb.Listener(ctx.id("http"), {
+      port: 80,
+      protocol: "HTTP",
+      loadBalancerArn: getLoadBalancerId(args.loadBalancer),
+      defaultActions: [
+        {
+          type: "fixed-response",
+          fixedResponse: {
+            contentType: "text/plain",
+            messageBody: "Not found",
+            statusCode: "404",
+          },
+        },
+      ],
+    });
+  }
+
+  return listener;
+}
+
 export interface LoadBalancerArgs {
   network: NetworkInput;
   certificate?: pulumi.Input<string>;
@@ -152,65 +219,17 @@ export function loadBalancer(
     vpc: args.network.vpc,
   });
 
-  const loadBalancer = new aws.lb.LoadBalancer(ctx.shortId("load-balancer"), {
+  const loadBalancer = new aws.lb.LoadBalancer(ctx.id("load-balancer"), {
     subnets: args.network.subnetIds,
     securityGroups: [securityGroup.id],
     idleTimeout: args.idleTimeout,
     tags: ctx.tags(),
   });
 
-  let listener: aws.lb.Listener;
-  if (args.certificate) {
-    new aws.lb.Listener(ctx.shortId("http-listener"), {
-      port: 80,
-      protocol: "HTTP",
-      loadBalancerArn: loadBalancer.arn,
-      defaultActions: [
-        {
-          type: "redirect",
-          redirect: {
-            port: "443",
-            protocol: "HTTPS",
-            statusCode: "HTTP_301",
-          },
-        },
-      ],
-    });
-
-    listener = new aws.lb.Listener(ctx.shortId("https-listener"), {
-      port: 443,
-      protocol: "HTTPS",
-      certificateArn: args.certificate,
-      loadBalancerArn: loadBalancer.arn,
-      sslPolicy: "ELBSecurityPolicy-2016-08",
-      defaultActions: [
-        {
-          type: "fixed-response",
-          fixedResponse: {
-            contentType: "text/plain",
-            messageBody: "Not found",
-            statusCode: "404",
-          },
-        },
-      ],
-    });
-  } else {
-    listener = new aws.lb.Listener(ctx.shortId("http-listener"), {
-      port: 80,
-      protocol: "HTTP",
-      loadBalancerArn: loadBalancer.arn,
-      defaultActions: [
-        {
-          type: "fixed-response",
-          fixedResponse: {
-            contentType: "text/plain",
-            messageBody: "Not found",
-            statusCode: "404",
-          },
-        },
-      ],
-    });
-  }
+  const listener = loadBalancerListener(ctx, {
+    loadBalancer,
+    certificate: args.certificate
+  });
 
   return { loadBalancer, listener };
 }
