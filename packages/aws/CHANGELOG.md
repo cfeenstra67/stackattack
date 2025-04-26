@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.0.2-dev.2
+
+### Patch Changes
+
+- 5ed1776: Limit what's in the bundle to relevant things
+
 ## 0.0.2-dev.1
 
 ### Patch Changes
