@@ -8,7 +8,8 @@
   "scripts": {
     "check": "pnpm run -r check",
     "prerelease-enter": "changeset pre enter dev",
-    "prerelease-exit": "changeset pre exit"
+    "prerelease-exit": "changeset pre exit",
+    "release": "changeset publish"
   },
   "keywords": [],
   "author": "",
