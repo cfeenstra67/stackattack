@@ -6,12 +6,14 @@ import { serviceAssumeRolePolicy } from "../policies.js";
 import { NetworkInput, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
 
 export type ClusterInput =
-  | pulumi.Input<string>
-  | pulumi.Input<aws.ecs.Cluster>
-  | pulumi.Input<aws.ecs.GetClusterResult>
+  | string
+  | aws.ecs.Cluster
+  | aws.ecs.GetClusterResult
   | ClusterOutput;
 
-export function getClusterId(input: ClusterInput): pulumi.Output<string> {
+export function getClusterId(
+  input: pulumi.Input<ClusterInput>,
+): pulumi.Output<string> {
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
       return pulumi.output(value);
@@ -24,7 +26,7 @@ export function getClusterId(input: ClusterInput): pulumi.Output<string> {
 }
 
 export function getClusterAttributes(
-  input: ClusterInput,
+  input: pulumi.Input<ClusterInput>,
 ): pulumi.Output<aws.ecs.Cluster | aws.ecs.GetClusterResult> {
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
@@ -39,12 +41,10 @@ export function getClusterAttributes(
   });
 }
 
-export type CapacityProviderInput =
-  | pulumi.Input<string>
-  | pulumi.Input<aws.ecs.CapacityProvider>;
+export type CapacityProviderInput = string | aws.ecs.CapacityProvider;
 
 export function getCapacityProviderId(
-  input: CapacityProviderInput,
+  input: pulumi.Input<CapacityProviderInput>,
 ): pulumi.Output<string> {
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
@@ -55,12 +55,12 @@ export function getCapacityProviderId(
 }
 
 export type HttpNamespaceInput =
-  | pulumi.Input<string>
-  | pulumi.Input<aws.servicediscovery.HttpNamespace>
-  | pulumi.Input<aws.servicediscovery.GetHttpNamespaceResult>;
+  | string
+  | aws.servicediscovery.HttpNamespace
+  | aws.servicediscovery.GetHttpNamespaceResult;
 
 export function getHttpNamespaceId(
-  input: HttpNamespaceInput,
+  input: pulumi.Input<HttpNamespaceInput>,
 ): pulumi.Output<string> {
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
@@ -71,11 +71,11 @@ export function getHttpNamespaceId(
 }
 
 export type PrivateDnsNamespaceInput =
-  | pulumi.Input<string>
-  | pulumi.Input<aws.servicediscovery.PrivateDnsNamespace>;
+  | string
+  | aws.servicediscovery.PrivateDnsNamespace;
 
 export function getPrivateDnsNamespaceId(
-  input: PrivateDnsNamespaceInput,
+  input: pulumi.Input<PrivateDnsNamespaceInput>,
 ): pulumi.Output<string> {
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
@@ -159,7 +159,7 @@ function cloudwatchAgentConfig() {
 }
 
 export interface ClusterSecurityGroupArgs {
-  vpc: VpcInput;
+  vpc: pulumi.Input<VpcInput>;
   noPrefix?: boolean;
 }
 
@@ -217,7 +217,7 @@ export function clusterSecurityGroup(
 }
 
 export interface ClusterInstanceInitScriptArgs {
-  cluster: ClusterInput;
+  cluster: pulumi.Input<ClusterInput>;
   paramName: pulumi.Input<string>;
 }
 
@@ -252,7 +252,7 @@ export interface ClusterCapacityConfig {
 
 export interface ClusterCapacityArgs extends ClusterCapacityConfig {
   network: NetworkInput;
-  cluster: ClusterInput;
+  cluster: pulumi.Input<ClusterInput>;
 }
 
 export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
@@ -398,22 +398,30 @@ export interface ClusterArgs extends ClusterCapacityConfig {
 }
 
 export interface ClusterResourcesInput {
-  cluster: ClusterInput;
-  capacityProvider: CapacityProviderInput;
-  privateNamespace?: PrivateDnsNamespaceInput;
+  cluster: pulumi.Input<ClusterInput>;
+  capacityProvider: pulumi.Input<CapacityProviderInput>;
+  privateNamespace?: pulumi.Input<PrivateDnsNamespaceInput>;
 }
 
-export interface ClusterOutput {
+export interface ClusterOutput extends ClusterResourcesInput {
   cluster: aws.ecs.Cluster;
   capacityProvider: aws.ecs.CapacityProvider;
   autoScalingGroup: aws.autoscaling.Group;
   privateNamespace: aws.servicediscovery.PrivateDnsNamespace;
 }
 
-export function clusterToIds(cluster: ClusterOutput): ClusterResourcesInput {
+export interface ClusterIds {
+  cluster: pulumi.Output<string>;
+  capacityProvider: pulumi.Output<string>;
+  autoScalingGroup: pulumi.Output<string>;
+  privateNamespace: pulumi.Output<string>;
+}
+
+export function clusterToIds(cluster: ClusterOutput): ClusterIds {
   return {
     cluster: cluster.cluster.id,
     capacityProvider: cluster.capacityProvider.id,
+    autoScalingGroup: cluster.autoScalingGroup.id,
     privateNamespace: cluster.privateNamespace.id,
   };
 }

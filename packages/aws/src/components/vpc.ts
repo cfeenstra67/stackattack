@@ -4,13 +4,9 @@ import { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
 import { LogGroupInput, getLogGroupId } from "./logs.js";
 
-export type VpcInput =
-  | pulumi.Input<string>
-  | aws.ec2.Vpc
-  | pulumi.Input<aws.ec2.GetVpcResult>
-  | VpcOutput;
+export type VpcInput = string | aws.ec2.Vpc | aws.ec2.GetVpcResult | VpcOutput;
 
-export function getVpcId(input: VpcInput): pulumi.Output<string> {
+export function getVpcId(input: pulumi.Input<VpcInput>): pulumi.Output<string> {
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
       return pulumi.output(value);
@@ -23,7 +19,7 @@ export function getVpcId(input: VpcInput): pulumi.Output<string> {
 }
 
 export function getVpcAttributes(
-  input: VpcInput,
+  input: pulumi.Input<VpcInput>,
 ): pulumi.Output<aws.ec2.Vpc | aws.ec2.GetVpcResult> {
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
@@ -39,7 +35,7 @@ export function getVpcAttributes(
 }
 
 export interface InternetGatewayArgs {
-  vpc: VpcInput;
+  vpc: pulumi.Input<VpcInput>;
   noPrefix?: boolean;
 }
 
@@ -54,7 +50,7 @@ export function internetGateway(ctx: Context, args: InternetGatewayArgs) {
 }
 
 interface SubnetsArgs {
-  vpc: VpcInput;
+  vpc: pulumi.Input<VpcInput>;
   cidrAllocator: CidrAllocator;
   nat?: "single" | "none";
   availabilityZones: number | pulumi.Input<string>[];
@@ -98,7 +94,7 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
   for (const zoneId of availabilityZones(args.availabilityZones)) {
     const privateSubnet = new aws.ec2.Subnet(ctx.id(`private-${idx}`), {
       vpcId,
-      cidrBlock: args.cidrAllocator(24),
+      cidrBlock: args.cidrAllocator.allocate(24),
       availabilityZone: zoneId,
       tags: { ...ctx.tags(), Name: ctx.id(`private-${idx}`) },
     });
@@ -114,7 +110,7 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
 
     const publicSubnet = new aws.ec2.Subnet(ctx.id(`public-${idx}`), {
       vpcId,
-      cidrBlock: args.cidrAllocator(24),
+      cidrBlock: args.cidrAllocator.allocate(24),
       availabilityZone: zoneId,
       tags: { ...ctx.tags(), Name: ctx.id(`public-${idx}`) },
     });
@@ -209,7 +205,10 @@ function numberToIp(num: number): string {
   ].join(".");
 }
 
-export type CidrAllocator = (netmask: number) => pulumi.Output<string>;
+export interface CidrAllocator {
+  allocate: (netmask: number) => pulumi.Output<string>;
+  counter: () => pulumi.Output<number>;
+}
 
 function parseCidrBlock(block: string) {
   const [cidrIp, netmask] = block.split("/");
@@ -219,35 +218,46 @@ function parseCidrBlock(block: string) {
   return { block, ip: ipToNumber(cidrIp), netmask: Number(netmask) };
 }
 
-function cidrAllocator(cidrBlock: pulumi.Input<string>): CidrAllocator {
+function cidrAllocator(
+  cidrBlock: pulumi.Input<string>,
+  initial?: pulumi.Input<number>,
+): CidrAllocator {
   const parsedCidr = pulumi.output(cidrBlock).apply(parseCidrBlock);
 
   // https://docs.aws.amazon.com/vpc/latest/userguide/subnet-sizing.html
-  let counter = 256;
+  const initialCounter = pulumi.output(initial).apply((initialVal) => {
+    return initialVal === undefined ? 256 : initialVal;
+  });
+  let counter = 0;
 
-  return (subnetMask) =>
-    parsedCidr.apply(({ block, ip, netmask }) => {
-      const maxIps = ip + (1 << (32 - netmask));
-      const requestedIps = 1 << (32 - subnetMask);
-      const nextIp = ip + counter;
-      let remainder = nextIp % requestedIps;
-      if (remainder > 0) {
-        remainder = requestedIps - remainder;
-      }
-      const currentIp = nextIp + remainder;
+  return {
+    allocate: (subnetMask) =>
+      pulumi
+        .all([initialCounter, parsedCidr])
+        .apply(([initial, { block, ip, netmask }]) => {
+          const maxIps = ip + (1 << (32 - netmask));
+          const requestedIps = 1 << (32 - subnetMask);
+          const nextIp = ip + initial + counter;
+          let remainder = nextIp % requestedIps;
+          if (remainder > 0) {
+            remainder = requestedIps - remainder;
+          }
+          const currentIp = nextIp + remainder;
 
-      if (currentIp + requestedIps > maxIps) {
-        const remaining = maxIps - currentIp;
-        throw new Error(
-          `Not enough addresses left (/${subnetMask}: ` +
-            `${requestedIps} > ${block}: ${remaining})`,
-        );
-      }
+          if (currentIp + requestedIps > maxIps) {
+            const remaining = maxIps - currentIp;
+            throw new Error(
+              `Not enough addresses left (/${subnetMask}: ` +
+                `${requestedIps} > ${block}: ${remaining})`,
+            );
+          }
 
-      counter += requestedIps + remainder;
+          counter += requestedIps + remainder;
 
-      return `${numberToIp(currentIp)}/${subnetMask}`;
-    });
+          return `${numberToIp(currentIp)}/${subnetMask}`;
+        }),
+    counter: () => initialCounter.apply((c) => c + counter),
+  };
 }
 
 export function getVpcDnsServer(
@@ -339,8 +349,8 @@ export interface Network {
 }
 
 export interface NetworkInput {
-  vpc: VpcInput;
-  subnetIds: pulumi.Input<string>[];
+  vpc: pulumi.Input<VpcInput>;
+  subnetIds: pulumi.Input<pulumi.Input<string>[]>;
 }
 
 interface VpcOutput {
@@ -401,6 +411,43 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
       return {
         vpc,
         subnetIds: type === "private" ? privateSubnetIds : publicSubnetIds,
+      };
+    },
+  };
+}
+
+export interface VpcIds {
+  vpc: pulumi.Output<string>;
+  publicSubnetIds: pulumi.Output<string>[];
+  privateSubnetIds: pulumi.Output<string>[];
+  counter: pulumi.Output<number>;
+}
+
+export function vpcToIds(vpc: VpcOutput): VpcIds {
+  return {
+    vpc: vpc.vpc.id,
+    publicSubnetIds: vpc.publicSubnetIds,
+    privateSubnetIds: vpc.privateSubnetIds,
+    counter: vpc.cidrAllocator.counter(),
+  };
+}
+
+export function vpcFromIds(vpcInput: pulumi.Input<VpcIds>, increment?: number) {
+  const vpc = pulumi.output(vpcInput) as unknown as pulumi.Output<VpcIds>;
+  const attrs = getVpcAttributes(vpc.vpc);
+  return {
+    vpc: attrs,
+    publicSubnetIds: vpc.publicSubnetIds,
+    privateSubnetIds: vpc.privateSubnetIds,
+    cidrAllocator: cidrAllocator(
+      attrs.cidrBlock,
+      vpc.counter.apply((c) => c + (increment ?? 0)),
+    ),
+    network: (type) => {
+      return {
+        vpc: attrs,
+        subnetIds:
+          type === "private" ? vpc.privateSubnetIds : vpc.publicSubnetIds,
       };
     },
   };

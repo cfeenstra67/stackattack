@@ -222,7 +222,8 @@ export function loadBalancer(
     vpc: args.network.vpc,
   });
 
-  const loadBalancer = new aws.lb.LoadBalancer(ctx.id("load-balancer"), {
+  const loadBalancer = new aws.lb.LoadBalancer(ctx.id(), {
+    namePrefix: "lb-",
     subnets: args.network.subnetIds,
     securityGroups: [securityGroup.id],
     idleTimeout: args.idleTimeout,

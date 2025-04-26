@@ -174,7 +174,7 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
 }
 
 export interface ServiceSecurityGroupArgs {
-  vpc: VpcInput;
+  vpc: pulumi.Input<VpcInput>;
   port: pulumi.Input<number>;
   noPrefix?: boolean;
 }
@@ -228,7 +228,7 @@ export function serviceSecurityGroup(
 export type ServiceArgs = TaskDefinitionArgs & {
   network: NetworkInput;
   replicas?: pulumi.Input<number>;
-  cluster: ClusterResourcesInput;
+  cluster: pulumi.Input<ClusterResourcesInput>;
   domain?: pulumi.Input<string>;
   zone?: pulumi.Input<string>;
   loadBalancer?: LoadBalancerWithListener;
@@ -241,7 +241,7 @@ export interface ServiceOutput {
 export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   const {
     network,
-    cluster,
+    cluster: clusterInput,
     replicas,
     noPrefix,
     port: portArg,
@@ -253,6 +253,8 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   const port = portArg ? portArg : args.domain ? 80 : undefined;
 
   const definition = taskDefinition(ctx, { ...taskArgs, port });
+
+  const cluster = pulumi.output(clusterInput);
 
   const clusterAttrs = getClusterAttributes(cluster.cluster);
 
@@ -343,13 +345,22 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   }
 
   let serviceDiscovery: aws.servicediscovery.Service | undefined = undefined;
-  if (args.cluster.privateNamespace && port) {
+  if (cluster.privateNamespace && port) {
+    const namespace = pulumi.output(cluster.privateNamespace).apply((ns) => {
+      if (!ns) {
+        throw new Error(
+          `You passed an Output value that resolves to ${ns} to cluster.privateNamespace. This is not supported.`,
+        );
+      }
+      return ns;
+    });
+
     serviceDiscovery = new aws.servicediscovery.Service(
       ctx.id("service-discovery"),
       {
         name: ctx.id(),
         dnsConfig: {
-          namespaceId: getPrivateDnsNamespaceId(args.cluster.privateNamespace),
+          namespaceId: getPrivateDnsNamespaceId(namespace),
           dnsRecords: [
             {
               ttl: 10,
