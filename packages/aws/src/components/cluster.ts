@@ -269,6 +269,7 @@ export interface ClusterInstanceTypeConfig {
 export interface ClusterRequirementsConfig
   extends aws.types.input.ec2.LaunchTemplateInstanceRequirements {
   architecture: pulumi.Input<string>;
+  allowNoEniTrunking?: boolean;
 }
 
 type ClusterInstancesConfig =
@@ -292,6 +293,39 @@ export interface ClusterCapacityArgs extends ClusterCapacityConfig {
   cluster: pulumi.Input<ClusterInput>;
 }
 
+// Manually fetched from: https://docs.aws.amazon.com/AmazonECS/latest/developerguide/eni-trunking-supported-instance-types.html
+const nonEniTrunkingCompatibleInstanceTypes = [
+  "a1.metal",
+  "c5.metal",
+  "c5a.8xlarge",
+  "c5ad.8xlarge",
+  "c5d.metal",
+  "m5.metal",
+  "p3dn.24xlarge",
+  "r5.metal",
+  "r5.8xlarge",
+  "c5n",
+  "d3",
+  "d3en",
+  "g3",
+  "g3s",
+  "g4dn",
+  "i3",
+  "i3en",
+  "inf1",
+  "m5dn",
+  "m5n",
+  "m5zn",
+  "mac1",
+  "r5b",
+  "r5n",
+  "r5dn",
+  "u-12tb1",
+  "u-6tb1",
+  "u-9tb1",
+  "z1d",
+];
+
 export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("capacity");
@@ -304,10 +338,36 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
     vcpuCount: { min: 1, max: 2 },
   };
 
-  const architecture =
-    "type" in instances
-      ? getInstanceTypeArchitecture(instances.type)
-      : instances.architecture;
+  let architecture: pulumi.Input<string>;
+  let instanceType: pulumi.Input<string> | undefined = undefined;
+  let instanceRequirements:
+    | aws.types.input.ec2.LaunchTemplateInstanceRequirements
+    | undefined = undefined;
+  if ("type" in instances) {
+    instanceType = instances.type;
+    architecture = getInstanceTypeArchitecture(instances.type);
+  } else {
+    const {
+      architecture: arch,
+      allowNoEniTrunking,
+      ...requirements
+    } = instances;
+    architecture = arch;
+    if (!allowNoEniTrunking) {
+      if (requirements.excludedInstanceTypes) {
+        requirements.excludedInstanceTypes = pulumi
+          .output(requirements.excludedInstanceTypes)
+          .apply((types) => {
+            return types.concat(nonEniTrunkingCompatibleInstanceTypes);
+          });
+      } else {
+        requirements.excludedInstanceTypes =
+          nonEniTrunkingCompatibleInstanceTypes;
+      }
+    }
+    instanceRequirements = requirements;
+  }
+
   const cluster = getClusterAttributes(args.cluster);
 
   const ami = aws.ec2.getAmiOutput({
@@ -350,14 +410,8 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
     ctx.id("launch-template"),
     {
       imageId: ami.id,
-      instanceType: "type" in instances ? instances.type : undefined,
-      instanceRequirements:
-        "type" in instances
-          ? undefined
-          : (() => {
-              const { architecture, ...args } = instances;
-              return args;
-            })(),
+      instanceType,
+      instanceRequirements,
       iamInstanceProfile: {
         arn: profile.arn,
       },

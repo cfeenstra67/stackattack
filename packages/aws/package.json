@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.2-dev.2",
   "description": "",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "files": [
     "dist/**",
     "src/**",
