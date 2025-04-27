@@ -191,7 +191,7 @@ export function loadBalancerListener(
     });
   }
 
-  return listener;
+  return { loadBalancer: args.loadBalancer, listener } satisfies LoadBalancerWithListener;
 }
 
 export interface LoadBalancerArgs {
@@ -204,6 +204,7 @@ export interface LoadBalancerArgs {
 export interface LoadBalancerOutput {
   loadBalancer: aws.lb.LoadBalancer;
   listener: aws.lb.Listener;
+  url: pulumi.Output<string>;
 }
 
 export interface LoadBalancerWithListener {
@@ -215,7 +216,8 @@ export function loadBalancerToIds(output: LoadBalancerOutput) {
   return {
     loadBalancer: output.loadBalancer.arn,
     listener: output.listener.arn,
-  } satisfies LoadBalancerWithListener;
+    url: output.url,
+  } satisfies LoadBalancerWithListener & { url: pulumi.Output<string> };
 }
 
 export function loadBalancer(
@@ -238,10 +240,12 @@ export function loadBalancer(
     tags: ctx.tags(),
   });
 
-  const listener = loadBalancerListener(ctx, {
+  const { listener } = loadBalancerListener(ctx, {
     loadBalancer,
     certificate: args.certificate,
   });
 
-  return { loadBalancer, listener };
+  const url = pulumi.interpolate`${listener.protocol.apply((p) => p.toLowerCase())}://${loadBalancer.dnsName}`;
+
+  return { loadBalancer, listener, url };
 }

@@ -6,11 +6,9 @@ export default () => {
   const vpc = saws.vpc(ctx);
   const vpn = saws.vpn(ctx, vpc);
 
-  // const lmkCertificate = saws.certificate(ctx, { domain: '*.lmkapp.dev' });
-  // const lmkLoadBalancer = saws.loadBalancer(ctx, {
-  //   network: vpc.network("public"),
-  //   certificate: lmkCertificate,
-  // });
+  const loadBalancer = saws.loadBalancer(ctx, {
+    network: vpc.network("public"),
+  });
 
   const cluster = saws.cluster(ctx, {
     network: vpc.network("private"),
@@ -25,7 +23,7 @@ export default () => {
   return {
     clientConfig: vpn.clientConfig,
     cluster: saws.clusterToIds(cluster),
-    // lmkLoadBalancer: saws.loadBalancerToIds(lmkLoadBalancer),
+    loadBalancer: saws.loadBalancerToIds(loadBalancer),
     vpc: saws.vpcToIds(vpc),
     database: saws.databaseToIds(database),
   };
