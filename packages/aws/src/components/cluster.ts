@@ -262,8 +262,25 @@ sudo yum install -y amazon-cloudwatch-agent
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c ssm:${paramName}`;
 }
 
+export interface ClusterInstanceTypeConfig {
+  type: pulumi.Input<string>;
+}
+
+export interface ClusterRequirementsConfig
+  extends aws.types.input.ec2.LaunchTemplateInstanceRequirements {
+  architecture: pulumi.Input<string>;
+}
+
+type ClusterInstancesConfig =
+  | ClusterInstanceTypeConfig
+  | ClusterRequirementsConfig;
+
 export interface ClusterCapacityConfig {
-  instanceType?: pulumi.Input<string>;
+  instances?: ClusterInstancesConfig;
+  noSpot?: boolean;
+  onDemandBase?: number;
+  onDemandPercentage?: number;
+  spotAllocationStrategy?: string;
   minSize?: pulumi.Input<number>;
   maxSize?: pulumi.Input<number>;
   diskSize?: number;
@@ -280,9 +297,17 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
     ctx = ctx.prefix("capacity");
   }
 
-  const instanceType = args.instanceType ?? "t3.micro";
+  const instances = args.instances ?? {
+    architecture: "x86_64",
+    memoryMib: { min: 1, max: 2 },
+    memoryGibPerVcpu: { min: 1, max: 2 },
+    vcpuCount: { min: 1, max: 2 },
+  };
 
-  const architecture = getInstanceTypeArchitecture(instanceType);
+  const architecture =
+    "type" in instances
+      ? getInstanceTypeArchitecture(instances.type)
+      : instances.architecture;
   const cluster = getClusterAttributes(args.cluster);
 
   const ami = aws.ec2.getAmiOutput({
@@ -325,7 +350,14 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
     ctx.id("launch-template"),
     {
       imageId: ami.id,
-      instanceType,
+      instanceType: "type" in instances ? instances.type : undefined,
+      instanceRequirements:
+        "type" in instances
+          ? undefined
+          : (() => {
+              const { architecture, ...args } = instances;
+              return args;
+            })(),
       iamInstanceProfile: {
         arn: profile.arn,
       },
@@ -366,12 +398,24 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
     ctx.id("auto-scaling"),
     {
       vpcZoneIdentifiers: args.network.subnetIds,
-      launchTemplate: {
-        id: launchTemplate.id,
-        version: "$Latest",
-      },
       minSize: sizes.min,
       maxSize: sizes.max,
+      mixedInstancesPolicy: {
+        instancesDistribution: {
+          onDemandBaseCapacity: args.onDemandBase,
+          onDemandPercentageAboveBaseCapacity: args.noSpot
+            ? 100
+            : args.onDemandPercentage ?? 0,
+          spotAllocationStrategy:
+            args.spotAllocationStrategy ?? "capacity-optimized",
+        },
+        launchTemplate: {
+          launchTemplateSpecification: {
+            launchTemplateId: launchTemplate.id,
+            version: "$Latest",
+          },
+        },
+      },
       enabledMetrics: [
         "GroupMinSize",
         "GroupMaxSize",
