@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.3
+
+### Minor Changes
+
+- 9ac7147: Added way to share resources between stacks
+
 ## 0.0.2-dev.2
 
 ### Patch Changes
