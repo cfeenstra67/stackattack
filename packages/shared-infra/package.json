@@ -1,0 +1,26 @@
+{
+  "name": "@stackattack/shared-infra",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/stack.js",
+  "scripts": {
+    "typecheck": "tsc",
+    "build": "tsc -p tsconfig.build.json",
+    "check": "biome check --apply *.ts"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^6.73.0",
+    "@pulumi/pulumi": "^3.157.0",
+    "@stackattack/aws": "workspace:*",
+    "@types/node": "^20.10.7",
+    "typescript": "^5.8.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@biomejs/biome": "^1.5.0",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -1,0 +1,7 @@
+name: infra
+main: stack.ts
+runtime:
+  name: nodejs
+  options:
+    nodeargs: "--loader ts-node/esm --no-warnings"
+description: "Shared infrastructure for my projects"

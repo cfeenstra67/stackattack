@@ -15,7 +15,7 @@ function infra() {
 
   const cluster = saws.cluster(ctx, {
     network: vpc.network("private"),
-    instanceType: "a1.medium",
+    instances: { type: "a1.medium" }
   });
   const database = saws.database(ctx, { network: vpc.network("private") });
 
