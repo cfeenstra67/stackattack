@@ -1,49 +1,65 @@
-import * as saws from './src/index.js';
+import * as saws from "./src/index.js";
+import * as pulumi from '@pulumi/pulumi';
 
-const ctx = saws.context();
+function infra() {
+  const ctx = saws.context();
 
-// const bucket = saws.bucket(ctx);
-const vpc = saws.vpc(ctx);
-const vpn = saws.vpn(ctx, vpc);
+  const vpc = saws.vpc(ctx);
+  const vpn = saws.vpn(ctx, vpc);
 
-const domain = 'sa-test.singlesock.co';
+  const certificate = saws.certificate(ctx, { domain: '*.test.singlesock.co' });
+  const loadBalancer = saws.loadBalancer(ctx, {
+    network: vpc.network("public"),
+    certificate,
+  });
 
-const certificate = saws.certificate(ctx, { domain });
-const loadBalancer = saws.loadBalancer(ctx, {
-  network: vpc.network('public'),
-  certificate,
-});
+  const cluster = saws.cluster(ctx, {
+    network: vpc.network("private"),
+    instanceType: "a1.medium",
+  });
+  const database = saws.database(ctx, { network: vpc.network("private") });
 
-const cluster = saws.cluster(ctx, {
-  network: vpc.network('private'),
-  instanceType: 'a1.medium',
-});
-// const database = saws.database(ctx, { network: vpc.network('private') });
+  return {
+    clientConfig: vpn.clientConfig,
+    cluster: saws.clusterToIds(cluster),
+    loadBalancer: saws.loadBalancerToIds(loadBalancer),
+    vpc: saws.vpcToIds(vpc),
+    database: saws.databaseToIds(database),
+  };
+};
 
-const nginx = saws.service(ctx, {
-  name: 'nginx',
-  image: 'nginx:latest',
-  memory: 256,
-  cpu: 256,
-  replicas: 1,
-  // env: {
-  //   DATABASE_URL: database.url
-  // },
-  healthcheck: {
-    path: '/'
-  },
-  domain,
-  loadBalancer,
-  network: vpc.network('private'),
-  cluster
-});
+function app() {
+  const ctx = saws.context();
+  const config = new pulumi.Config();
 
-// export const bucketName = bucket.bucket;
+  const ref = saws.stackRef(config.require('infra-stack'), infra);
 
-export const clientConfig = vpn.clientConfig;
+  const cluster = ref.require('cluster');
+  const vpc = saws.vpcFromIds(ref.require('vpc'));
+  const database = ref.require('database');
+  const loadBalancer = ref.require('loadBalancer');
+  
+  const domain = 'sa.test.singlesock.co';
 
-export const clusterOutput = saws.clusterToIds(cluster);
+  const nginx = saws.service(ctx, {
+    name: 'nginx',
+    image: 'nginx:latest',
+    memory: 256,
+    cpu: 256,
+    replicas: 1,
+    env: {
+      DATABASE_URL: database.url
+    },
+    healthcheck: {
+      path: '/'
+    },
+    domain,
+    loadBalancer,
+    network: vpc.network('private'),
+    cluster
+  });
 
-// export const databaseUrl = database.url;
+  return { url: nginx.url };  
+}
 
-export const loadBalancerOutput = saws.loadBalancerToIds(loadBalancer);
+export default () => saws.select({ infra, app });

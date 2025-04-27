@@ -5,12 +5,12 @@ import { ClusterSecurityGroupArgs } from "./cluster.js";
 import { NetworkInput, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
 
 export type LoadBalancerInput =
-  | pulumi.Input<string>
-  | pulumi.Input<aws.lb.LoadBalancer>
-  | pulumi.Input<aws.lb.GetLoadBalancerResult>;
+  | string
+  | aws.lb.LoadBalancer
+  | aws.lb.GetLoadBalancerResult;
 
 export function getLoadBalancerId(
-  input: LoadBalancerInput,
+  input: pulumi.Input<LoadBalancerInput>,
 ): pulumi.Output<string> {
   return pulumi.output(input).apply((obj) => {
     if (typeof obj === "string") {
@@ -21,7 +21,7 @@ export function getLoadBalancerId(
 }
 
 export function getLoadBalancerAttributes(
-  input: LoadBalancerInput,
+  input: pulumi.Input<LoadBalancerInput>,
 ): pulumi.Output<aws.lb.LoadBalancer | aws.lb.GetLoadBalancerResult> {
   return pulumi.output(input).apply((obj) => {
     if (typeof obj === "string") {
@@ -31,12 +31,11 @@ export function getLoadBalancerAttributes(
   });
 }
 
-export type ListenerInput =
-  | pulumi.Input<string>
-  | pulumi.Input<aws.lb.Listener>
-  | pulumi.Input<aws.lb.GetListenerResult>;
+export type ListenerInput = string | aws.lb.Listener | aws.lb.GetListenerResult;
 
-export function getListenerId(input: ListenerInput): pulumi.Output<string> {
+export function getListenerId(
+  input: pulumi.Input<ListenerInput>,
+): pulumi.Output<string> {
   return pulumi.output(input).apply((obj) => {
     if (typeof obj === "string") {
       return pulumi.output(obj);
@@ -45,8 +44,19 @@ export function getListenerId(input: ListenerInput): pulumi.Output<string> {
   });
 }
 
+export function getListenerAttributes(
+  input: pulumi.Input<ListenerInput>,
+): pulumi.Output<aws.lb.Listener | aws.lb.GetListenerResult> {
+  return pulumi.output(input).apply((obj) => {
+    if (typeof obj === "string") {
+      return aws.lb.getListenerOutput({ arn: obj });
+    }
+    return pulumi.output(obj);
+  });
+}
+
 export interface LoadBalancerSecurityGroupArgs {
-  vpc: VpcInput;
+  vpc: pulumi.Input<VpcInput>;
   noPrefix?: boolean;
 }
 
@@ -115,7 +125,7 @@ export function loadBalancerSecurityGroup(
 }
 
 export interface LoadBalancerListenerArgs {
-  loadBalancer: LoadBalancerInput;
+  loadBalancer: pulumi.Input<LoadBalancerInput>;
   certificate?: pulumi.Input<string>;
   noPrefix?: boolean;
 }
@@ -197,17 +207,15 @@ export interface LoadBalancerOutput {
 }
 
 export interface LoadBalancerWithListener {
-  loadBalancer: LoadBalancerInput;
-  listener: ListenerInput;
+  loadBalancer: pulumi.Input<LoadBalancerInput>;
+  listener: pulumi.Input<ListenerInput>;
 }
 
-export function loadBalancerToIds(
-  output: LoadBalancerOutput,
-): LoadBalancerWithListener {
+export function loadBalancerToIds(output: LoadBalancerOutput) {
   return {
     loadBalancer: output.loadBalancer.arn,
     listener: output.listener.arn,
-  };
+  } satisfies LoadBalancerWithListener;
 }
 
 export function loadBalancer(

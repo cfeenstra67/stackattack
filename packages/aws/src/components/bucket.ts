@@ -3,20 +3,20 @@ import pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
 
 export type BucketInput =
-  | pulumi.Input<string>
+  | string
   | aws.s3.BucketV2
   | aws.s3.Bucket
   | aws.s3.GetBucketResult;
 
-export function getBucketId(input: BucketInput): pulumi.Output<string> {
-  if (
-    typeof input === "string" ||
-    input instanceof Promise ||
-    "apply" in input
-  ) {
-    return pulumi.output(input);
-  }
-  return pulumi.output(input.bucket);
+export function getBucketId(
+  input: pulumi.Input<BucketInput>,
+): pulumi.Output<string> {
+  return pulumi.output(input).apply((value) => {
+    if (typeof value === "string") {
+      return pulumi.output(value);
+    }
+    return pulumi.output(value.bucket);
+  });
 }
 
 export interface BucketVersioningArgs {
@@ -224,5 +224,7 @@ export function bucket(ctx: Context, args?: BucketArgs) {
     bucketServiceAccess(ctx, { bucket, services: args.allowServiceAccess });
   }
 
-  return bucket;
+  const url = pulumi.interpolate`s3://${bucket.bucket}`;
+
+  return { bucket, url };
 }

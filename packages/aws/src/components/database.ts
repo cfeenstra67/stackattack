@@ -55,7 +55,12 @@ export interface DatabaseArgs {
   noPrefix?: boolean;
 }
 
-export function database(ctx: Context, args: DatabaseArgs) {
+export interface DatabaseOutput {
+  instance: aws.rds.Instance;
+  url: pulumi.Output<string>;
+}
+
+export function database(ctx: Context, args: DatabaseArgs): DatabaseOutput {
   if (!args.noPrefix) {
     ctx = ctx.prefix("database");
   }
@@ -149,4 +154,11 @@ export function database(ctx: Context, args: DatabaseArgs) {
   const url = pulumi.interpolate`${engine}://${username}:${password}@${instance.address}:${instance.port}/${name}`;
 
   return { instance, url };
+}
+
+export function databaseToIds(database: DatabaseOutput) {
+  return {
+    instance: database.instance.id,
+    url: database.url,
+  };
 }

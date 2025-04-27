@@ -8,3 +8,5 @@ export * from "./components/vpn.js";
 export * from "./context.js";
 export * from "./components/certificate.js";
 export * from "./components/load-balancer.js";
+export * from "./stack-ref.js";
+export * from "./select.js";

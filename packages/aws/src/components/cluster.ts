@@ -47,6 +47,9 @@ export function getCapacityProviderId(
   input: pulumi.Input<CapacityProviderInput>,
 ): pulumi.Output<string> {
   return pulumi.output(input).apply((value) => {
+    if (typeof value === "string" && value.startsWith("arn:")) {
+      return pulumi.output(value.split("/").at(-1)!);
+    }
     if (typeof value === "string") {
       return pulumi.output(value);
     }
@@ -81,7 +84,24 @@ export function getPrivateDnsNamespaceId(
     if (typeof value === "string") {
       return pulumi.output(value);
     }
-    return pulumi.output(value.id);
+    return pulumi.output(value.name);
+  });
+}
+
+export function getPrivateDnsNamespaceAttributes(
+  input: pulumi.Input<PrivateDnsNamespaceInput>,
+): pulumi.Output<
+  | aws.servicediscovery.PrivateDnsNamespace
+  | aws.servicediscovery.GetDnsNamespaceResult
+> {
+  return pulumi.output(input).apply(async (value) => {
+    if (typeof value === "string") {
+      return await aws.servicediscovery.getDnsNamespace({
+        name: value,
+        type: "DNS_PRIVATE",
+      });
+    }
+    return value;
   });
 }
 
@@ -420,9 +440,9 @@ export interface ClusterIds {
 export function clusterToIds(cluster: ClusterOutput): ClusterIds {
   return {
     cluster: cluster.cluster.id,
-    capacityProvider: cluster.capacityProvider.id,
+    capacityProvider: cluster.capacityProvider.name,
     autoScalingGroup: cluster.autoScalingGroup.id,
-    privateNamespace: cluster.privateNamespace.id,
+    privateNamespace: cluster.privateNamespace.name,
   };
 }
 

@@ -107,7 +107,7 @@ verify-x509-name server name`;
 }
 
 interface VpnArgs {
-  vpc: VpcInput;
+  vpc: pulumi.Input<VpcInput>;
   privateSubnetIds: pulumi.Input<string>[];
   publicSubnetIds: pulumi.Input<string>[];
   certificate?: pulumi.Input<VPNCertificateOutput>;
@@ -127,7 +127,7 @@ export function vpn(ctx: Context, args: VpnArgs) {
   if (args.cidrBlock) {
     cidrBlock = args.cidrBlock;
   } else if (args.cidrAllocator) {
-    cidrBlock = args.cidrAllocator(22);
+    cidrBlock = args.cidrAllocator.allocate(22);
   } else {
     throw new Error("cidrBlock or cidrAllocator must be provided");
   }

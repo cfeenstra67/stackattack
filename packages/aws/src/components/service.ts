@@ -7,10 +7,11 @@ import {
   ClusterResourcesInput,
   getCapacityProviderId,
   getClusterAttributes,
-  getPrivateDnsNamespaceId,
+  getPrivateDnsNamespaceAttributes,
 } from "./cluster.js";
 import {
   LoadBalancerWithListener,
+  getListenerAttributes,
   getListenerId,
   getLoadBalancerAttributes,
 } from "./load-balancer.js";
@@ -236,6 +237,8 @@ export type ServiceArgs = TaskDefinitionArgs & {
 
 export interface ServiceOutput {
   service: aws.ecs.Service;
+  url?: pulumi.Output<string>;
+  internalUrl?: pulumi.Output<string>;
 }
 
 export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
@@ -266,6 +269,7 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   if (args.domain && !args.loadBalancer) {
     throw new Error("loadBalancer must be specified with domain");
   }
+  let url: pulumi.Output<string> | undefined = undefined;
   if (args.domain) {
     const targetGroup = new aws.lb.TargetGroup(ctx.id("target-group"), {
       namePrefix: pulumi.output(args.name).apply((name) => name.slice(0, 6)),
@@ -313,7 +317,7 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
       args.loadBalancer!.loadBalancer,
     );
 
-    new aws.route53.Record(ctx.id("dns-record-api"), {
+    const dnsRecord = new aws.route53.Record(ctx.id("dns-record-api"), {
       zoneId: zone,
       name: args.domain,
       type: "A",
@@ -325,6 +329,12 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
         },
       ],
     });
+
+    const listener = getListenerAttributes(args.loadBalancer!.listener);
+
+    url = pulumi
+      .all([listener.protocol, args.domain, dnsRecord.id, rule.id])
+      .apply(([protocol, domain]) => `${protocol.toLowerCase()}://${domain}`);
 
     loadBalancers.push({
       targetGroupArn: targetGroup.arn,
@@ -345,6 +355,7 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   }
 
   let serviceDiscovery: aws.servicediscovery.Service | undefined = undefined;
+  let internalUrl: pulumi.Output<string> | undefined = undefined;
   if (cluster.privateNamespace && port) {
     const namespace = pulumi.output(cluster.privateNamespace).apply((ns) => {
       if (!ns) {
@@ -355,12 +366,14 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
       return ns;
     });
 
+    const namespaceAttrs = getPrivateDnsNamespaceAttributes(namespace);
+
     serviceDiscovery = new aws.servicediscovery.Service(
       ctx.id("service-discovery"),
       {
         name: ctx.id(),
         dnsConfig: {
-          namespaceId: getPrivateDnsNamespaceId(namespace),
+          namespaceId: namespaceAttrs.id,
           dnsRecords: [
             {
               ttl: 10,
@@ -376,6 +389,8 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
         deleteBeforeReplace: true,
       },
     );
+
+    internalUrl = pulumi.interpolate`http://${serviceDiscovery.name}.${namespaceAttrs.name}`;
   }
 
   const service = new aws.ecs.Service(
@@ -421,5 +436,5 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
     },
   );
 
-  return { service };
+  return { service, url, internalUrl };
 }
