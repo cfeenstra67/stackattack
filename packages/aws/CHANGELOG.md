@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.5
+
+### Patch Changes
+
+- b3e48e1: Protect VPN certificate + do not recreate if command changes
+
 ## 0.1.0-dev.4
 
 ### Minor Changes
