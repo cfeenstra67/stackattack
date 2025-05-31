@@ -16,6 +16,7 @@ export default () => {
       architecture: "arm64",
       memoryMib: { min: 2048, max: 4096 },
       vcpuCount: { min: 2, max: 4 },
+      memoryGibPerVcpu: { min: 2, max: 2 }
     },
   });
   const database = saws.database(ctx, { network: vpc.network("private") });

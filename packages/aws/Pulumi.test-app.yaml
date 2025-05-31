@@ -1,5 +1,0 @@
-config:
-  stackattack:stack-type: app
-  aws:region: us-east-2
-  aws-native:region: us-east-2
-  stackattack:infra-stack: cfeenstra67/stackattack/test
