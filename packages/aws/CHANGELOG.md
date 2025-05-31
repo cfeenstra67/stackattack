@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.4
+
+### Minor Changes
+
+- 60d6cea: Added ability to use spot instances w/ mixed instances policy to cluster, including auto-excluding instance types that do not support ENI trunking
+
 ## 0.1.0-dev.3
 
 ### Minor Changes
