@@ -191,7 +191,10 @@ export function loadBalancerListener(
     });
   }
 
-  return { loadBalancer: args.loadBalancer, listener } satisfies LoadBalancerWithListener;
+  return {
+    loadBalancer: args.loadBalancer,
+    listener,
+  } satisfies LoadBalancerWithListener;
 }
 
 export interface LoadBalancerArgs {
@@ -245,7 +248,9 @@ export function loadBalancer(
     certificate: args.certificate,
   });
 
-  const url = pulumi.interpolate`${listener.protocol.apply((p) => p.toLowerCase())}://${loadBalancer.dnsName}`;
+  const url = pulumi.interpolate`${listener.protocol.apply((p) =>
+    p.toLowerCase(),
+  )}://${loadBalancer.dnsName}`;
 
   return { loadBalancer, listener, url };
 }

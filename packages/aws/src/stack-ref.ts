@@ -6,7 +6,7 @@ export interface StackRef<T> {
 
 export function stackRef<Output>(
   stack: string,
-  func?: () => Output,
+  func: () => Output,
 ): StackRef<Output> {
   const stackRef = new pulumi.StackReference(stack);
 

@@ -39,21 +39,28 @@ export function vpnCertificate(
   if (!args?.noPrefix) {
     ctx = ctx.prefix("certificate");
   }
-  const cmd = new command.local.Command(ctx.id(), {
-    create: easyRsaGeneratePath,
-    triggers: [args?.clientName, args?.commonName, args?.serverName],
-    environment: {
-      ...(args?.clientName && {
-        CLIENT_NAME: args.clientName,
-      }),
-      ...(args?.commonName && {
-        COMMON_NAME: args.commonName,
-      }),
-      ...(args?.serverName && {
-        SERVER_NAME: args.serverName,
-      }),
+  const cmd = new command.local.Command(
+    ctx.id(),
+    {
+      create: easyRsaGeneratePath,
+      triggers: [args?.clientName, args?.commonName, args?.serverName],
+      environment: {
+        ...(args?.clientName && {
+          CLIENT_NAME: args.clientName,
+        }),
+        ...(args?.commonName && {
+          COMMON_NAME: args.commonName,
+        }),
+        ...(args?.serverName && {
+          SERVER_NAME: args.serverName,
+        }),
+      },
     },
-  });
+    {
+      ignoreChanges: ["create"],
+      protect: true,
+    },
+  );
 
   return cmd.stdout.apply((data): VPNCertificateOutput => {
     return JSON.parse(data);
