@@ -9,12 +9,15 @@
     "@stackattack/simple-api-example": "1.0.0"
   },
   "changesets": [
+    "eager-impalas-smash",
     "great-goats-show",
     "green-beds-strive",
     "happy-dodos-see",
     "happy-results-sing",
     "modern-beers-brake",
+    "ninety-socks-ring",
     "sad-bats-serve",
+    "small-mice-invite",
     "stupid-icons-occur"
   ]
 }

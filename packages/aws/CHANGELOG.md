@@ -1,5 +1,13 @@
 # @stackattack/aws
 
+## 0.1.0-dev.5
+
+### Patch Changes
+
+- 3c9d61b: Added email domain resource
+- a84b5b4: Added s3 firehose resource
+- b3e48e1: Protect VPN certificate + do not recreate if command changes
+
 ## 0.1.0-dev.4
 
 ### Minor Changes
