@@ -3,7 +3,7 @@ import * as pulumi from "@pulumi/pulumi";
 import { glueCatalogArn, glueDatabaseArn, s3BucketArn } from "../arns.js";
 import { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
-import { BucketInput, getBucketId } from "./bucket.js";
+import { BucketInput, bucket, getBucketId } from "./bucket.js";
 
 export interface S3FirehosePolicyArgs {
   bucket: BucketInput;
@@ -90,10 +90,7 @@ export interface S3FirehoseArgs {
   noPrefix?: boolean;
 }
 
-export function s3Firehose(
-  ctx: Context,
-  args: S3FirehoseArgs,
-): aws.kinesis.FirehoseDeliveryStream {
+export function s3Firehose(ctx: Context, args: S3FirehoseArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("s3-firehose");
   }
@@ -111,7 +108,12 @@ export function s3Firehose(
     tags: ctx.tags(),
   });
 
-  const bucketName = getBucketId(args.bucket);
+  let bucketInput = args.bucket;
+  if (!bucketInput) {
+    bucketInput = bucket(ctx).bucket;
+  }
+
+  const bucketName = getBucketId(bucketInput);
 
   new aws.iam.RolePolicy(ctx.id("role-policy"), {
     role: role.id,
@@ -122,18 +124,21 @@ export function s3Firehose(
     }).json,
   });
 
-  let outputPrefix = pulumi
+  const originalOutputPrefix = pulumi
     .output(args.prefix ?? "")
     .apply((outputPrefix) =>
       outputPrefix.endsWith("/") ? outputPrefix : `${outputPrefix}/`,
     );
 
-  let errorOutputPrefix = pulumi
-    .all([args.errorPrefix, outputPrefix])
+  const originalErrorOutputPrefix = pulumi
+    .all([args.errorPrefix, originalOutputPrefix])
     .apply(([errorPrefix, outputPrefix]) => {
       const initial = errorPrefix ?? `${outputPrefix}error/`;
       return initial.endsWith("/") ? initial : `${initial}/`;
     });
+
+  let outputPrefix = originalOutputPrefix;
+  let errorOutputPrefix = originalErrorOutputPrefix;
 
   const processors: aws.types.input.kinesis.FirehoseDeliveryStreamExtendedS3ConfigurationProcessingConfigurationProcessor[] =
     [];
@@ -241,5 +246,8 @@ export function s3Firehose(
     policy: s3FirehoseKinesisPolicy(stream.arn).json,
   });
 
-  return stream;
+  const url = pulumi.interpolate`s3://${bucketName}/${originalOutputPrefix}`;
+  const errorUrl = pulumi.interpolate`s3://${bucketName}/${originalErrorOutputPrefix}`;
+
+  return { firehose: stream, url, errorUrl };
 }
