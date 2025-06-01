@@ -8,6 +8,7 @@ import {
   CidrAllocator,
   VpcInput,
   getVpcAttributes,
+  getVpcDefaultSecurityGroup,
   getVpcDnsServer,
 } from "./vpc.js";
 
@@ -118,6 +119,7 @@ interface VpnArgs {
   privateSubnetIds: pulumi.Input<string>[];
   publicSubnetIds: pulumi.Input<string>[];
   certificate?: pulumi.Input<VPNCertificateOutput>;
+  securityGroupIds?: pulumi.Input<pulumi.Input<string>[]>;
   cidrBlock?: pulumi.Input<string>;
   cidrAllocator?: CidrAllocator;
   enableConnectionLogs?: boolean;
@@ -193,9 +195,18 @@ export function vpn(ctx: Context, args: VpnArgs) {
 
   const dnsServer = vpc.cidrBlock.apply(getVpcDnsServer);
 
+  let securityGroupIds: pulumi.Input<pulumi.Input<string>[]>;
+  if (args.securityGroupIds) {
+    securityGroupIds = args.securityGroupIds;
+  } else {
+    const defaultSecurityGroup = getVpcDefaultSecurityGroup(vpc.id);
+    securityGroupIds = [defaultSecurityGroup.id];
+  }
+
   const vpnEndpoint = new aws.ec2clientvpn.Endpoint(ctx.id(), {
     serverCertificateArn: serverCertificate.arn,
     clientCidrBlock: cidrBlock,
+    securityGroupIds,
     authenticationOptions: [
       {
         type: "certificate-authentication",

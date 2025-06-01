@@ -34,6 +34,18 @@ export function getVpcAttributes(
   });
 }
 
+export function getVpcDefaultSecurityGroup(vpcId: pulumi.Input<string>) {
+  return aws.ec2.getSecurityGroupOutput({
+    vpcId,
+    filters: [
+      {
+        name: "group-name",
+        values: ["default"],
+      },
+    ],
+  });
+}
+
 export interface InternetGatewayArgs {
   vpc: pulumi.Input<VpcInput>;
   noPrefix?: boolean;
@@ -382,6 +394,27 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
       protect: !args?.noProtect,
     },
   );
+
+  new aws.ec2.DefaultSecurityGroup(ctx.id("default-sg"), {
+    vpcId: vpc.id,
+    ingress: [
+      {
+        protocol: "-1",
+        self: true,
+        fromPort: 0,
+        toPort: 0,
+      },
+    ],
+    egress: [
+      {
+        fromPort: 0,
+        toPort: 0,
+        protocol: "-1",
+        cidrBlocks: ["0.0.0.0/0"],
+      },
+    ],
+    tags: ctx.tags(),
+  });
 
   const allocator = cidrAllocator(cidrBlock);
 

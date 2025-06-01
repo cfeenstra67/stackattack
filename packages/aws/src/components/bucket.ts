@@ -3,7 +3,7 @@ import pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
 
 export type BucketInput =
-  | string
+  | pulumi.Input<string>
   | aws.s3.BucketV2
   | aws.s3.Bucket
   | aws.s3.GetBucketResult;

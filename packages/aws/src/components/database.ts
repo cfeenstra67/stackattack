@@ -2,48 +2,13 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
 import { Context } from "../context.js";
-import { Network, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
-
-export interface DatabaseSecurityGroupArgs {
-  vpc: VpcInput;
-  port?: pulumi.Input<number>;
-  noPrefix?: boolean;
-}
-
-export function databaseSecurityGroup(
-  ctx: Context,
-  args: DatabaseSecurityGroupArgs,
-) {
-  if (!args.noPrefix) {
-    ctx = ctx.prefix("security-group");
-  }
-  const vpcAttrs = getVpcAttributes(args.vpc);
-  const group = new aws.ec2.SecurityGroup(ctx.id(), {
-    vpcId: getVpcId(vpcAttrs.id),
-    tags: ctx.tags(),
-  });
-  const port = args.port ?? 5432;
-  new aws.ec2.SecurityGroupRule(
-    ctx.id("ingress"),
-    {
-      type: "ingress",
-      securityGroupId: group.id,
-      protocol: "tcp",
-      fromPort: port,
-      toPort: port,
-      cidrBlocks: [vpcAttrs.cidrBlock],
-      ipv6CidrBlocks: vpcAttrs.ipv6CidrBlock.apply((v) => (v ? [v] : [])),
-    },
-    {
-      deleteBeforeReplace: true,
-    },
-  );
-  return group;
-}
+import { singlePortIngressSecurityGroup } from "../security-groups.js";
+import { Network } from "./vpc.js";
 
 export interface DatabaseArgs {
   network: Network;
   availabilityZone?: pulumi.Input<string>;
+  sourceSecurityGroupId?: pulumi.Input<string>;
   engine?: pulumi.Input<"postgres">;
   version?: pulumi.Input<string>;
   port?: pulumi.Input<number>;
@@ -71,8 +36,9 @@ export function database(ctx: Context, args: DatabaseArgs): DatabaseOutput {
     tags: ctx.tags(),
   });
 
-  const securityGroup = databaseSecurityGroup(ctx, {
+  const securityGroup = singlePortIngressSecurityGroup(ctx, {
     vpc: args.network.vpc,
+    sourceSecurityGroupId: args.sourceSecurityGroupId,
     port,
   });
 
