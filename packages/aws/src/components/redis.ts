@@ -63,7 +63,7 @@ export function redis(ctx: Context, args: RedisArgs): RedisOutput {
     tags: ctx.tags(),
   });
 
-  const cluster = new aws.elasticache.Cluster(ctx.id("instance"), {
+  const cluster = new aws.elasticache.Cluster(ctx.id(), {
     engine,
     engineVersion,
     nodeType: args.nodeType ?? "cache.t4g.micro",
