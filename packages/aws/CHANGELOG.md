@@ -1,5 +1,12 @@
 # @stackattack/aws
 
+## 0.1.0-dev.6
+
+### Patch Changes
+
+- 2dbc4ab: Fixed exports
+- 2dbc4ab: export new components
+
 ## 0.1.0-dev.5
 
 ### Patch Changes
