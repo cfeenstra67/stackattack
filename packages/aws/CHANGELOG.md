@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.7
+
+### Patch Changes
+
+- 5479fac: Fix redis instance id
+
 ## 0.1.0-dev.6
 
 ### Patch Changes
