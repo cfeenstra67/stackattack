@@ -9,7 +9,7 @@ export interface StackRef<T> {
 
 export function stackRef<Output>(
   stack: string,
-  func: (...args: unknown[]) => Output,
+  func: (...args: never[]) => Output,
 ): StackRef<Output> {
   const stackRef = new pulumi.StackReference(stack);
 
