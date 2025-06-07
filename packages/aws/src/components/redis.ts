@@ -63,12 +63,18 @@ export function redis(ctx: Context, args: RedisArgs): RedisOutput {
     tags: ctx.tags(),
   });
 
+  const subnetGroup = new aws.elasticache.SubnetGroup(ctx.id("subnet-group"), {
+    subnetIds: args.network.subnetIds,
+    tags: ctx.tags(),
+  });
+
   const cluster = new aws.elasticache.Cluster(ctx.id(), {
     engine,
     engineVersion,
     nodeType: args.nodeType ?? "cache.t4g.micro",
     numCacheNodes: args.numNodes ?? 1,
     parameterGroupName: parameterGroup.name,
+    subnetGroupName: subnetGroup.name,
     securityGroupIds: [securityGroup.id],
     availabilityZone: args.availabilityZone,
     port,

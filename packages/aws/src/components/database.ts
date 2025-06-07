@@ -117,7 +117,11 @@ export function database(ctx: Context, args: DatabaseArgs): DatabaseOutput {
     tags: ctx.tags(),
   });
 
-  const url = pulumi.interpolate`${engine}://${username}:${password}@${instance.address}:${instance.port}/${name}`;
+  const protocol = pulumi
+    .output(engine)
+    .apply((val) => (val === "postgres" ? "postgresql" : val));
+
+  const url = pulumi.interpolate`${protocol}://${username}:${password}@${instance.address}:${instance.port}/${name}`;
 
   return { instance, url };
 }

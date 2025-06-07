@@ -365,11 +365,13 @@ export interface NetworkInput {
   subnetIds: pulumi.Input<pulumi.Input<string>[]>;
 }
 
+export type NetworkType = "public" | "private";
+
 interface VpcOutput {
   vpc: aws.ec2.Vpc;
   publicSubnetIds: pulumi.Output<string>[];
   privateSubnetIds: pulumi.Output<string>[];
-  network: (type: "public" | "private") => Network;
+  network: (type: NetworkType) => Network;
   cidrAllocator: CidrAllocator;
 }
 
@@ -476,7 +478,7 @@ export function vpcFromIds(vpcInput: pulumi.Input<VpcIds>, increment?: number) {
       attrs.cidrBlock,
       vpc.counter.apply((c) => c + (increment ?? 0)),
     ),
-    network: (type) => {
+    network: (type: NetworkType) => {
       return {
         vpc: attrs,
         subnetIds:
