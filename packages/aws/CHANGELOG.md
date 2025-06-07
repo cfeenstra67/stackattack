@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.8
+
+### Patch Changes
+
+- 5d6bfc3: Fix stackRef for stack functions that take arguments, fix output coercion
+
 ## 0.1.0-dev.7
 
 ### Patch Changes
