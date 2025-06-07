@@ -1,7 +1,7 @@
 {
   "name": "@stackattack/aws",
   "type": "module",
-  "version": "0.1.0-dev.8",
+  "version": "0.1.0-dev.9",
   "description": "",
   "main": "dist/index.js",
   "files": [

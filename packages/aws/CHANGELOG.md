@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.9
+
+### Patch Changes
+
+- 521042c: Fix stackRef type
+
 ## 0.1.0-dev.8
 
 ### Patch Changes
