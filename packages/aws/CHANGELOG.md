@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.11
+
+### Patch Changes
+
+- 3e80558: Added noValidate option for certificate
+
 ## 0.1.0-dev.10
 
 ### Patch Changes
