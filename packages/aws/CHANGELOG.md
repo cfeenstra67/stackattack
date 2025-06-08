@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.13
+
+### Patch Changes
+
+- 127663e: Added essential: false to init container
+
 ## 0.1.0-dev.12
 
 ### Patch Changes

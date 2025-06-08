@@ -1,5 +1,12 @@
 # @stackattack/metabase-example
 
+## 0.0.2-dev.13
+
+### Patch Changes
+
+- Updated dependencies [127663e]
+  - @stackattack/aws@0.1.0-dev.13
+
 ## 0.0.2-dev.12
 
 ### Patch Changes
