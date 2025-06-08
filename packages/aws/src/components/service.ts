@@ -191,6 +191,29 @@ export interface ServiceOutput {
   internalUrl?: pulumi.Output<string>;
 }
 
+export function checkEcsDeployment(
+  service: aws.ecs.Service,
+  taskDefinition: awsNative.ecs.TaskDefinition,
+): pulumi.Output<string> {
+  return pulumi
+    .all([
+      service.name,
+      taskDefinition.taskDefinitionArn,
+      service.taskDefinition,
+    ])
+    .apply(([serviceName, expected, actual]) => {
+      if (expected !== actual) {
+        throw new Error(
+          `${serviceName} deployment failed.\n` +
+            `Expected task definition: ${expected}\n` +
+            `Actual task definition: ${actual}`,
+        );
+      }
+
+      return actual;
+    });
+}
+
 export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   const {
     network,
@@ -375,6 +398,8 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
       dependsOn,
     },
   );
+
+  checkEcsDeployment(service, definition);
 
   return { service, url, internalUrl };
 }

@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.16
+
+### Patch Changes
+
+- Add deployment check and fix excluded families for ENI trunking
+
 ## 0.1.0-dev.15
 
 ### Patch Changes
