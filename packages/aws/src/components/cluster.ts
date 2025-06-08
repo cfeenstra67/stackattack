@@ -254,6 +254,7 @@ set -eo pipefail
 cat >> /etc/ecs/ecs.config <<EOF
 ECS_CLUSTER=${clusterId}
 ECS_ENABLE_CONTAINER_METADATA=true
+ECS_ENABLE_SPOT_INSTANCE_DRAINING=true
 EOF
 
 sudo yum install -y ec2-instance-connect

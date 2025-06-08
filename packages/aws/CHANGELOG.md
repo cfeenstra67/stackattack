@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.17
+
+### Patch Changes
+
+- Spot instance draining
+
 ## 0.1.0-dev.16
 
 ### Patch Changes
