@@ -124,6 +124,25 @@ export function loadBalancerSecurityGroup(
   return group;
 }
 
+export interface LoadBalancerListenerCertificateArgs {
+  listener: pulumi.Input<ListenerInput>;
+  certificate: pulumi.Input<string>;
+  noPrefix?: boolean;
+}
+
+export function loadBalancerListenerCertificate(
+  ctx: Context,
+  args: LoadBalancerListenerCertificateArgs,
+) {
+  if (!args.noPrefix) {
+    ctx = ctx.prefix("listener-certificate");
+  }
+  return new aws.lb.ListenerCertificate(ctx.id(), {
+    listenerArn: getListenerId(args.listener),
+    certificateArn: args.certificate,
+  });
+}
+
 export interface LoadBalancerListenerArgs {
   loadBalancer: pulumi.Input<LoadBalancerInput>;
   certificate?: pulumi.Input<string>;
