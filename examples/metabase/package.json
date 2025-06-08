@@ -1,7 +1,7 @@
 {
   "name": "@stackattack/metabase-example",
   "private": true,
-  "version": "0.0.2-dev.10",
+  "version": "0.0.2-dev.11",
   "description": "",
   "main": "index.js",
   "scripts": {
