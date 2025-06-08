@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.10
+
+### Patch Changes
+
+- a22d86c: Add loadBalancerListenerToIds function
+
 ## 0.1.0-dev.9
 
 ### Patch Changes
