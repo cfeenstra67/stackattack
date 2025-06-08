@@ -197,6 +197,13 @@ export function loadBalancerListener(
   } satisfies LoadBalancerWithListener;
 }
 
+export function loadBalancerListenerToIds(output: LoadBalancerWithListener) {
+  return {
+    loadBalancer: getLoadBalancerId(output.loadBalancer),
+    listener: getListenerId(output.listener),
+  } satisfies LoadBalancerWithListener;
+}
+
 export interface LoadBalancerArgs {
   network: NetworkInput;
   certificate?: pulumi.Input<string>;
