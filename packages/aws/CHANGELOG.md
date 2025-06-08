@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.14
+
+### Patch Changes
+
+- b39f6ee: Use security-group based ingress for services
+
 ## 0.1.0-dev.13
 
 ### Patch Changes
