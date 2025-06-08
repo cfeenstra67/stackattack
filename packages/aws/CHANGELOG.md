@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.15
+
+### Patch Changes
+
+- Default to no explicit security groups for service
+
 ## 0.1.0-dev.14
 
 ### Patch Changes

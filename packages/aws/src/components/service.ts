@@ -2,7 +2,6 @@ import * as aws from "@pulumi/aws";
 import * as awsNative from "@pulumi/aws-native";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
-import { singlePortIngressSecurityGroup } from "../security-groups.js";
 import { getZoneFromDomain } from "./certificate.js";
 import {
   ClusterResourcesInput,
@@ -183,7 +182,7 @@ export type ServiceArgs = TaskDefinitionArgs & {
   domain?: pulumi.Input<string>;
   zone?: pulumi.Input<string>;
   loadBalancer?: LoadBalancerWithListener;
-  sourceSecurityGroupId?: pulumi.Input<string>;
+  securityGroups?: pulumi.Input<pulumi.Input<string>[]>;
 };
 
 export interface ServiceOutput {
@@ -295,17 +294,6 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
     dependsOn.push(rule);
   }
 
-  const securityGroups: pulumi.Output<string>[] = [];
-  if (port) {
-    const group = singlePortIngressSecurityGroup(ctx, {
-      vpc: args.network.vpc,
-      sourceSecurityGroupId: args.sourceSecurityGroupId,
-      port,
-    });
-
-    securityGroups.push(group.id);
-  }
-
   let serviceDiscovery: aws.servicediscovery.Service | undefined = undefined;
   let internalUrl: pulumi.Output<string> | undefined = undefined;
   if (cluster.privateNamespace && port) {
@@ -353,7 +341,7 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
       taskDefinition: definition.taskDefinitionArn,
       networkConfiguration: {
         subnets: network.subnetIds,
-        securityGroups,
+        securityGroups: args.securityGroups,
       },
       waitForSteadyState: true,
       tags: ctx.tags(),
