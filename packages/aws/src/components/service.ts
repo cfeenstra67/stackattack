@@ -2,6 +2,7 @@ import * as aws from "@pulumi/aws";
 import * as awsNative from "@pulumi/aws-native";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
+import { singlePortIngressSecurityGroup } from "../security-groups.js";
 import { getZoneFromDomain } from "./certificate.js";
 import {
   ClusterResourcesInput,
@@ -15,7 +16,7 @@ import {
   getListenerId,
   getLoadBalancerAttributes,
 } from "./load-balancer.js";
-import { NetworkInput, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
+import { NetworkInput, getVpcId } from "./vpc.js";
 
 export interface TaskDefinitionArgs {
   name: pulumi.Input<string>;
@@ -175,58 +176,6 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
   return taskDefinition;
 }
 
-export interface ServiceSecurityGroupArgs {
-  vpc: pulumi.Input<VpcInput>;
-  port: pulumi.Input<number>;
-  noPrefix?: boolean;
-}
-
-export function serviceSecurityGroup(
-  ctx: Context,
-  args: ServiceSecurityGroupArgs,
-) {
-  if (!args.noPrefix) {
-    ctx = ctx.prefix("security-group");
-  }
-
-  const vpcAttrs = getVpcAttributes(args.vpc);
-  const group = new aws.ec2.SecurityGroup(ctx.id(), {
-    vpcId: getVpcId(vpcAttrs.id),
-    tags: ctx.tags(),
-  });
-  new aws.ec2.SecurityGroupRule(
-    ctx.id("ingress"),
-    {
-      type: "ingress",
-      securityGroupId: group.id,
-      protocol: "tcp",
-      fromPort: args.port,
-      toPort: args.port,
-      cidrBlocks: [vpcAttrs.cidrBlock],
-      ipv6CidrBlocks: vpcAttrs.ipv6CidrBlock.apply((v) => (v ? [v] : [])),
-    },
-    {
-      deleteBeforeReplace: true,
-    },
-  );
-  new aws.ec2.SecurityGroupRule(
-    ctx.id("egress"),
-    {
-      type: "egress",
-      securityGroupId: group.id,
-      protocol: "-1",
-      fromPort: 0,
-      toPort: 0,
-      cidrBlocks: ["0.0.0.0/0"],
-      ipv6CidrBlocks: ["::/0"],
-    },
-    {
-      deleteBeforeReplace: true,
-    },
-  );
-  return group;
-}
-
 export type ServiceArgs = TaskDefinitionArgs & {
   network: NetworkInput;
   replicas?: pulumi.Input<number>;
@@ -234,6 +183,7 @@ export type ServiceArgs = TaskDefinitionArgs & {
   domain?: pulumi.Input<string>;
   zone?: pulumi.Input<string>;
   loadBalancer?: LoadBalancerWithListener;
+  sourceSecurityGroupId?: pulumi.Input<string>;
 };
 
 export interface ServiceOutput {
@@ -347,8 +297,9 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
 
   const securityGroups: pulumi.Output<string>[] = [];
   if (port) {
-    const group = serviceSecurityGroup(ctx, {
+    const group = singlePortIngressSecurityGroup(ctx, {
       vpc: args.network.vpc,
+      sourceSecurityGroupId: args.sourceSecurityGroupId,
       port,
     });
 

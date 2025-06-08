@@ -8,7 +8,7 @@ import {
 import { Context } from "./context.js";
 
 export interface SinglePortIngressSecurityGroupArgs {
-  vpc: VpcInput;
+  vpc: pulumi.Input<VpcInput>;
   sourceSecurityGroupId?: pulumi.Input<string>;
   port: pulumi.Input<number>;
   noPrefix?: boolean;
