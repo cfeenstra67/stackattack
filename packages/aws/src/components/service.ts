@@ -141,6 +141,7 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
         environment: initEnv.apply((env) =>
           Object.entries(env).map(([name, value]) => ({ name, value })),
         ),
+        essential: false,
       };
     containers.push(initContainer);
 
