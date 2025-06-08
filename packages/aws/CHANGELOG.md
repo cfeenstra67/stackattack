@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.12
+
+### Patch Changes
+
+- 8f2279a: Add loadBalancerListenerCertificate
+
 ## 0.1.0-dev.11
 
 ### Patch Changes
