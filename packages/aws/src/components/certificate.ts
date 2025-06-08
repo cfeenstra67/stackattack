@@ -15,6 +15,7 @@ export interface CertificateArgs {
   domain: pulumi.Input<string>;
   additionalDomains?: pulumi.Input<string>[];
   wildcard?: boolean;
+  noValidate?: boolean;
   zone?: pulumi.Input<string>;
   noPrefix?: boolean;
 }
@@ -55,6 +56,10 @@ export function certificate(
       deleteBeforeReplace: true,
     },
   );
+
+  if (args.noValidate) {
+    return certificate.arn;
+  }
 
   const fqdns = Array.from({ length: 1 }).map((_, idx) => {
     const record = new aws.route53.Record(
