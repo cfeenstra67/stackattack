@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.18
+
+### Patch Changes
+
+- Security group-based auth for load balancer egress
+
 ## 0.1.0-dev.17
 
 ### Patch Changes

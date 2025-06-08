@@ -1,8 +1,13 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
-import { ClusterSecurityGroupArgs } from "./cluster.js";
-import { NetworkInput, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
+import {
+  NetworkInput,
+  VpcInput,
+  getVpcAttributes,
+  getVpcDefaultSecurityGroup,
+  getVpcId,
+} from "./vpc.js";
 
 export type LoadBalancerInput =
   | string
@@ -57,12 +62,13 @@ export function getListenerAttributes(
 
 export interface LoadBalancerSecurityGroupArgs {
   vpc: pulumi.Input<VpcInput>;
+  destSecurityGroupId?: pulumi.Input<string>;
   noPrefix?: boolean;
 }
 
 export function loadBalancerSecurityGroup(
   ctx: Context,
-  args: ClusterSecurityGroupArgs,
+  args: LoadBalancerSecurityGroupArgs,
 ): aws.ec2.SecurityGroup {
   if (!args.noPrefix) {
     ctx = ctx.prefix("security-group");
@@ -105,6 +111,15 @@ export function loadBalancerSecurityGroup(
       deleteBeforeReplace: true,
     },
   );
+
+  let destSecurityGroupId: pulumi.Input<string>;
+  if (args.destSecurityGroupId) {
+    destSecurityGroupId = args.destSecurityGroupId;
+  } else {
+    const defaultSecurityGroup = getVpcDefaultSecurityGroup(vpc.id);
+    destSecurityGroupId = defaultSecurityGroup.id;
+  }
+
   new aws.ec2.SecurityGroupRule(
     ctx.id("egress-1"),
     {
@@ -113,8 +128,7 @@ export function loadBalancerSecurityGroup(
       protocol: "-1",
       fromPort: 0,
       toPort: 0,
-      cidrBlocks: [vpc.cidrBlock],
-      ipv6CidrBlocks: vpc.ipv6CidrBlock.apply((b) => (b ? [b] : [])),
+      sourceSecurityGroupId: destSecurityGroupId,
     },
     {
       deleteBeforeReplace: true,

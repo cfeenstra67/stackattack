@@ -9,6 +9,7 @@
     "@stackattack/simple-api-example": "1.0.0"
   },
   "changesets": [
+    "chatty-pets-smash",
     "curly-birds-draw",
     "dull-mammals-cough",
     "eager-impalas-smash",
