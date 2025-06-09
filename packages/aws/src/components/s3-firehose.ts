@@ -38,7 +38,7 @@ export function s3FirehosePolicy(args: S3FirehosePolicyArgs) {
 
   if (args.glueParquetTableArn !== undefined) {
     const parsedArn = aws.getArnOutput({ arn: args.glueParquetTableArn });
-    const databaseName = parsedArn.resource.apply((r) => r.split("/")[0]);
+    const databaseName = parsedArn.resource.apply((r) => r.split("/")[1]);
     const databaseArn = glueDatabaseArn({ databaseName });
     const catalogArn = glueCatalogArn();
 
@@ -188,8 +188,8 @@ export function s3Firehose(ctx: Context, args: S3FirehoseArgs) {
   let glueTableName: pulumi.Input<string> | undefined = undefined;
   if (args.glueParquetTableArn) {
     const arn = aws.getArnOutput({ arn: args.glueParquetTableArn });
-    glueDatabaseName = arn.resource.apply((r) => r.split("/")[0]);
-    glueTableName = arn.resource.apply((r) => r.split("/")[1]);
+    glueDatabaseName = arn.resource.apply((r) => r.split("/")[1]);
+    glueTableName = arn.resource.apply((r) => r.split("/")[2]);
   }
 
   const stream = new aws.kinesis.FirehoseDeliveryStream(ctx.id(), {

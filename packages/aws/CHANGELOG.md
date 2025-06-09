@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.24
+
+### Patch Changes
+
+- Fix ARN parsing in s3 firehose code
+
 ## 0.1.0-dev.23
 
 ### Patch Changes
