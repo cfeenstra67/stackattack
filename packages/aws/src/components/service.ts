@@ -371,7 +371,7 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
       taskDefinition: definition.taskDefinitionArn,
       networkConfiguration: {
         subnets: network.subnetIds,
-        securityGroups: args.securityGroups,
+        securityGroups,
       },
       waitForSteadyState: true,
       tags: ctx.tags(),

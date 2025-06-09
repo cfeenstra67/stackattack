@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.20
+
+### Patch Changes
+
+- Fixed securityGroups arg in service component
+
 ## 0.1.0-dev.19
 
 ### Patch Changes
