@@ -160,7 +160,6 @@ export interface EmailDomainArgs {
   webhookUrl?: pulumi.Input<string>;
   zoneId?: pulumi.Input<string>;
   noVerify?: boolean;
-  noDmarcTxt?: boolean;
   nTokens?: number;
   noPrefix?: boolean;
 }
@@ -178,7 +177,6 @@ export function emailDomain(ctx: Context, args: EmailDomainArgs) {
 
   const zoneId = args.zoneId ?? getZoneFromDomain(args.domain);
 
-  const mailFromDependsOn: pulumi.Resource[] = [];
   if (!args.noVerify) {
     const domainIdentityVerification = new aws.route53.Record(
       ctx.id("verification"),
@@ -190,61 +188,58 @@ export function emailDomain(ctx: Context, args: EmailDomainArgs) {
         records: [domainIdentity.verificationToken],
       },
     );
-    mailFromDependsOn.push(domainIdentityVerification);
-  }
 
-  const domainDkim = new aws.ses.DomainDkim(ctx.id("dkim"), {
-    domain: args.domain,
-  });
-
-  const domainDkimVerification: aws.route53.Record[] = [];
-  // TODO: unclear if this ever differs from 3 or whether it
-  // is otherwise knowable. Docs don't mention specifics
-  const nTokens = args.nTokens ?? 3;
-  for (let i = 0; i < nTokens; i++) {
-    domainDkimVerification.push(
-      new aws.route53.Record(ctx.id(`dkim-${i}`), {
-        zoneId,
-        name: pulumi.interpolate`${domainDkim.dkimTokens[i]}._domainkey.${args.domain}`,
-        type: "CNAME",
-        ttl: 600,
-        records: [
-          pulumi.interpolate`${domainDkim.dkimTokens[i]}.dkim.amazonses.com`,
-        ],
-      }),
-    );
-  }
-
-  const mailFromDomain = new aws.ses.MailFrom(
-    ctx.id("mail-from"),
-    {
+    const domainDkim = new aws.ses.DomainDkim(ctx.id("dkim"), {
       domain: args.domain,
-      mailFromDomain: pulumi.interpolate`bounce.${args.domain}`,
-    },
-    {
-      dependsOn: mailFromDependsOn,
-    },
-  );
+    });
 
-  new aws.route53.Record(ctx.id("mail-from-mx"), {
-    zoneId,
-    name: mailFromDomain.mailFromDomain,
-    type: "MX",
-    ttl: 600,
-    records: [
-      pulumi.interpolate`10 feedback-smtp.${awsRegion.name}.amazonses.com`,
-    ],
-  });
+    const domainDkimVerification: aws.route53.Record[] = [];
+    // TODO: unclear if this ever differs from 3 or whether it
+    // is otherwise knowable. Docs don't mention specifics
+    const nTokens = args.nTokens ?? 3;
+    for (let i = 0; i < nTokens; i++) {
+      domainDkimVerification.push(
+        new aws.route53.Record(ctx.id(`dkim-${i}`), {
+          zoneId,
+          name: pulumi.interpolate`${domainDkim.dkimTokens[i]}._domainkey.${args.domain}`,
+          type: "CNAME",
+          ttl: 600,
+          records: [
+            pulumi.interpolate`${domainDkim.dkimTokens[i]}.dkim.amazonses.com`,
+          ],
+        }),
+      );
+    }
 
-  new aws.route53.Record(ctx.id("mail-from-txt"), {
-    zoneId,
-    name: mailFromDomain.mailFromDomain,
-    type: "TXT",
-    ttl: 600,
-    records: ["v=spf1 include:amazonses.com ~all"],
-  });
+    const mailFromDomain = new aws.ses.MailFrom(
+      ctx.id("mail-from"),
+      {
+        domain: args.domain,
+        mailFromDomain: pulumi.interpolate`bounce.${args.domain}`,
+      },
+      {
+        dependsOn: [domainIdentityVerification],
+      },
+    );
 
-  if (!args.noDmarcTxt) {
+    new aws.route53.Record(ctx.id("mail-from-mx"), {
+      zoneId,
+      name: mailFromDomain.mailFromDomain,
+      type: "MX",
+      ttl: 600,
+      records: [
+        pulumi.interpolate`10 feedback-smtp.${awsRegion.name}.amazonses.com`,
+      ],
+    });
+
+    new aws.route53.Record(ctx.id("mail-from-txt"), {
+      zoneId,
+      name: mailFromDomain.mailFromDomain,
+      type: "TXT",
+      ttl: 600,
+      records: ["v=spf1 include:amazonses.com ~all"],
+    });
+
     new aws.route53.Record(ctx.id("dmarc-txt"), {
       zoneId,
       name: pulumi.interpolate`_dmarc.${args.domain}`,

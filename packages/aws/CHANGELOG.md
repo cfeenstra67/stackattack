@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.23
+
+### Patch Changes
+
+- Fix email domain noVerify
+
 ## 0.1.0-dev.22
 
 ### Patch Changes
