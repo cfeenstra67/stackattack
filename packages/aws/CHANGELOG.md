@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.19
+
+### Patch Changes
+
+- service default security group
+
 ## 0.1.0-dev.18
 
 ### Patch Changes

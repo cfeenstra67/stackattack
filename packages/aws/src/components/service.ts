@@ -15,7 +15,7 @@ import {
   getListenerId,
   getLoadBalancerAttributes,
 } from "./load-balancer.js";
-import { NetworkInput, getVpcId } from "./vpc.js";
+import { NetworkInput, getVpcDefaultSecurityGroup, getVpcId } from "./vpc.js";
 
 export interface TaskDefinitionArgs {
   name: pulumi.Input<string>;
@@ -354,6 +354,13 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
     );
 
     internalUrl = pulumi.interpolate`http://${serviceDiscovery.name}.${namespaceAttrs.name}`;
+  }
+
+  let securityGroups: pulumi.Input<pulumi.Input<string>[]>;
+  if (args.securityGroups) {
+    securityGroups = args.securityGroups;
+  } else {
+    securityGroups = [getVpcDefaultSecurityGroup(getVpcId(network.vpc)).id];
   }
 
   const service = new aws.ecs.Service(
