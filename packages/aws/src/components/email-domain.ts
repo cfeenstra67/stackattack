@@ -159,6 +159,8 @@ export interface EmailDomainArgs {
   logs?: S3FirehoseArgs;
   webhookUrl?: pulumi.Input<string>;
   zoneId?: pulumi.Input<string>;
+  noVerify?: boolean;
+  noDmarcTxt?: boolean;
   nTokens?: number;
   noPrefix?: boolean;
 }
@@ -176,16 +178,20 @@ export function emailDomain(ctx: Context, args: EmailDomainArgs) {
 
   const zoneId = args.zoneId ?? getZoneFromDomain(args.domain);
 
-  const domainIdentityVerification = new aws.route53.Record(
-    ctx.id("verification"),
-    {
-      zoneId,
-      name: pulumi.interpolate`_amazonses.${args.domain}`,
-      type: "TXT",
-      ttl: 600,
-      records: [domainIdentity.verificationToken],
-    },
-  );
+  const mailFromDependsOn: pulumi.Resource[] = [];
+  if (!args.noVerify) {
+    const domainIdentityVerification = new aws.route53.Record(
+      ctx.id("verification"),
+      {
+        zoneId,
+        name: pulumi.interpolate`_amazonses.${args.domain}`,
+        type: "TXT",
+        ttl: 600,
+        records: [domainIdentity.verificationToken],
+      },
+    );
+    mailFromDependsOn.push(domainIdentityVerification);
+  }
 
   const domainDkim = new aws.ses.DomainDkim(ctx.id("dkim"), {
     domain: args.domain,
@@ -216,7 +222,7 @@ export function emailDomain(ctx: Context, args: EmailDomainArgs) {
       mailFromDomain: pulumi.interpolate`bounce.${args.domain}`,
     },
     {
-      dependsOn: [domainIdentityVerification],
+      dependsOn: mailFromDependsOn,
     },
   );
 
@@ -238,15 +244,17 @@ export function emailDomain(ctx: Context, args: EmailDomainArgs) {
     records: ["v=spf1 include:amazonses.com ~all"],
   });
 
-  new aws.route53.Record(ctx.id("dmarc-txt"), {
-    zoneId,
-    name: pulumi.interpolate`_dmarc.${args.domain}`,
-    type: "TXT",
-    ttl: 600,
-    records: [
-      pulumi.interpolate`v=DMARC1;p=reject;rua=mailto:${args.dmarcInbox}`,
-    ],
-  });
+  if (!args.noDmarcTxt) {
+    new aws.route53.Record(ctx.id("dmarc-txt"), {
+      zoneId,
+      name: pulumi.interpolate`_dmarc.${args.domain}`,
+      type: "TXT",
+      ttl: 600,
+      records: [
+        pulumi.interpolate`v=DMARC1;p=reject;rua=mailto:${args.dmarcInbox}`,
+      ],
+    });
+  }
 
   const configurationSet = new aws.ses.ConfigurationSet(ctx.id("config-set"), {
     reputationMetricsEnabled: true,

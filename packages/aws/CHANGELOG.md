@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.22
+
+### Patch Changes
+
+- Add more email domain options
+
 ## 0.1.0-dev.21
 
 ### Patch Changes
