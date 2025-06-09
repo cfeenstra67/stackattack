@@ -118,6 +118,15 @@ export function loadBalancerSecurityGroup(
   } else {
     const defaultSecurityGroup = getVpcDefaultSecurityGroup(vpc.id);
     destSecurityGroupId = defaultSecurityGroup.id;
+
+    new aws.ec2.SecurityGroupRule(ctx.id("default-ingress"), {
+      type: "ingress",
+      securityGroupId: defaultSecurityGroup.id,
+      protocol: "-1",
+      fromPort: 0,
+      toPort: 0,
+      sourceSecurityGroupId: group.id,
+    });
   }
 
   new aws.ec2.SecurityGroupRule(

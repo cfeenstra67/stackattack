@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.21
+
+### Patch Changes
+
+- Add default group rule for load balancer group
+
 ## 0.1.0-dev.20
 
 ### Patch Changes
