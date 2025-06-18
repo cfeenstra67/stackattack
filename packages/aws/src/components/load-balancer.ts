@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * Application Load Balancer components for HTTP/HTTPS traffic routing and SSL termination.
+ * 
+ * Creates ALBs with target groups, listeners, and SSL certificate integration for secure traffic handling.
+ * Includes utilities for load balancer management, health checks, and traffic distribution across services.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";

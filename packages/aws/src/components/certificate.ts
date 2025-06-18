@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * ACM certificate components for creating SSL/TLS certificates with DNS validation.
+ * 
+ * Creates ACM certificates with Route53 DNS validation, supports wildcard domains and additional SANs.
+ * Automatically handles certificate validation and includes utilities for Route53 zone management.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";

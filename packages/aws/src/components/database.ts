@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * RDS database components for creating PostgreSQL database instances with secure networking.
+ * 
+ * Creates RDS instances with subnet groups, parameter groups, and security groups for database access.
+ * Includes automatic password generation, encryption at rest, and deletion protection by default.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";

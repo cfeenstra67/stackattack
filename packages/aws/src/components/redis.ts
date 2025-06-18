@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * ElastiCache Redis components for creating Redis clusters with secure networking.
+ * 
+ * Creates ElastiCache clusters with subnet groups, parameter groups, and security groups for Redis access.
+ * Supports configurable node types, engine versions, and custom parameter configurations.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";

@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * ECS cluster components for creating and managing AWS ECS clusters with EC2 capacity.
+ * 
+ * Creates ECS clusters with auto scaling groups, launch templates, and EC2 instance connect endpoints.
+ * Includes utilities for cluster management, capacity provider configuration, and instance access control.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";

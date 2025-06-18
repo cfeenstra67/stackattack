@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * CloudWatch Logs components for managing log groups and log streams.
+ * 
+ * Provides utilities for working with CloudWatch log groups, extracting log group IDs from various input types.
+ * Supports flexible input handling for log group references across different AWS resource configurations.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 

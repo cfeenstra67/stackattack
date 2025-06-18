@@ -9,7 +9,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "generate": "tsx generate.ts"
+    "generate": "tsx generate.ts",
+    "check": "biome check --apply src"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +20,8 @@
     "astro": "^5.2.3"
   },
   "devDependencies": {
-    "typedoc": "^0.27.6",
-    "tsx": "^4.19.2"
+    "@biomejs/biome": "^1.5.0",
+    "tsx": "^4.19.2",
+    "typedoc": "^0.27.6"
   }
 }

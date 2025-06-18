@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * AWS Client VPN components for creating secure VPN connections with certificate-based authentication.
+ * 
+ * Creates Client VPN endpoints with certificate generation, network associations, and authorization rules.
+ * Includes automated certificate management using Easy-RSA and configurable client access policies.
+ */
+
 import * as path from "node:path";
 import * as url from "node:url";
 import * as aws from "@pulumi/aws";

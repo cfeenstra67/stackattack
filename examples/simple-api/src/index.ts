@@ -1,8 +1,8 @@
 import "dotenv/config";
+import { eq } from "drizzle-orm";
 import express from "express";
 import { db } from "./db.js";
 import { todos } from "./schema.js";
-import { eq } from "drizzle-orm";
 
 const app = express();
 app.use(express.json());

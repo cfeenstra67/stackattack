@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * ECS service components for running containerized applications on AWS ECS.
+ * 
+ * Creates task definitions, ECS services, CloudWatch log groups, and handles load balancer integration.
+ * Supports container configuration, health checks, service discovery, and deployment validation.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as awsNative from "@pulumi/aws-native";
 import * as pulumi from "@pulumi/pulumi";

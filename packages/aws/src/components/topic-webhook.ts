@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * SNS topic webhook components for delivering messages to HTTP/HTTPS endpoints.
+ * 
+ * Creates SNS subscriptions with configurable retry policies, throttling, and delivery settings.
+ * Supports webhook integrations with customizable backoff strategies and request formatting options.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";

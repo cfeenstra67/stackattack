@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ * 
+ * VPC components for creating and managing AWS Virtual Private Clouds and networking resources.
+ * 
+ * Creates VPCs with multi-AZ subnets, internet gateways, route tables, and flow logs. Includes utilities
+ * for subnet allocation, CIDR management, and extracting network attributes from existing VPCs.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
