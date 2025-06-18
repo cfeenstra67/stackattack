@@ -5,7 +5,12 @@ import { Application, ProjectReflection, ReflectionKind, DeclarationReflection, 
 async function generateDocs() {
   // Bootstrap the application
   const app = await Application.bootstrapWithPlugins({
-    entryPoints: ["../aws/src/components"],
+    entryPoints: [
+      "../aws/src/components",
+      "../aws/src/arns.ts",
+      "../aws/src/security-groups.ts", 
+      "../aws/src/stack-ref.ts"
+    ],
     entryPointStrategy: "expand",
     tsconfig: "../aws/tsconfig.json",
     excludeExternals: true,
@@ -20,11 +25,15 @@ async function generateDocs() {
   }
   
 
-  const outputDir = "./src/content/docs/components";
+  const componentsOutputDir = "./src/content/docs/components";
+  const utilitiesOutputDir = "./src/content/docs/utilities";
 
-  // Ensure output directory exists
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
+  // Ensure output directories exist
+  if (!fs.existsSync(componentsOutputDir)) {
+    fs.mkdirSync(componentsOutputDir, { recursive: true });
+  }
+  if (!fs.existsSync(utilitiesOutputDir)) {
+    fs.mkdirSync(utilitiesOutputDir, { recursive: true });
   }
 
   // Helper function to format TypeDoc comments
@@ -50,7 +59,11 @@ async function generateDocs() {
       const description = formatComment(param.comment);
       const optional = param.flags.isOptional ? "?" : "";
       
-      result += `- **\`${name}${optional}\`** (\`${linkedType}\`) - ${description}\n`;
+      // Format type properly - add backticks around non-linked portions
+      const formattedType = formatTypeAsCode(linkedType);
+      // Clean up any extra spaces around links
+      const cleanedType = formattedType.replace(/`\s+\[/g, '`[').replace(/\]\s+`/g, ']`');
+      result += `- **\`${name}${optional}\`** (${cleanedType}) - ${description}\n`;
     }
     return result;
   }
@@ -68,7 +81,11 @@ async function generateDocs() {
       const description = formatComment(prop.comment);
       const optional = prop.flags.isOptional ? "?" : "";
       
-      result += `- **\`${name}${optional}\`** (\`${linkedType}\`) - ${description}\n`;
+      // Format type properly - add backticks around non-linked portions
+      const formattedType = formatTypeAsCode(linkedType);
+      // Clean up any extra spaces around links
+      const cleanedType = formattedType.replace(/`\s+\[/g, '`[').replace(/\]\s+`/g, ']`');
+      result += `- **\`${name}${optional}\`** (${cleanedType}) - ${description}\n`;
     }
     return result;
   }
@@ -80,11 +97,52 @@ async function generateDocs() {
     for (const [typeName, typeInfo] of typeMap) {
       // Use word boundaries to avoid replacing partial matches
       const regex = new RegExp(`\\b${typeName}\\b`, 'g');
-      result = result.replace(regex, `[${typeName}](/components/${typeInfo.componentName}${typeInfo.anchor})`);
+      result = result.replace(regex, `[${typeName}](${typeInfo.componentName}${typeInfo.anchor})`);
     }
     
     // Handle Context type (from context.ts, not in components)
     result = result.replace(/\bContext\b/g, '[Context](/concepts/context/)');
+    
+    return result;
+  }
+
+  // Helper function to wrap non-linked parts of types in backticks
+  function formatTypeAsCode(typeStr: string): string {
+    // For types that contain links, we need to be more careful
+    // Split by markdown links and wrap only the non-link parts
+    const linkRegex = /(\[[^\]]+\]\([^)]+\))/g;
+    
+    if (!linkRegex.test(typeStr)) {
+      // No links, just wrap the whole thing
+      return `\`${typeStr}\``;
+    }
+    
+    // Has links - need to split and wrap parts carefully
+    const parts = typeStr.split(linkRegex);
+    let result = '';
+    let currentCodeBlock = '';
+    
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      
+      if (part.match(linkRegex)) {
+        // This is a markdown link
+        if (currentCodeBlock) {
+          result += `\`${currentCodeBlock}\``;
+          currentCodeBlock = '';
+        }
+        // Add backticks inside the link
+        const linkWithBackticks = part.replace(/\[([^\]]+)\]/, '[`$1`]');
+        result += linkWithBackticks;
+      } else if (part) {
+        // This is regular text that should be in a code block
+        currentCodeBlock += part;
+      }
+    }
+    
+    if (currentCodeBlock) {
+      result += `\`${currentCodeBlock}\``;
+    }
     
     return result;
   }
@@ -108,55 +166,73 @@ async function generateDocs() {
     return `\`\`\`typescript\nfunction ${declaration.name}(${params}): ${returnType}\n\`\`\``;
   }
 
-  // Process each component file
+  // Process component and utility files
   const componentFiles = new Map<string, DeclarationReflection[]>();
+  const utilityFiles = new Map<string, DeclarationReflection[]>();
   
   // Build a global map of all types/interfaces for cross-linking
   const typeMap = new Map<string, { componentName: string; anchor: string }>();
+
+  // Utility file name mappings
+  const utilityNameMap: Record<string, string> = {
+    'arns': 'arns',
+    'security-groups': 'security-groups', 
+    'stack-ref': 'stack-references'
+  };
 
   // Group declarations by source file
   project.children?.forEach(child => {
     if (child.sources && child.sources.length > 0) {
       const sourceFile = child.sources[0].fileName;
-      // Since we're only looking at components directory, just extract the basename
-      const componentMatch = sourceFile.match(/^(.+)\.ts$/);
+      const fileMatch = sourceFile.match(/^(.+)\.ts$/);
       
-      if (componentMatch) {
-        const componentName = componentMatch[1];
+      if (fileMatch) {
+        let fileName = fileMatch[1];
         
-        if (!componentFiles.has(componentName)) {
-          componentFiles.set(componentName, []);
+        // Handle components/ prefix for component files
+        if (fileName.startsWith('components/')) {
+          fileName = fileName.replace('components/', '');
+        }
+        
+        // Determine if this is a component or utility file
+        const isUtility = utilityNameMap.hasOwnProperty(fileName);
+        const targetMap = isUtility ? utilityFiles : componentFiles;
+        const targetName = isUtility ? utilityNameMap[fileName] : fileName;
+        
+        if (!targetMap.has(targetName)) {
+          targetMap.set(targetName, []);
         }
         
         // If this is a module, get its children (the actual exports)
         if (child.kind === ReflectionKind.Module && child.children) {
           // Store the module itself for potential @packageDocumentation comment
           const moduleDecl = child as DeclarationReflection;
-          componentFiles.get(componentName)!.push(moduleDecl);
+          targetMap.get(targetName)!.push(moduleDecl);
           
           child.children.forEach((exportChild: any) => {
             const decl = exportChild as DeclarationReflection;
-            componentFiles.get(componentName)!.push(decl);
+            targetMap.get(targetName)!.push(decl);
             
             // Add to type map for cross-linking
             if (decl.kind === ReflectionKind.Interface || decl.kind === ReflectionKind.TypeAlias) {
+              const linkPath = isUtility ? `/utilities/${targetName}` : `/components/${targetName}`;
               typeMap.set(decl.name, { 
-                componentName, 
+                componentName: linkPath, 
                 anchor: `#${decl.name.toLowerCase()}` 
               });
             }
           });
         } else {
-          componentFiles.get(componentName)!.push(child as DeclarationReflection);
+          targetMap.get(targetName)!.push(child as DeclarationReflection);
         }
       }
     }
   });
 
-  // Generate markdown for each component
-  for (const [componentName, declarations] of componentFiles) {
-    
-    let markdown = `---\ntitle: ${componentName}\ndescription: ${componentName} component documentation\n---\n\n`;
+  // Helper function to generate markdown documentation
+  function generateMarkdown(name: string, declarations: DeclarationReflection[], isUtility = false): string {
+    const docType = isUtility ? 'utility' : 'component';
+    let markdown = `---\ntitle: ${name}\ndescription: ${name} ${docType} documentation\n---\n\n`;
     
     // Look for module-level documentation
     const moduleDecl = declarations.find(d => d.kind === ReflectionKind.Module);
@@ -170,12 +246,16 @@ async function generateDocs() {
     // Filter out module declaration for other processing
     const nonModuleDeclarations = declarations.filter(d => d.kind !== ReflectionKind.Module);
     
-    // Find the main component function (usually matches the file name or is the primary export)
-    const mainFunction = nonModuleDeclarations.find(d => 
-      d.name === componentName || 
-      d.name === componentName.replace(/-/g, "") ||
-      (d.kind === ReflectionKind.Function && d.name.toLowerCase().includes(componentName.toLowerCase()))
-    );
+    // For utilities, don't look for a "main" function, just document all functions
+    // For components, find the main component function
+    let mainFunction: DeclarationReflection | undefined;
+    if (!isUtility) {
+      mainFunction = nonModuleDeclarations.find(d => 
+        d.name === name || 
+        d.name === name.replace(/-/g, "") ||
+        (d.kind === ReflectionKind.Function && d.name.toLowerCase().includes(name.toLowerCase()))
+      );
+    }
     
     if (mainFunction && mainFunction.kind === ReflectionKind.Function) {
       markdown += `# ${mainFunction.name}\n\n`;
@@ -207,11 +287,12 @@ async function generateDocs() {
       }
     }
     
-    // Document additional functions
+    // Document functions
     if (functions.length > 0) {
-      markdown += "## Functions\n\n";
+      const heading = isUtility || !mainFunction ? "# Functions" : "## Functions";
+      markdown += `${heading}\n\n`;
       for (const func of functions) {
-        markdown += `### ${func.name}\n\n`;
+        markdown += `## ${func.name}\n\n`;
         // Try to get comment from signature if not on function itself
         const comment = func.comment || func.signatures?.[0]?.comment;
         const funcDescription = formatComment(comment);
@@ -236,10 +317,23 @@ async function generateDocs() {
       }
     }
     
-    // Write the markdown file
-    const outputPath = path.join(outputDir, `${componentName}.md`);
+    return markdown;
+  }
+
+  // Generate component documentation
+  for (const [componentName, declarations] of componentFiles) {
+    const markdown = generateMarkdown(componentName, declarations, false);
+    const outputPath = path.join(componentsOutputDir, `${componentName}.md`);
     fs.writeFileSync(outputPath, markdown);
     console.log(`Generated documentation for ${componentName}`);
+  }
+
+  // Generate utility documentation  
+  for (const [utilityName, declarations] of utilityFiles) {
+    const markdown = generateMarkdown(utilityName, declarations, true);
+    const outputPath = path.join(utilitiesOutputDir, `${utilityName}.md`);
+    fs.writeFileSync(outputPath, markdown);
+    console.log(`Generated utility documentation for ${utilityName}`);
   }
 
   console.log("Documentation generation complete!");
