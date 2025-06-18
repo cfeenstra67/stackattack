@@ -1,5 +1,6 @@
 import aws from "@pulumi/aws";
 import pulumi from "@pulumi/pulumi";
+import { s3BucketArn } from "../arns.js";
 import { Context } from "../context.js";
 
 export type BucketInput =
@@ -150,22 +151,48 @@ export function bucketServiceAccessPolicy(
   });
 }
 
-export interface BucketServiceAccessArgs {
+export interface BucketPolicyArgs {
   bucket: BucketInput;
-  services: pulumi.Input<string>[];
+  services?: pulumi.Input<string>[];
+  accounts?: pulumi.Input<string>[];
   noPrefix?: boolean;
 }
 
-export function bucketServiceAccess(
-  ctx: Context,
-  args: BucketServiceAccessArgs,
-) {
+export function bucketPolicy(ctx: Context, args: BucketPolicyArgs) {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("service-access");
   }
+  const bucket = getBucketId(args.bucket);
+  const bucketArn = s3BucketArn({ bucket });
+
+  const principals: aws.types.input.iam.GetPolicyDocumentStatementPrincipalArgs[] =
+    [];
+  if (args.services) {
+    principals.push({
+      type: "Service",
+      identifiers: args.services,
+    });
+  }
+  if (args.accounts) {
+    principals.push({
+      type: "AWS",
+      identifiers: args.accounts.map(
+        (accountId) => pulumi.interpolate`arn:aws:iam::${accountId}:root`,
+      ),
+    });
+  }
+
   return new aws.s3.BucketPolicy(ctx.id(), {
     bucket: getBucketId(args.bucket),
-    policy: bucketServiceAccessPolicy(args.bucket, args.services).json,
+    policy: aws.iam.getPolicyDocumentOutput({
+      statements: [
+        {
+          principals,
+          actions: ["s3:GetObject", "s3:ListBucket", "s3:PutObject"],
+          resources: [bucketArn, pulumi.interpolate`${bucketArn}/*`],
+        },
+      ],
+    }).json,
   });
 }
 
@@ -179,7 +206,7 @@ export type BucketArgs = Pick<
   public?: boolean;
   noProtect?: boolean;
   lifecycleRules?: BucketLifecycleRule[];
-  allowServiceAccess?: pulumi.Input<string>[];
+  policy?: Omit<BucketPolicyArgs, "bucket" | "noPrefix">;
   noPrefix?: boolean;
 };
 
@@ -220,8 +247,8 @@ export function bucket(ctx: Context, args?: BucketArgs) {
     bucketPublicAccessBlock(ctx, { bucket });
   }
 
-  if (args?.allowServiceAccess) {
-    bucketServiceAccess(ctx, { bucket, services: args.allowServiceAccess });
+  if (args?.policy) {
+    bucketPolicy(ctx, { bucket, ...args?.policy });
   }
 
   const url = pulumi.interpolate`s3://${bucket.bucket}`;

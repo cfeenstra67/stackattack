@@ -4,6 +4,7 @@ import { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
 import { getZoneFromDomain } from "./certificate.js";
 import { S3FirehoseArgs, s3Firehose } from "./s3-firehose.js";
+import { topicWebhook } from "./topic-webhook.js";
 
 export function emailLogRolePolicy(firehoseArn: pulumi.Input<string>) {
   return aws.iam.getPolicyDocumentOutput({
@@ -51,69 +52,6 @@ export function emailS3Log(
   });
 
   return subscription;
-}
-
-export interface EmailWebhookArgs {
-  emailLogTopicArn: pulumi.Input<string>;
-  webhookUrl: pulumi.Input<string>;
-  protocol?: pulumi.Input<string>;
-  retryPolicy?: {
-    healthyRetryPolicy?: {
-      minDelayTarget?: number;
-      maxDelayTarget?: number;
-      numRetries?: number;
-      numMinDelayRetries?: number;
-      numMaxDelayRetries?: number;
-      backoffFunction?: "linear" | "arithmetic" | "geometric" | "exponential";
-    };
-    throttlePolicy?: {
-      maxReceivesPerSecond?: number;
-    };
-    requestPolicy?: {
-      headerContentType: "text/plain" | "application/json" | "application/xml";
-    };
-  };
-  noPrefix?: boolean;
-}
-
-export function emailWebhook(
-  ctx: Context,
-  args: EmailWebhookArgs,
-): aws.sns.TopicSubscription {
-  if (!args.noPrefix) {
-    ctx = ctx.prefix("webhook");
-  }
-  return new aws.sns.TopicSubscription(ctx.id(), {
-    topic: args.emailLogTopicArn,
-    protocol: args.protocol ?? "https",
-    endpoint: args.webhookUrl,
-    deliveryPolicy: JSON.stringify({
-      healthyRetryPolicy: {
-        minDelayTarget:
-          args.retryPolicy?.healthyRetryPolicy?.minDelayTarget ?? 1,
-        maxDelayTarget:
-          args.retryPolicy?.healthyRetryPolicy?.maxDelayTarget ?? 60,
-        numRetries: args.retryPolicy?.healthyRetryPolicy?.numRetries ?? 50,
-        numMinDelayRetries:
-          args.retryPolicy?.healthyRetryPolicy?.numMinDelayRetries ?? 3,
-        numMaxDelayRetries:
-          args.retryPolicy?.healthyRetryPolicy?.numMaxDelayRetries ?? 35,
-        backoffFunction:
-          args?.retryPolicy?.healthyRetryPolicy?.backoffFunction ??
-          "exponential",
-      },
-      throttlePolicy: {
-        maxReceivesPerSecond:
-          args?.retryPolicy?.throttlePolicy?.maxReceivesPerSecond ?? 10,
-      },
-      requestPolicy: {
-        headerContentType:
-          args?.retryPolicy?.requestPolicy?.headerContentType ??
-          "application/json",
-      },
-    }),
-    rawMessageDelivery: true,
-  });
 }
 
 export interface EmailSNSTopicPolicyArgs {
@@ -291,9 +229,9 @@ export function emailDomain(ctx: Context, args: EmailDomainArgs) {
   }
 
   if (args.webhookUrl !== undefined) {
-    emailWebhook(ctx, {
-      emailLogTopicArn: topic.arn,
-      webhookUrl: args.webhookUrl,
+    topicWebhook(ctx, {
+      topic: topic.arn,
+      url: args.webhookUrl,
     });
   }
 

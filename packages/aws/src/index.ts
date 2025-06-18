@@ -14,3 +14,4 @@ export * from "./components/load-balancer.js";
 export * from "./components/redis.js";
 export * from "./components/s3-firehose.js";
 export * from "./components/email-domain.js";
+export * from "./components/topic-webhook.js";

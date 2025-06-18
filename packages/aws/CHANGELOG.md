@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.25
+
+### Patch Changes
+
+- Adding more infra from lmk
+
 ## 0.1.0-dev.24
 
 ### Patch Changes

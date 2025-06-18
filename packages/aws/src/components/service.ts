@@ -408,5 +408,15 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
 
   checkEcsDeployment(service, definition);
 
-  return { service, url, internalUrl };
+  const finalUrl =
+    url === undefined
+      ? undefined
+      : pulumi.all([url, service.id]).apply(([url]) => url);
+
+  const finalInternalUrl =
+    internalUrl === undefined
+      ? undefined
+      : pulumi.all([internalUrl, service.id]).apply(([url]) => url);
+
+  return { service, url: finalUrl, internalUrl: finalInternalUrl };
 }
