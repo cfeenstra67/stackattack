@@ -1,7 +1,7 @@
 {
   "name": "@stackattack/shared-infra",
   "type": "module",
-  "version": "0.1.0-dev.24",
+  "version": "0.1.0-dev.25",
   "description": "",
   "main": "dist/stack.js",
   "scripts": {

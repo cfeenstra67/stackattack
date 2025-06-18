@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.28
+
+### Patch Changes
+
+- Fix ttl value
+
 ## 0.1.0-dev.27
 
 ### Patch Changes

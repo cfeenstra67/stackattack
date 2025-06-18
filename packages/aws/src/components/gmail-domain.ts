@@ -21,6 +21,7 @@ export function gmailDomain(ctx: Context, args: GmailDomainArgs) {
     name: args.domain,
     zoneId,
     type: "MX",
+    ttl: 300,
     records: ["smtp.google.com."],
   });
 
