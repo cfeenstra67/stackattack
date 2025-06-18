@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.27
+
+### Patch Changes
+
+- Fix build
+
 ## 0.1.0-dev.26
 
 ### Patch Changes
