@@ -6,6 +6,13 @@ export default defineConfig({
   integrations: [starlight({
     title: 'StackAttack AWS',
     description: 'AWS infrastructure components for Pulumi',
+    logo: {
+      src: './src/assets/logo.svg',
+      replacesTitle: true,
+    },
+    customCss: [
+      './src/styles/custom.css',
+    ],
     social: {
       github: 'https://github.com/your-org/stackattack',
     },
