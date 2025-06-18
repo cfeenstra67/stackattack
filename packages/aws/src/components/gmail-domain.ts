@@ -22,7 +22,7 @@ export function gmailDomain(ctx: Context, args: GmailDomainArgs) {
     zoneId,
     type: "MX",
     ttl: 300,
-    records: ["smtp.google.com."],
+    records: ["1 smtp.google.com."],
   });
 
   const verificationRecord = new aws.route53.Record(ctx.id("verification"), {

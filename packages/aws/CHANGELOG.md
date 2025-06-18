@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.29
+
+### Patch Changes
+
+- Fix MX record
+
 ## 0.1.0-dev.28
 
 ### Patch Changes

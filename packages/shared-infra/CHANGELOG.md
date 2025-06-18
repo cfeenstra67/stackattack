@@ -1,5 +1,12 @@
 # @stackattack/shared-infra
 
+## 0.1.0-dev.26
+
+### Patch Changes
+
+- Updated dependencies
+  - @stackattack/aws@0.1.0-dev.29
+
 ## 0.1.0-dev.25
 
 ### Patch Changes
