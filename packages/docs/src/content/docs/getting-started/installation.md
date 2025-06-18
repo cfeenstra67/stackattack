@@ -37,25 +37,6 @@ StackAttack AWS components require the Pulumi AWS provider. Install it in your P
 npm install @pulumi/aws
 ```
 
-## TypeScript Configuration
-
-If you're using TypeScript, make sure your `tsconfig.json` includes the necessary configuration:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "declaration": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true
-  }
-}
-```
-
 ## Verify Installation
 
 Create a simple test file to verify everything is working:

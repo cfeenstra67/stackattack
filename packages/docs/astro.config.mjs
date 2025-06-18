@@ -22,8 +22,6 @@ export default defineConfig({
         label: 'Concepts',
         items: [
           { label: 'Context', link: '/concepts/context/' },
-          { label: 'Resource Naming', link: '/concepts/resource-naming/' },
-          { label: 'Component Architecture', link: '/concepts/component-architecture/' },
         ],
       },
       {
