@@ -4,8 +4,17 @@ import { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
 import { LogGroupInput, getLogGroupId } from "./logs.js";
 
+/**
+ * Union type representing various VPC input formats.
+ * Accepts VPC ID string, VPC resource, VPC result, or VPC output.
+ */
 export type VpcInput = string | aws.ec2.Vpc | aws.ec2.GetVpcResult | VpcOutput;
 
+/**
+ * Extracts the VPC ID from various VPC input formats.
+ * @param input - VPC input in any supported format
+ * @returns The VPC ID as a Pulumi output string
+ */
 export function getVpcId(input: pulumi.Input<VpcInput>): pulumi.Output<string> {
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
@@ -18,6 +27,11 @@ export function getVpcId(input: pulumi.Input<VpcInput>): pulumi.Output<string> {
   });
 }
 
+/**
+ * Retrieves VPC attributes from various VPC input formats.
+ * @param input - VPC input in any supported format
+ * @returns VPC attributes as a Pulumi output
+ */
 export function getVpcAttributes(
   input: pulumi.Input<VpcInput>,
 ): pulumi.Output<aws.ec2.Vpc | aws.ec2.GetVpcResult> {
@@ -34,6 +48,11 @@ export function getVpcAttributes(
   });
 }
 
+/**
+ * Retrieves the default security group for a VPC.
+ * @param vpcId - The VPC ID to get the default security group for
+ * @returns The default security group for the specified VPC
+ */
 export function getVpcDefaultSecurityGroup(vpcId: pulumi.Input<string>) {
   return aws.ec2.getSecurityGroupOutput({
     vpcId,
@@ -46,11 +65,22 @@ export function getVpcDefaultSecurityGroup(vpcId: pulumi.Input<string>) {
   });
 }
 
+/**
+ * Arguments for creating an Internet Gateway.
+ */
 export interface InternetGatewayArgs {
+  /** The VPC to attach the Internet Gateway to */
   vpc: pulumi.Input<VpcInput>;
+  /** Whether to skip adding prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates an Internet Gateway attached to a VPC.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Internet Gateway configuration arguments
+ * @returns The created Internet Gateway resource
+ */
 export function internetGateway(ctx: Context, args: InternetGatewayArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("internet-gateway");
@@ -69,6 +99,12 @@ interface SubnetsArgs {
   noPrefix?: boolean;
 }
 
+/**
+ * Creates public and private subnets across multiple availability zones.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Subnet configuration arguments
+ * @returns Object containing arrays of public and private subnet IDs
+ */
 export function subnets(ctx: Context, args: SubnetsArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("subnets");
@@ -217,8 +253,13 @@ function numberToIp(num: number): string {
   ].join(".");
 }
 
+/**
+ * Interface for allocating CIDR blocks within a VPC.
+ */
 export interface CidrAllocator {
+  /** Allocates a subnet with the specified netmask within the VPC CIDR block */
   allocate: (netmask: number) => pulumi.Output<string>;
+  /** Returns the current allocation counter */
   counter: () => pulumi.Output<number>;
 }
 
@@ -272,6 +313,12 @@ function cidrAllocator(
   };
 }
 
+/**
+ * Gets the VPC DNS server IP address based on the VPC CIDR block.
+ * AWS reserves the second IP address in the VPC CIDR block for the DNS server.
+ * @param cidrBlock - The VPC CIDR block
+ * @returns The DNS server IP address
+ */
 export function getVpcDnsServer(
   cidrBlock: pulumi.Input<string>,
 ): pulumi.Output<string> {
@@ -281,11 +328,22 @@ export function getVpcDnsServer(
   });
 }
 
+/**
+ * Arguments for creating a VPC Flow Logs IAM role.
+ */
 export interface VPCFlowLogsRoleArgs {
+  /** The log group where flow logs will be written */
   logGroup: LogGroupInput;
+  /** Whether to skip adding prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates an IAM role for VPC Flow Logs with appropriate permissions.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - VPC Flow Logs role configuration arguments
+ * @returns The created IAM role for VPC Flow Logs
+ */
 export function vpcFlowLogsRole(ctx: Context, args: VPCFlowLogsRoleArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("role");
@@ -322,11 +380,21 @@ export function vpcFlowLogsRole(ctx: Context, args: VPCFlowLogsRoleArgs) {
   });
 }
 
+/**
+ * Arguments for creating VPC Flow Logs.
+ */
 export interface VPCFlowLogsArgs {
+  /** The VPC to enable flow logs for */
   vpc: VpcInput;
+  /** Whether to skip adding prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates VPC Flow Logs with associated log group and IAM role.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - VPC Flow Logs configuration arguments
+ */
 export function vpcFlowLogs(ctx: Context, args: VPCFlowLogsArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("flow-logs");
@@ -355,16 +423,29 @@ interface VpcArgs {
   noPrefix?: boolean;
 }
 
+/**
+ * Represents a network configuration with VPC and subnets.
+ */
 export interface Network {
+  /** The VPC resource */
   vpc: aws.ec2.Vpc;
+  /** Array of subnet IDs in the network */
   subnetIds: pulumi.Output<string>[];
 }
 
+/**
+ * Input type for network configuration.
+ */
 export interface NetworkInput {
+  /** The VPC input */
   vpc: pulumi.Input<VpcInput>;
+  /** Array of subnet ID inputs */
   subnetIds: pulumi.Input<pulumi.Input<string>[]>;
 }
 
+/**
+ * Type representing network visibility - either public or private.
+ */
 export type NetworkType = "public" | "private";
 
 interface VpcOutput {
@@ -375,6 +456,12 @@ interface VpcOutput {
   cidrAllocator: CidrAllocator;
 }
 
+/**
+ * Creates a complete VPC with public and private subnets across availability zones.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - VPC configuration arguments
+ * @returns VPC output with created resources and helper functions
+ */
 export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("vpc");
@@ -451,13 +538,25 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
   };
 }
 
+/**
+ * Interface representing VPC resources as IDs for serialization.
+ */
 export interface VpcIds {
+  /** The VPC ID */
   vpc: pulumi.Output<string>;
+  /** Array of public subnet IDs */
   publicSubnetIds: pulumi.Output<string>[];
+  /** Array of private subnet IDs */
   privateSubnetIds: pulumi.Output<string>[];
+  /** CIDR allocation counter */
   counter: pulumi.Output<number>;
 }
 
+/**
+ * Converts a VPC output to a serializable VPC IDs format.
+ * @param vpc - The VPC output to convert
+ * @returns VPC IDs representation for serialization
+ */
 export function vpcToIds(vpc: VpcOutput): VpcIds {
   return {
     vpc: vpc.vpc.id,
@@ -467,6 +566,12 @@ export function vpcToIds(vpc: VpcOutput): VpcIds {
   };
 }
 
+/**
+ * Reconstructs a VPC output from serialized VPC IDs.
+ * @param vpcInput - The VPC IDs input to reconstruct from
+ * @param increment - Optional increment to add to the CIDR counter
+ * @returns Reconstructed VPC output with all original functionality
+ */
 export function vpcFromIds(vpcInput: pulumi.Input<VpcIds>, increment?: number) {
   const vpc = pulumi.output(vpcInput) as unknown as pulumi.Output<VpcIds>;
   const attrs = getVpcAttributes(vpc.vpc);

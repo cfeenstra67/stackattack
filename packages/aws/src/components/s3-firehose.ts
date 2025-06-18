@@ -5,12 +5,23 @@ import { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
 import { BucketInput, bucket, getBucketId } from "./bucket.js";
 
+/**
+ * Arguments for creating IAM policy for S3 Firehose access.
+ */
 export interface S3FirehosePolicyArgs {
+  /** The S3 bucket to grant access to */
   bucket: BucketInput;
+  /** ARN of the CloudWatch log stream for logging */
   logStreamArn: pulumi.Input<string>;
+  /** Optional ARN of a Glue table for Parquet conversion */
   glueParquetTableArn?: pulumi.Input<string>;
 }
 
+/**
+ * Creates an IAM policy document that grants Firehose access to S3, CloudWatch Logs, and optionally Glue.
+ * @param args - Configuration arguments for the policy
+ * @returns IAM policy document granting necessary permissions
+ */
 export function s3FirehosePolicy(args: S3FirehosePolicyArgs) {
   const bucketArn = s3BucketArn({ bucket: args.bucket });
 
@@ -56,6 +67,11 @@ export function s3FirehosePolicy(args: S3FirehosePolicyArgs) {
   return aws.iam.getPolicyDocumentOutput({ statements });
 }
 
+/**
+ * Creates an IAM policy document that grants Firehose access to read from a Kinesis stream.
+ * @param kinesisStreamArn - ARN of the Kinesis stream to grant access to
+ * @returns IAM policy document granting Kinesis read permissions
+ */
 export function s3FirehoseKinesisPolicy(
   kinesisStreamArn: pulumi.Input<string>,
 ) {
@@ -76,20 +92,40 @@ export function s3FirehoseKinesisPolicy(
   });
 }
 
+/**
+ * Configuration arguments for creating a Kinesis Firehose delivery stream to S3.
+ */
 export interface S3FirehoseArgs {
+  /** The S3 bucket to deliver data to */
   bucket: BucketInput;
+  /** S3 prefix for successful deliveries */
   prefix?: pulumi.Input<string>;
+  /** S3 prefix for error outputs (defaults to prefix + "error/") */
   errorPrefix?: pulumi.Input<string>;
+  /** JQ queries for dynamic partitioning by field values */
   dynamicPartitioningFields?: Record<string, pulumi.Input<string>>;
+  /** Timestamp-based partitioning granularity */
   timestampPartitioning?: "year" | "month" | "day" | "hour";
+  /** Optional Glue table ARN for Parquet conversion */
   glueParquetTableArn?: pulumi.Input<string>;
+  /** Whether to partition errors by type */
   partitionErrorsByType?: boolean;
+  /** Buffering interval in seconds (defaults to 900) */
   bufferInterval?: pulumi.Input<number>;
+  /** Buffering size in MB (defaults to 64) */
   bufferSize?: pulumi.Input<number>;
+  /** CloudWatch log retention in days (defaults to 365) */
   logRetentionDays?: pulumi.Input<number>;
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates a Kinesis Firehose delivery stream that delivers data to S3 with optional partitioning and Parquet conversion.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the Firehose delivery stream
+ * @returns Object containing the Firehose stream, output URL, and error URL
+ */
 export function s3Firehose(ctx: Context, args: S3FirehoseArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("s3-firehose");

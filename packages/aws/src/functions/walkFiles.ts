@@ -1,6 +1,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
+/**
+ * Recursively walks a directory and yields relative file paths.
+ * @param dir - The directory path to walk
+ * @yields Relative file paths from the directory
+ */
 export function* walkFiles(dir: string): Generator<string> {
   if (!fs.existsSync(dir)) {
     return;

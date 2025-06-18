@@ -3,12 +3,20 @@ import pulumi from "@pulumi/pulumi";
 import { s3BucketArn } from "../arns.js";
 import { Context } from "../context.js";
 
+/**
+ * Union type representing different ways to reference an S3 bucket.
+ */
 export type BucketInput =
   | pulumi.Input<string>
   | aws.s3.BucketV2
   | aws.s3.Bucket
   | aws.s3.GetBucketResult;
 
+/**
+ * Extracts the bucket ID from various bucket input types.
+ * @param input - The bucket input (string, bucket resource, or bucket result)
+ * @returns The bucket ID as a Pulumi output
+ */
 export function getBucketId(
   input: pulumi.Input<BucketInput>,
 ): pulumi.Output<string> {
@@ -20,11 +28,22 @@ export function getBucketId(
   });
 }
 
+/**
+ * Arguments for configuring S3 bucket versioning.
+ */
 export interface BucketVersioningArgs {
+  /** The S3 bucket to configure versioning for */
   bucket: BucketInput;
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Enables versioning on an S3 bucket.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for bucket versioning
+ * @returns The bucket versioning configuration resource
+ */
 export function bucketVersioning(ctx: Context, args: BucketVersioningArgs) {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("versioning");
@@ -37,6 +56,12 @@ export function bucketVersioning(ctx: Context, args: BucketVersioningArgs) {
   });
 }
 
+/**
+ * Configures server-side encryption for an S3 bucket using AES256.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for bucket encryption
+ * @returns The bucket encryption configuration resource
+ */
 export function bucketEncryption(ctx: Context, args: BucketVersioningArgs) {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("encryption");
@@ -53,12 +78,24 @@ export function bucketEncryption(ctx: Context, args: BucketVersioningArgs) {
   });
 }
 
+/**
+ * Arguments for configuring CORS on an S3 bucket.
+ */
 export interface BucketCorsArgs {
+  /** The S3 bucket to configure CORS for */
   bucket: BucketInput;
+  /** Custom CORS rules (defaults to permissive rules if not specified) */
   corsRules?: aws.s3.BucketCorsConfigurationV2Args["corsRules"];
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Configures CORS settings for an S3 bucket.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for bucket CORS
+ * @returns The bucket CORS configuration resource
+ */
 export function bucketCors(ctx: Context, args: BucketCorsArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("cors");
@@ -75,18 +112,36 @@ export function bucketCors(ctx: Context, args: BucketCorsArgs) {
   });
 }
 
+/**
+ * Configuration for a single S3 bucket lifecycle rule.
+ */
 export interface BucketLifecycleRule {
+  /** Optional identifier for the lifecycle rule */
   id?: string;
+  /** Number of days after which objects expire */
   days: number;
+  /** Whether to include prefix in the rule ID */
   prefix?: boolean;
 }
 
+/**
+ * Arguments for configuring lifecycle rules on an S3 bucket.
+ */
 export interface BucketLifecycleRulesArgs {
+  /** The S3 bucket to configure lifecycle rules for */
   bucket: BucketInput;
+  /** Array of lifecycle rules to apply */
   rules: BucketLifecycleRule[];
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Configures lifecycle rules for an S3 bucket to automatically transition or expire objects.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for bucket lifecycle rules
+ * @returns The bucket lifecycle configuration resource
+ */
 export function bucketLifecycleRules(
   ctx: Context,
   args: BucketLifecycleRulesArgs,
@@ -114,6 +169,12 @@ export function bucketLifecycleRules(
   });
 }
 
+/**
+ * Blocks all public access to an S3 bucket for security.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the bucket
+ * @returns The bucket public access block resource
+ */
 export function bucketPublicAccessBlock(
   ctx: Context,
   args: BucketVersioningArgs,
@@ -130,6 +191,12 @@ export function bucketPublicAccessBlock(
   });
 }
 
+/**
+ * Creates an IAM policy that grants specified AWS services access to an S3 bucket.
+ * @param bucket - The S3 bucket to grant access to
+ * @param services - AWS services that should be granted access
+ * @returns An IAM policy document granting the services bucket access
+ */
 export function bucketServiceAccessPolicy(
   bucket: BucketInput,
   services: pulumi.Input<string>[],
@@ -151,13 +218,26 @@ export function bucketServiceAccessPolicy(
   });
 }
 
+/**
+ * Arguments for creating a bucket policy that grants access to services and accounts.
+ */
 export interface BucketPolicyArgs {
+  /** The S3 bucket to create a policy for */
   bucket: BucketInput;
+  /** AWS services that should be granted access to the bucket */
   services?: pulumi.Input<string>[];
+  /** AWS account IDs that should be granted access to the bucket */
   accounts?: pulumi.Input<string>[];
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates a bucket policy that grants access to specified services and AWS accounts.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the bucket policy
+ * @returns The bucket policy resource
+ */
 export function bucketPolicy(ctx: Context, args: BucketPolicyArgs) {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("service-access");
@@ -196,20 +276,37 @@ export function bucketPolicy(ctx: Context, args: BucketPolicyArgs) {
   });
 }
 
+/**
+ * Configuration arguments for creating an S3 bucket with optional features.
+ */
 export type BucketArgs = Pick<
   aws.s3.BucketV2Args,
   "bucket" | "bucketPrefix"
 > & {
+  /** Whether to enable versioning on the bucket */
   versioned?: boolean;
+  /** Whether to enable server-side encryption (defaults to true) */
   encrypted?: boolean;
+  /** Whether to allow CORS requests */
   allowCors?: boolean;
+  /** Whether the bucket should allow public access */
   public?: boolean;
+  /** Whether to disable deletion protection */
   noProtect?: boolean;
+  /** Lifecycle rules to automatically manage object expiration */
   lifecycleRules?: BucketLifecycleRule[];
+  /** Policy configuration for granting access to services and accounts */
   policy?: Omit<BucketPolicyArgs, "bucket" | "noPrefix">;
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 };
 
+/**
+ * Creates an S3 bucket with optional versioning, encryption, CORS, lifecycle rules, and policies.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Optional configuration arguments for the bucket
+ * @returns An object containing the bucket resource and its S3 URL
+ */
 export function bucket(ctx: Context, args?: BucketArgs) {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("bucket");

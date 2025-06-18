@@ -17,6 +17,9 @@ import {
 } from "./load-balancer.js";
 import { NetworkInput, getVpcDefaultSecurityGroup, getVpcId } from "./vpc.js";
 
+/**
+ * Configuration arguments for creating an ECS task definition.
+ */
 export interface TaskDefinitionArgs {
   name: pulumi.Input<string>;
   image: pulumi.Input<string>;
@@ -43,6 +46,12 @@ export interface TaskDefinitionArgs {
   noPrefix?: boolean;
 }
 
+/**
+ * Creates an ECS task definition with container configuration, logging, and optional init container.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the task definition
+ * @returns The ECS task definition resource
+ */
 export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("task-definition");
@@ -175,6 +184,9 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
   return taskDefinition;
 }
 
+/**
+ * Configuration arguments for creating an ECS service, extending TaskDefinitionArgs.
+ */
 export type ServiceArgs = TaskDefinitionArgs & {
   network: NetworkInput;
   replicas?: pulumi.Input<number>;
@@ -185,12 +197,22 @@ export type ServiceArgs = TaskDefinitionArgs & {
   securityGroups?: pulumi.Input<pulumi.Input<string>[]>;
 };
 
+/**
+ * Output from creating an ECS service, containing the service resource and URLs.
+ */
 export interface ServiceOutput {
   service: aws.ecs.Service;
   url?: pulumi.Output<string>;
   internalUrl?: pulumi.Output<string>;
 }
 
+/**
+ * Validates that an ECS service deployment matches the expected task definition.
+ * @param service - The ECS service to check
+ * @param taskDefinition - The expected task definition
+ * @returns The actual task definition ARN if deployment is successful
+ * @throws Error if deployment failed (task definitions don't match)
+ */
 export function checkEcsDeployment(
   service: aws.ecs.Service,
   taskDefinition: awsNative.ecs.TaskDefinition,
@@ -214,6 +236,12 @@ export function checkEcsDeployment(
     });
 }
 
+/**
+ * Creates an ECS service with task definition, load balancer integration, and service discovery.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the service
+ * @returns Service output containing the service resource and access URLs
+ */
 export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   const {
     network,

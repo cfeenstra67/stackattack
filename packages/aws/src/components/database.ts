@@ -5,26 +5,52 @@ import { Context } from "../context.js";
 import { singlePortIngressSecurityGroup } from "../security-groups.js";
 import { Network } from "./vpc.js";
 
+/**
+ * Configuration arguments for creating an RDS database instance.
+ */
 export interface DatabaseArgs {
+  /** The network configuration (VPC and subnets) for the database */
   network: Network;
+  /** Specific availability zone for the database instance */
   availabilityZone?: pulumi.Input<string>;
+  /** Security group ID that should be allowed to access the database */
   sourceSecurityGroupId?: pulumi.Input<string>;
+  /** Database engine type (currently only postgres is supported) */
   engine?: pulumi.Input<"postgres">;
+  /** Database engine version (defaults to "17" for postgres) */
   version?: pulumi.Input<string>;
+  /** Port number for database connections (defaults to 5432) */
   port?: pulumi.Input<number>;
+  /** Name of the database to create (defaults to "main") */
   name?: pulumi.Input<string>;
+  /** Master username for the database (defaults to "root") */
   username?: pulumi.Input<string>;
+  /** Master password for the database (auto-generated if not provided) */
   password?: pulumi.Input<string>;
+  /** RDS instance type (defaults to "db.t4g.micro") */
   instanceType?: pulumi.Input<string>;
+  /** Whether to disable deletion protection */
   noDeletionProtection?: boolean;
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Output from creating a database, containing the instance and connection URL.
+ */
 export interface DatabaseOutput {
+  /** The RDS instance resource */
   instance: aws.rds.Instance;
+  /** Connection URL for the database */
   url: pulumi.Output<string>;
 }
 
+/**
+ * Creates an RDS database instance with security group, subnet group, and parameter group.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the database
+ * @returns Database output containing the instance and connection URL
+ */
 export function database(ctx: Context, args: DatabaseArgs): DatabaseOutput {
   if (!args.noPrefix) {
     ctx = ctx.prefix("database");
@@ -126,6 +152,11 @@ export function database(ctx: Context, args: DatabaseArgs): DatabaseOutput {
   return { instance, url };
 }
 
+/**
+ * Converts a DatabaseOutput to a structure containing just the instance ID and URL.
+ * @param database - The database output to convert
+ * @returns Object with instance ID and URL
+ */
 export function databaseToIds(database: DatabaseOutput) {
   return {
     instance: database.instance.id,

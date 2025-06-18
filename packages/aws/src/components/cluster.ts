@@ -5,12 +5,21 @@ import { getEc2InstanceConnectCidr } from "../functions/ec2-instance-connect-cid
 import { serviceAssumeRolePolicy } from "../policies.js";
 import { NetworkInput, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
 
+/**
+ * Union type representing different ways to specify an ECS cluster.
+ * Can be a cluster name (string), an actual Cluster resource, cluster data, or cluster output.
+ */
 export type ClusterInput =
   | string
   | aws.ecs.Cluster
   | aws.ecs.GetClusterResult
   | ClusterOutput;
 
+/**
+ * Extracts the cluster ID from a ClusterInput.
+ * @param input - The cluster input to extract the ID from
+ * @returns The cluster ID as a Pulumi Output
+ */
 export function getClusterId(
   input: pulumi.Input<ClusterInput>,
 ): pulumi.Output<string> {
@@ -25,6 +34,11 @@ export function getClusterId(
   });
 }
 
+/**
+ * Retrieves the full cluster attributes from a ClusterInput.
+ * @param input - The cluster input to get attributes from
+ * @returns The cluster attributes as a Pulumi Output
+ */
 export function getClusterAttributes(
   input: pulumi.Input<ClusterInput>,
 ): pulumi.Output<aws.ecs.Cluster | aws.ecs.GetClusterResult> {
@@ -41,8 +55,17 @@ export function getClusterAttributes(
   });
 }
 
+/**
+ * Union type representing different ways to specify an ECS capacity provider.
+ * Can be a capacity provider name (string) or an actual CapacityProvider resource.
+ */
 export type CapacityProviderInput = string | aws.ecs.CapacityProvider;
 
+/**
+ * Extracts the capacity provider ID from a CapacityProviderInput.
+ * @param input - The capacity provider input to extract the ID from
+ * @returns The capacity provider ID as a Pulumi Output
+ */
 export function getCapacityProviderId(
   input: pulumi.Input<CapacityProviderInput>,
 ): pulumi.Output<string> {
@@ -57,11 +80,20 @@ export function getCapacityProviderId(
   });
 }
 
+/**
+ * Union type representing different ways to specify an HTTP namespace.
+ * Can be a namespace name (string), an actual HttpNamespace resource, or namespace data.
+ */
 export type HttpNamespaceInput =
   | string
   | aws.servicediscovery.HttpNamespace
   | aws.servicediscovery.GetHttpNamespaceResult;
 
+/**
+ * Extracts the HTTP namespace ID from an HttpNamespaceInput.
+ * @param input - The HTTP namespace input to extract the ID from
+ * @returns The HTTP namespace ARN as a Pulumi Output
+ */
 export function getHttpNamespaceId(
   input: pulumi.Input<HttpNamespaceInput>,
 ): pulumi.Output<string> {
@@ -73,10 +105,19 @@ export function getHttpNamespaceId(
   });
 }
 
+/**
+ * Union type representing different ways to specify a private DNS namespace.
+ * Can be a namespace name (string) or an actual PrivateDnsNamespace resource.
+ */
 export type PrivateDnsNamespaceInput =
   | string
   | aws.servicediscovery.PrivateDnsNamespace;
 
+/**
+ * Extracts the private DNS namespace ID from a PrivateDnsNamespaceInput.
+ * @param input - The private DNS namespace input to extract the ID from
+ * @returns The private DNS namespace name as a Pulumi Output
+ */
 export function getPrivateDnsNamespaceId(
   input: pulumi.Input<PrivateDnsNamespaceInput>,
 ): pulumi.Output<string> {
@@ -88,6 +129,11 @@ export function getPrivateDnsNamespaceId(
   });
 }
 
+/**
+ * Retrieves the full private DNS namespace attributes from a PrivateDnsNamespaceInput.
+ * @param input - The private DNS namespace input to get attributes from
+ * @returns The private DNS namespace attributes as a Pulumi Output
+ */
 export function getPrivateDnsNamespaceAttributes(
   input: pulumi.Input<PrivateDnsNamespaceInput>,
 ): pulumi.Output<
@@ -105,10 +151,20 @@ export function getPrivateDnsNamespaceAttributes(
   });
 }
 
+/**
+ * Arguments for creating a cluster instance role.
+ */
 export interface ClusterInstanceRoleArgs {
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates an IAM role for ECS cluster instances with necessary policies attached.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Optional arguments for role configuration
+ * @returns The created IAM role
+ */
 export function clusterInstanceRole(
   ctx: Context,
   args?: ClusterInstanceRoleArgs,
@@ -136,6 +192,11 @@ export function clusterInstanceRole(
   return ecsInstanceRole;
 }
 
+/**
+ * Gets the architecture (e.g., x86_64, arm64) for a given EC2 instance type.
+ * @param instanceType - The EC2 instance type to get the architecture for
+ * @returns The architecture as a Pulumi Output
+ */
 export function getInstanceTypeArchitecture(
   instanceType: pulumi.Input<string>,
 ): pulumi.Output<string> {
@@ -178,11 +239,22 @@ function cloudwatchAgentConfig() {
   });
 }
 
+/**
+ * Arguments for creating a cluster security group.
+ */
 export interface ClusterSecurityGroupArgs {
+  /** The VPC to create the security group in */
   vpc: pulumi.Input<VpcInput>;
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates a security group for cluster instances with SSH access and full egress.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Arguments for security group configuration
+ * @returns The created security group
+ */
 export function clusterSecurityGroup(
   ctx: Context,
   args: ClusterSecurityGroupArgs,
@@ -236,11 +308,21 @@ export function clusterSecurityGroup(
   return group;
 }
 
+/**
+ * Arguments for generating a cluster instance initialization script.
+ */
 export interface ClusterInstanceInitScriptArgs {
+  /** The ECS cluster to join */
   cluster: pulumi.Input<ClusterInput>;
+  /** Name of the SSM parameter containing CloudWatch agent configuration */
   paramName: pulumi.Input<string>;
 }
 
+/**
+ * Generates a bash initialization script for ECS cluster instances.
+ * @param args - Arguments containing cluster and parameter information
+ * @returns The initialization script as a Pulumi Output
+ */
 export function clusterInstanceInitScript({
   cluster,
   paramName,
@@ -263,34 +345,64 @@ sudo yum install -y amazon-cloudwatch-agent
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c ssm:${paramName}`;
 }
 
+/**
+ * Configuration for using a specific EC2 instance type.
+ */
 export interface ClusterInstanceTypeConfig {
+  /** The specific EC2 instance type to use */
   type: pulumi.Input<string>;
 }
 
+/**
+ * Configuration for using instance requirements instead of specific instance types.
+ */
 export interface ClusterRequirementsConfig
   extends aws.types.input.ec2.LaunchTemplateInstanceRequirements {
+  /** The CPU architecture (e.g., x86_64, arm64) */
   architecture: pulumi.Input<string>;
+  /** Whether to allow instance types that don't support ENI trunking */
   allowNoEniTrunking?: boolean;
 }
 
+/**
+ * Union type for cluster instance configuration.
+ * Can specify either a specific instance type or instance requirements.
+ */
 type ClusterInstancesConfig =
   | ClusterInstanceTypeConfig
   | ClusterRequirementsConfig;
 
+/**
+ * Configuration for cluster capacity and scaling behavior.
+ */
 export interface ClusterCapacityConfig {
+  /** Instance configuration (type or requirements) */
   instances?: ClusterInstancesConfig;
+  /** Whether to disable spot instances */
   noSpot?: boolean;
+  /** Number of on-demand instances to maintain as base capacity */
   onDemandBase?: number;
+  /** Percentage of on-demand instances above base capacity */
   onDemandPercentage?: number;
+  /** Strategy for allocating spot instances */
   spotAllocationStrategy?: string;
+  /** Minimum number of instances in the auto scaling group */
   minSize?: pulumi.Input<number>;
+  /** Maximum number of instances in the auto scaling group */
   maxSize?: pulumi.Input<number>;
+  /** Size of the root disk in GB */
   diskSize?: number;
+  /** Whether to skip adding a prefix to resource names */
   noPrefix?: boolean;
 }
 
+/**
+ * Arguments for creating cluster capacity including network and cluster references.
+ */
 export interface ClusterCapacityArgs extends ClusterCapacityConfig {
+  /** Network configuration for the cluster */
   network: NetworkInput;
+  /** The ECS cluster to create capacity for */
   cluster: pulumi.Input<ClusterInput>;
 }
 
@@ -327,6 +439,12 @@ const nonEniTrunkingCompatibleInstanceTypes = [
   "z1d.*",
 ];
 
+/**
+ * Creates ECS cluster capacity including auto scaling group and capacity provider.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Arguments for capacity configuration
+ * @returns Object containing the capacity provider and auto scaling group
+ */
 export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("capacity");
@@ -511,31 +629,61 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
   return { capacityProvider, autoScalingGroup };
 }
 
+/**
+ * Arguments for creating a complete ECS cluster with capacity.
+ */
 export interface ClusterArgs extends ClusterCapacityConfig {
+  /** Network configuration for the cluster */
   network: NetworkInput;
+  /** Whether to skip adding a prefix to resource names */
   noPrefix?: boolean;
 }
 
+/**
+ * Input interface for cluster resources.
+ */
 export interface ClusterResourcesInput {
+  /** The ECS cluster */
   cluster: pulumi.Input<ClusterInput>;
+  /** The capacity provider for the cluster */
   capacityProvider: pulumi.Input<CapacityProviderInput>;
+  /** Optional private DNS namespace for service discovery */
   privateNamespace?: pulumi.Input<PrivateDnsNamespaceInput>;
 }
 
+/**
+ * Output interface containing all cluster-related resources.
+ */
 export interface ClusterOutput extends ClusterResourcesInput {
+  /** The ECS cluster resource */
   cluster: aws.ecs.Cluster;
+  /** The capacity provider resource */
   capacityProvider: aws.ecs.CapacityProvider;
+  /** The auto scaling group resource */
   autoScalingGroup: aws.autoscaling.Group;
+  /** The private DNS namespace resource */
   privateNamespace: aws.servicediscovery.PrivateDnsNamespace;
 }
 
+/**
+ * Interface containing the IDs of all cluster-related resources.
+ */
 export interface ClusterIds {
+  /** The cluster ID */
   cluster: pulumi.Output<string>;
+  /** The capacity provider name */
   capacityProvider: pulumi.Output<string>;
+  /** The auto scaling group ID */
   autoScalingGroup: pulumi.Output<string>;
+  /** The private namespace name */
   privateNamespace: pulumi.Output<string>;
 }
 
+/**
+ * Converts a ClusterOutput to ClusterIds by extracting resource identifiers.
+ * @param cluster - The cluster output containing all resources
+ * @returns Object containing the IDs of all cluster resources
+ */
 export function clusterToIds(cluster: ClusterOutput): ClusterIds {
   return {
     cluster: cluster.cluster.id,
@@ -545,6 +693,12 @@ export function clusterToIds(cluster: ClusterOutput): ClusterIds {
   };
 }
 
+/**
+ * Creates a complete ECS cluster with capacity provider, auto scaling group, and private namespace.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Arguments for cluster configuration
+ * @returns Object containing all created cluster resources
+ */
 export function cluster(ctx: Context, args: ClusterArgs): ClusterOutput {
   const { network, noPrefix, ...capacityArgs } = args;
   if (!noPrefix) {

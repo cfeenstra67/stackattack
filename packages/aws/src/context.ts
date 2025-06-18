@@ -1,16 +1,29 @@
 import * as crypto from "node:crypto";
 import * as pulumi from "@pulumi/pulumi";
 
+/**
+ * Core context interface for resource naming and tagging in AWS infrastructure.
+ */
 export interface Context {
+  /** Generates a resource ID by combining the context prefix with an optional value */
   id: (value?: string) => string;
+  /** Generates a short ID with a hash suffix for uniqueness */
   shortId: (value: string) => string;
+  /** Returns merged tags combining context tags with optional additional tags */
   tags: (others?: Record<string, string>) => Record<string, string>;
+  /** Creates a new Context with an extended prefix */
   prefix: (value: string) => Context;
+  /** Creates a new Context with additional tags merged in */
   withTags: (others: Record<string, string>) => Context;
 }
 
+/**
+ * Configuration options for creating a Context.
+ */
 export interface ContextOpts {
+  /** Optional prefix for resource naming (defaults to project-stack combination) */
   prefix?: string;
+  /** Optional tags to apply to all resources created with this context */
   tags?: Record<string, string>;
 }
 
@@ -20,6 +33,11 @@ function defaultContextPrefix(): string {
   return stack.startsWith(project) ? stack : `${project}-${stack}`;
 }
 
+/**
+ * Creates a new Context for consistent resource naming and tagging.
+ * @param opts - Optional configuration for prefix and tags
+ * @returns A Context instance with id, shortId, tags, prefix, and withTags methods
+ */
 export function context(opts?: ContextOpts): Context {
   let prefix: string;
   if (opts?.prefix !== undefined) {

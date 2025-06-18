@@ -4,24 +4,48 @@ import { Context } from "../context.js";
 import { singlePortIngressSecurityGroup } from "../security-groups.js";
 import { Network } from "./vpc.js";
 
+/**
+ * Configuration arguments for creating an ElastiCache Redis cluster.
+ */
 export interface RedisArgs {
+  /** The network configuration (VPC and subnets) for the Redis cluster */
   network: Network;
+  /** ElastiCache engine type (defaults to "redis") */
   engine?: pulumi.Input<string>;
+  /** Engine version (defaults to "6.x") */
   engineVersion?: pulumi.Input<string>;
+  /** Instance type for cache nodes (defaults to "cache.t4g.micro") */
   nodeType?: pulumi.Input<string>;
+  /** Number of cache nodes in the cluster (defaults to 1) */
   numNodes?: pulumi.Input<number>;
+  /** Security group ID that should be allowed to access the cluster */
   sourceSecurityGroupId?: pulumi.Input<string>;
+  /** Specific availability zone for the cluster */
   availabilityZone?: pulumi.Input<string>;
+  /** Custom parameters for the parameter group */
   parameters?: Record<string, pulumi.Input<string>>;
+  /** Port number for Redis connections (defaults to 6379) */
   port?: pulumi.Input<number>;
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Output from creating a Redis cluster, containing the instance and connection URL.
+ */
 export interface RedisOutput {
+  /** The ElastiCache cluster resource */
   instance: aws.elasticache.Cluster;
+  /** Connection URL for the Redis cluster */
   url: pulumi.Output<string>;
 }
 
+/**
+ * Creates an ElastiCache Redis cluster with security group, parameter group, and subnet group.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the Redis cluster
+ * @returns Redis output containing the cluster instance and connection URL
+ */
 export function redis(ctx: Context, args: RedisArgs): RedisOutput {
   if (!args.noPrefix) {
     ctx = ctx.prefix("redis");

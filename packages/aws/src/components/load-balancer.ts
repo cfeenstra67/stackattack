@@ -9,11 +9,20 @@ import {
   getVpcId,
 } from "./vpc.js";
 
+/**
+ * Union type representing different ways to specify a load balancer.
+ * Can be an ARN string, LoadBalancer resource, or load balancer query result.
+ */
 export type LoadBalancerInput =
   | string
   | aws.lb.LoadBalancer
   | aws.lb.GetLoadBalancerResult;
 
+/**
+ * Extracts the load balancer ARN/ID from various input types.
+ * @param input - Load balancer input (ARN string, LoadBalancer resource, or query result)
+ * @returns The load balancer ARN as a Pulumi Output
+ */
 export function getLoadBalancerId(
   input: pulumi.Input<LoadBalancerInput>,
 ): pulumi.Output<string> {
@@ -25,6 +34,11 @@ export function getLoadBalancerId(
   });
 }
 
+/**
+ * Retrieves the full load balancer attributes from various input types.
+ * @param input - Load balancer input (ARN string, LoadBalancer resource, or query result)
+ * @returns The load balancer resource or query result as a Pulumi Output
+ */
 export function getLoadBalancerAttributes(
   input: pulumi.Input<LoadBalancerInput>,
 ): pulumi.Output<aws.lb.LoadBalancer | aws.lb.GetLoadBalancerResult> {
@@ -36,8 +50,17 @@ export function getLoadBalancerAttributes(
   });
 }
 
+/**
+ * Union type representing different ways to specify a load balancer listener.
+ * Can be an ARN string, Listener resource, or listener query result.
+ */
 export type ListenerInput = string | aws.lb.Listener | aws.lb.GetListenerResult;
 
+/**
+ * Extracts the listener ARN/ID from various input types.
+ * @param input - Listener input (ARN string, Listener resource, or query result)
+ * @returns The listener ARN/ID as a Pulumi Output
+ */
 export function getListenerId(
   input: pulumi.Input<ListenerInput>,
 ): pulumi.Output<string> {
@@ -49,6 +72,11 @@ export function getListenerId(
   });
 }
 
+/**
+ * Retrieves the full listener attributes from various input types.
+ * @param input - Listener input (ARN string, Listener resource, or query result)
+ * @returns The listener resource or query result as a Pulumi Output
+ */
 export function getListenerAttributes(
   input: pulumi.Input<ListenerInput>,
 ): pulumi.Output<aws.lb.Listener | aws.lb.GetListenerResult> {
@@ -60,12 +88,25 @@ export function getListenerAttributes(
   });
 }
 
+/**
+ * Configuration options for creating a load balancer security group.
+ */
 export interface LoadBalancerSecurityGroupArgs {
+  /** VPC where the security group will be created */
   vpc: pulumi.Input<VpcInput>;
+  /** Optional destination security group ID for egress rules */
   destSecurityGroupId?: pulumi.Input<string>;
+  /** Whether to skip adding a prefix to the context */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates a security group for load balancers with HTTP/HTTPS ingress rules.
+ * Allows inbound traffic on ports 80 and 443 from anywhere, and outbound traffic to the specified destination.
+ * @param ctx - Pulumi context for resource naming and tagging
+ * @param args - Configuration for the security group
+ * @returns The created security group resource
+ */
 export function loadBalancerSecurityGroup(
   ctx: Context,
   args: LoadBalancerSecurityGroupArgs,
@@ -147,12 +188,24 @@ export function loadBalancerSecurityGroup(
   return group;
 }
 
+/**
+ * Configuration options for attaching a certificate to a load balancer listener.
+ */
 export interface LoadBalancerListenerCertificateArgs {
+  /** The listener to attach the certificate to */
   listener: pulumi.Input<ListenerInput>;
+  /** ARN of the SSL certificate to attach */
   certificate: pulumi.Input<string>;
+  /** Whether to skip adding a prefix to the context */
   noPrefix?: boolean;
 }
 
+/**
+ * Attaches an SSL certificate to a load balancer listener.
+ * @param ctx - Pulumi context for resource naming and tagging
+ * @param args - Configuration for the certificate attachment
+ * @returns The created listener certificate resource
+ */
 export function loadBalancerListenerCertificate(
   ctx: Context,
   args: LoadBalancerListenerCertificateArgs,
@@ -166,12 +219,25 @@ export function loadBalancerListenerCertificate(
   });
 }
 
+/**
+ * Configuration options for creating load balancer listeners.
+ */
 export interface LoadBalancerListenerArgs {
+  /** The load balancer to create listeners for */
   loadBalancer: pulumi.Input<LoadBalancerInput>;
+  /** Optional SSL certificate ARN for HTTPS listener */
   certificate?: pulumi.Input<string>;
+  /** Whether to skip adding a prefix to the context */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates listeners for a load balancer. If a certificate is provided, creates both HTTP (redirect to HTTPS) and HTTPS listeners.
+ * Otherwise, creates only an HTTP listener. Both listeners return 404 by default.
+ * @param ctx - Pulumi context for resource naming and tagging
+ * @param args - Configuration for the listeners
+ * @returns Object containing the load balancer input and the primary listener
+ */
 export function loadBalancerListener(
   ctx: Context,
   args: LoadBalancerListenerArgs,
@@ -239,6 +305,11 @@ export function loadBalancerListener(
   } satisfies LoadBalancerWithListener;
 }
 
+/**
+ * Converts a LoadBalancerWithListener object to use ARN/ID strings instead of resources.
+ * @param output - LoadBalancerWithListener object with resource references
+ * @returns LoadBalancerWithListener object with ARN/ID strings
+ */
 export function loadBalancerListenerToIds(output: LoadBalancerWithListener) {
   return {
     loadBalancer: getLoadBalancerId(output.loadBalancer),
@@ -246,24 +317,47 @@ export function loadBalancerListenerToIds(output: LoadBalancerWithListener) {
   } satisfies LoadBalancerWithListener;
 }
 
+/**
+ * Configuration options for creating a complete load balancer setup.
+ */
 export interface LoadBalancerArgs {
+  /** Network configuration including VPC and subnets */
   network: NetworkInput;
+  /** Optional SSL certificate ARN for HTTPS support */
   certificate?: pulumi.Input<string>;
+  /** Connection idle timeout in seconds */
   idleTimeout?: pulumi.Input<number>;
+  /** Whether to skip adding a prefix to the context */
   noPrefix?: boolean;
 }
 
+/**
+ * Output from creating a complete load balancer setup.
+ */
 export interface LoadBalancerOutput {
+  /** The created load balancer resource */
   loadBalancer: aws.lb.LoadBalancer;
+  /** The primary listener resource */
   listener: aws.lb.Listener;
+  /** The URL of the load balancer */
   url: pulumi.Output<string>;
 }
 
+/**
+ * Represents a load balancer paired with a listener.
+ */
 export interface LoadBalancerWithListener {
+  /** The load balancer reference */
   loadBalancer: pulumi.Input<LoadBalancerInput>;
+  /** The listener reference */
   listener: pulumi.Input<ListenerInput>;
 }
 
+/**
+ * Converts a LoadBalancerOutput to use ARN strings instead of resources, while preserving the URL.
+ * @param output - LoadBalancerOutput object with resource references
+ * @returns Object with ARN strings and URL
+ */
 export function loadBalancerToIds(output: LoadBalancerOutput) {
   return {
     loadBalancer: output.loadBalancer.arn,
@@ -272,6 +366,13 @@ export function loadBalancerToIds(output: LoadBalancerOutput) {
   } satisfies LoadBalancerWithListener & { url: pulumi.Output<string> };
 }
 
+/**
+ * Creates a complete load balancer setup including security group, load balancer, and listeners.
+ * Automatically configures security rules for HTTP/HTTPS traffic.
+ * @param ctx - Pulumi context for resource naming and tagging
+ * @param args - Configuration for the load balancer
+ * @returns Complete load balancer setup with URL
+ */
 export function loadBalancer(
   ctx: Context,
   args: LoadBalancerArgs,

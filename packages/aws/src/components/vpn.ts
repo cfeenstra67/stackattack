@@ -18,21 +18,44 @@ const scriptsDir = path.normalize(path.join(dirname, "../../scripts"));
 
 const easyRsaGeneratePath = path.join(scriptsDir, "easy-rsa-generate.sh");
 
+/**
+ * Configuration options for generating VPN certificates.
+ */
 export interface VPNCertificateArgs {
+  /** Common name for the certificate authority */
   commonName?: pulumi.Input<string>;
+  /** Server certificate name */
   serverName?: pulumi.Input<string>;
+  /** Client certificate name */
   clientName?: pulumi.Input<string>;
+  /** Skip adding prefix to the resource context */
   noPrefix?: boolean;
 }
 
+/**
+ * Output structure containing generated VPN certificates and keys.
+ */
 export interface VPNCertificateOutput {
+  /** Certificate Authority (CA) certificate */
   ca: string;
+  /** Server certificate */
   serverCrt: string;
+  /** Server private key */
   serverPrivateKey: string;
+  /** Client certificate */
   clientCrt: string;
+  /** Client private key */
   clientPrivateKey: string;
 }
 
+/**
+ * Generates VPN certificates using Easy-RSA for mutual TLS authentication.
+ * Creates a certificate authority, server certificate, and client certificate.
+ *
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Optional configuration for certificate generation
+ * @returns A promise that resolves to the generated certificates and keys
+ */
 export function vpnCertificate(
   ctx: Context,
   args?: VPNCertificateArgs,
@@ -68,14 +91,29 @@ export function vpnCertificate(
   });
 }
 
+/**
+ * Configuration for generating OpenVPN client configuration file.
+ */
 interface GenerateClientConfigArgs {
+  /** Name used for the client configuration */
   name: pulumi.Input<string>;
+  /** VPN server hostname (may contain wildcards) */
   hostname: pulumi.Input<string>;
+  /** CA certificate chain */
   certificateChain: pulumi.Input<string>;
+  /** Client certificate */
   clientCertificate: pulumi.Input<string>;
+  /** Client private key */
   clientPrivateKey: pulumi.Input<string>;
 }
 
+/**
+ * Generates an OpenVPN client configuration file (.ovpn) with embedded certificates.
+ * The configuration includes security settings and embedded CA, client cert, and private key.
+ *
+ * @param args - Configuration parameters for the client config
+ * @returns A secret string containing the complete OpenVPN client configuration
+ */
 export function clientConfigFile({
   name,
   hostname,
@@ -114,18 +152,38 @@ verify-x509-name server name`;
   return pulumi.secret(config);
 }
 
+/**
+ * Configuration options for creating an AWS Client VPN endpoint.
+ */
 interface VpnArgs {
+  /** VPC where the VPN endpoint will be created */
   vpc: pulumi.Input<VpcInput>;
+  /** Private subnet IDs for VPN network associations */
   privateSubnetIds: pulumi.Input<string>[];
+  /** Public subnet IDs (currently unused but part of interface) */
   publicSubnetIds: pulumi.Input<string>[];
+  /** Pre-generated VPN certificates, will auto-generate if not provided */
   certificate?: pulumi.Input<VPNCertificateOutput>;
+  /** Security group IDs to attach to the VPN endpoint */
   securityGroupIds?: pulumi.Input<pulumi.Input<string>[]>;
+  /** CIDR block for VPN client IP addresses */
   cidrBlock?: pulumi.Input<string>;
+  /** CIDR allocator to automatically assign a CIDR block */
   cidrAllocator?: CidrAllocator;
+  /** Enable CloudWatch connection logging (default: true) */
   enableConnectionLogs?: boolean;
+  /** Skip adding prefix to the resource context */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates an AWS Client VPN endpoint with certificate-based authentication.
+ * Sets up the VPN endpoint, network associations, authorization rules, and generates client configuration.
+ *
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration options for the VPN endpoint
+ * @returns An object containing the VPN endpoint resource and client configuration file
+ */
 export function vpn(ctx: Context, args: VpnArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("vpn");

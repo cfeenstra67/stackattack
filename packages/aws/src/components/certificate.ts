@@ -2,6 +2,11 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
 
+/**
+ * Retrieves the Route53 hosted zone ID for a given domain by extracting the root domain.
+ * @param domain - The domain name to find the hosted zone for
+ * @returns The Route53 hosted zone ID as a Pulumi output
+ */
 export function getZoneFromDomain(
   domain: pulumi.Input<string>,
 ): pulumi.Output<string> {
@@ -11,15 +16,30 @@ export function getZoneFromDomain(
   });
 }
 
+/**
+ * Configuration arguments for creating an ACM certificate.
+ */
 export interface CertificateArgs {
+  /** The primary domain name for the certificate */
   domain: pulumi.Input<string>;
+  /** Additional domain names to include in the certificate */
   additionalDomains?: pulumi.Input<string>[];
+  /** Whether to include a wildcard subdomain (*.domain) */
   wildcard?: boolean;
+  /** Whether to skip DNS validation (returns certificate ARN immediately) */
   noValidate?: boolean;
+  /** Specific Route53 zone ID (auto-detected from domain if not provided) */
   zone?: pulumi.Input<string>;
+  /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates an ACM certificate with DNS validation and optional wildcard support.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the certificate
+ * @returns The ARN of the validated certificate as a Pulumi output
+ */
 export function certificate(
   ctx: Context,
   args: CertificateArgs,

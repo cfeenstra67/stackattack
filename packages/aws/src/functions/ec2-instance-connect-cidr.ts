@@ -3,6 +3,12 @@ import * as pulumi from "@pulumi/pulumi";
 
 const ipRangesUrl = "https://ip-ranges.amazonaws.com/ip-ranges.json";
 
+/**
+ * Retrieves the CIDR block for EC2 Instance Connect service in a specific AWS region.
+ * @param region - AWS region (defaults to current region if not specified)
+ * @returns The CIDR block for EC2 Instance Connect as a Pulumi output
+ * @throws Error if no EC2 Instance Connect IP range is found for the region
+ */
 export function getEc2InstanceConnectCidr(
   region?: pulumi.Input<string>,
 ): pulumi.Output<string> {
