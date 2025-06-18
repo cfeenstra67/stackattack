@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.26
+
+### Patch Changes
+
+- Export gmail domain
+
 ## 0.1.0-dev.25
 
 ### Patch Changes
