@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "generate": "tsx generate.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +17,9 @@
   "dependencies": {
     "@astrojs/starlight": "^0.31.1",
     "astro": "^5.2.3"
+  },
+  "devDependencies": {
+    "typedoc": "^0.27.6",
+    "tsx": "^4.19.2"
   }
 }
