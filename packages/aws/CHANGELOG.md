@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.30
+
+### Patch Changes
+
+- Export serviceAssumeRolePolicy
+
 ## 0.1.0-dev.29
 
 ### Patch Changes
