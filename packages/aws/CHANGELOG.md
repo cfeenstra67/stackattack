@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.32
+
+### Patch Changes
+
+- Vercel domain
+
 ## 0.1.0-dev.31
 
 ### Patch Changes
