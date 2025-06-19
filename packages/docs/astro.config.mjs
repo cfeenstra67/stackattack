@@ -14,7 +14,7 @@ export default defineConfig({
       './src/styles/custom.css',
     ],
     social: {
-      github: 'https://github.com/your-org/stackattack',
+      github: 'https://github.com/cfeenstra67/stackattack',
     },
     sidebar: [
       {
