@@ -1,7 +1,7 @@
 {
   "name": "@stackattack/aws",
   "type": "module",
-  "version": "0.1.0-dev.30",
+  "version": "0.1.0-dev.31",
   "description": "",
   "main": "dist/index.js",
   "files": [
@@ -13,7 +13,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.build.json --noEmit"
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "check": "biome check --apply src"
   },
   "keywords": [],
   "author": "",

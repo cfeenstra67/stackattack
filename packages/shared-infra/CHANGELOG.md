@@ -1,5 +1,15 @@
 # @stackattack/shared-infra
 
+## 0.1.0-dev.28
+
+### Patch Changes
+
+- eca39bd: Working on docs; formatting
+- Updated dependencies
+- Updated dependencies [eca39bd]
+- Updated dependencies [69bc860]
+  - @stackattack/aws@0.1.0-dev.31
+
 ## 0.1.0-dev.27
 
 ### Patch Changes

@@ -1,8 +1,8 @@
 /**
  * @packageDocumentation
- * 
+ *
  * Kinesis Data Firehose components for streaming data to S3 with optional Parquet conversion.
- * 
+ *
  * Creates Firehose delivery streams with S3 destinations, CloudWatch logging, and optional Glue integration.
  * Supports data transformation, compression, and format conversion from JSON to Parquet using Glue tables.
  */

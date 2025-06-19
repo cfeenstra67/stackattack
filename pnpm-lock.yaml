@@ -108,7 +108,7 @@ importers:
         specifier: ^0.34.2
         version: 0.34.2
       tsx:
-        specifier: ^4.19.2
+        specifier: ^4.19.3
         version: 4.19.3
       typedoc:
         specifier: ^0.27.6

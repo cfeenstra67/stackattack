@@ -2,15 +2,16 @@
   "name": "@stackattack/docs",
   "type": "module",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2-dev.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build-only": "astro build",
+    "build": "pnpm generate && pnpm build-only",
     "preview": "astro preview",
     "generate": "tsx generate.ts",
-    "check": "biome check --apply src"
+    "check": "biome check --apply src *.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +23,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.5.0",
     "sharp": "^0.34.2",
-    "tsx": "^4.19.2",
+    "tsx": "^4.19.3",
     "typedoc": "^0.27.6"
   }
 }

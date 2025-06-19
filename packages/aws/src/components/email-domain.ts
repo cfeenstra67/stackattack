@@ -1,8 +1,8 @@
 /**
  * @packageDocumentation
- * 
+ *
  * Email domain components for setting up AWS SES email logging and delivery to S3.
- * 
+ *
  * Creates SNS topic subscriptions that stream email events to S3 via Kinesis Firehose.
  * Includes IAM roles and policies for secure email event delivery and webhook integration.
  */

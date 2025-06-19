@@ -1,8 +1,8 @@
 /**
  * @packageDocumentation
- * 
+ *
  * Gmail domain components for configuring custom domains with Gmail/Google Workspace.
- * 
+ *
  * Creates Route53 DNS records for domain verification and MX records for Gmail integration.
  * Handles automatic zone detection and domain ownership verification for Google services.
  */

@@ -6,7 +6,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "check": "pnpm run -r check",
+    "build": "pnpm -r build",
+    "check": "pnpm -r check",
+    "build-and-push": "pnpm build && pnpm changeset publish",
     "prerelease-enter": "changeset pre enter dev",
     "prerelease-exit": "changeset pre exit",
     "release": "changeset publish"

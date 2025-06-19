@@ -1,8 +1,8 @@
 /**
  * @packageDocumentation
- * 
+ *
  * S3 bucket components for creating and configuring AWS S3 buckets with secure defaults.
- * 
+ *
  * Includes functions for bucket creation, encryption, versioning, CORS configuration, lifecycle rules,
  * and access policies. All security features are enabled by default (encryption, public access blocking).
  */

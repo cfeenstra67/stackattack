@@ -7,6 +7,9 @@
 		"enabled": true,
 		"indentStyle": "space"
 	},
+	"files": {
+		"ignoreUnknown": true
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
