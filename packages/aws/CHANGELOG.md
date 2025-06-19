@@ -1,5 +1,12 @@
 # @stackattack/aws
 
+## 0.1.0-dev.31
+
+### Patch Changes
+
+- eca39bd: Working on docs; formatting
+- 69bc860: Added typedoc comments
+
 ## 0.1.0-dev.30
 
 ### Patch Changes
