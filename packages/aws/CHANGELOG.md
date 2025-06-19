@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.34
+
+### Patch Changes
+
+- Fix type issue
+
 ## 0.1.0-dev.33
 
 ### Patch Changes

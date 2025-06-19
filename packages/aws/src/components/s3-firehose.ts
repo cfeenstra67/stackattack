@@ -19,7 +19,7 @@ import { BucketInput, bucket, getBucketId } from "./bucket.js";
  */
 export interface S3FirehosePolicyArgs {
   /** The S3 bucket to grant access to */
-  bucket: BucketInput;
+  bucket: pulumi.Input<BucketInput>;
   /** ARN of the CloudWatch log stream for logging */
   logStreamArn: pulumi.Input<string>;
   /** Optional ARN of a Glue table for Parquet conversion */
