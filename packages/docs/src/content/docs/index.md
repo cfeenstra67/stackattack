@@ -6,7 +6,7 @@ hero:
   title: StackAttack AWS
   tagline: Production-ready AWS infrastructure components for Pulumi
   image:
-    file: ../../../assets/hero.png
+    file: ../../assets/hero.png
   actions:
     - text: Get Started
       link: /getting-started/introduction/

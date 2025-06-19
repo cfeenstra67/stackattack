@@ -26,6 +26,13 @@ export default defineConfig({
         ],
       },
       {
+        label: 'Working with Pulumi',
+        items: [
+          { label: 'Choosing a Backend', link: '/working-with-pulumi/choosing-a-backend' },
+          { label: 'Structuring Stacks', link: '/working-with-pulumi/structuring-stacks' },
+        ]
+      },
+      {
         label: 'Concepts',
         items: [
           { label: 'Context', link: '/concepts/context/' },

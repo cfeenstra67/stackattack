@@ -3,8 +3,6 @@ title: Installation
 description: How to install and set up StackAttack AWS
 ---
 
-# Installation
-
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 18 or later

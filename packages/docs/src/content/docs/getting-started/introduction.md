@@ -23,38 +23,79 @@ StackAttack AWS provides a curated collection of battle-tested infrastructure co
 
 **Type safety**: Full TypeScript support with comprehensive type definitions means fewer runtime errors and better developer experience.
 
-## Architecture Philosophy
+**Simplicity**: No abstractions, just functions. You can import the library to access them, or copy/paste them into your codebase and modify them to your heart's content.
 
-### Context-Driven Design
-The `Context` is the foundation of StackAttack AWS. It provides consistent resource naming, tagging, and organization across all components, ensuring your infrastructure is organized and discoverable.
+## Philsophy
 
-### Component Composition
-Components are designed as building blocks that create multiple related AWS resources. For example, the `vpc` component creates a VPC, subnets, route tables, and internet gateway—everything you need for a complete network foundation.
+Stackattack was created for one simple reason: **there's too much code needed to get up and running with infra-as-code**. Most of the time, putting up infrastructure with IaC tools requires a slow, iterative process of cross referencing Pulumi/Terraform docs, cross-referencing them with AWS docs, and trial-and-error to get things working.
 
-### Seamless Integration
-Components work together seamlessly. Outputs from one component can be easily used as inputs to another, enabling you to build complex infrastructure with simple, readable code.
+Most of the time, what you really want is to get something working quickly with reasonable defaults, then make adjustments if you have more specific requirements. Stackattack aims to be the best way to get started setting up infrastructure managed by Pulumi.
+
+Stackattack exposes a set of simple, self-contained building blocks that can be composed to quickly set up working infrastructure with all of the benefits of Infra-as-code: you can modify your infrastructure with a typical PR-based development workflow, your infrastructure configs are versioned alongside the rest of your code, and you can easily deploy additional copies of your infrastructure as needed.
 
 ## Quick Example
 
+This sets up a containerized API deployment, served through a load balancer with HTTPS, with access to a PostgreSQL database.
+
 ```typescript
-import { bucket, vpc, service } from '@stackattack/aws';
-import { context } from './shared';
+import * as saws from '@stackattack/aws';
+
+const ctx = saws.context();
 
 // Create a VPC with public and private subnets
-const network = vpc(context, { 
+const vpc = saws.vpc(ctx, { 
   cidr: '10.0.0.0/16' 
 });
 
 // Create an encrypted S3 bucket
-const storage = bucket(context, { 
+const storage = saws.bucket(ctx, { 
   versioned: true, 
   encrypted: true 
 });
 
+const cluster = saws.cluster(ctx, {
+  network: vpc.network("private"),
+  instances: {
+    architecture: "arm64",
+    memoryMib: { min: 4096, max: 8192 },
+    vcpuCount: { min: 2, max: 4 },
+    memoryGibPerVcpu: { min: 2, max: 2 },
+  },
+  maxSize: 5,
+});
+
+const database = saws.database(ctx, {
+  network: vpc.network("private")
+});
+
+const certificate = saws.certificate(ctx, {
+  domain: "mysite.com",
+  wildcard: true,
+});
+
+const loadBalancer = saws.loadBalancer(ctx, {
+  network: vpc.network("public"),
+  certificate,
+});
+
 // Deploy a containerized service
-const app = service(context, {
-  image: 'nginx:latest',
-  network: network.network('private'),
+const app = saws.service(ctx.prefix('api'), {
+  cluster,
+  name: 'mysite-api',
+  replicas: 1,
+  image: 'mysite-api:latest',
+  network: vpc.network('private'),
+  domain: 'api.mysite.com',
+  loadBalancer,
+  cpu: 256,
+  memory: 256,
+  port: 3000,
+  healthcheck: {
+    path: '/healthcheck'
+  },
+  env: {
+    DATABASE_URL: database.url
+  }
 });
 ```
 
