@@ -18,8 +18,8 @@ import { getZoneFromDomain } from "./certificate.js";
 export interface GmailDomainArgs {
   /** The domain name to configure for Gmail */
   domain: pulumi.Input<string>;
-  /** Google verification code for domain ownership */
-  verificationCode: pulumi.Input<string>;
+  /** Google verification code for domain ownership. If not passed, no verification record will be created for the domain */
+  verificationCode?: pulumi.Input<string>;
   /** Route53 zone ID (auto-detected from domain if not provided) */
   zoneId?: pulumi.Input<string>;
   /** Whether to skip adding a prefix to the resource name */
@@ -47,13 +47,25 @@ export function gmailDomain(ctx: Context, args: GmailDomainArgs) {
     records: ["1 smtp.google.com."],
   });
 
-  const verificationRecord = new aws.route53.Record(ctx.id("verification"), {
-    name: args.domain,
-    zoneId,
-    type: "TXT",
-    ttl: 300,
-    records: [args.verificationCode],
-  });
+  let verificationCode: pulumi.Output<string> | undefined = undefined;
+  if (args.verificationCode !== undefined) {
+    const prefix = "google-site-verification=";
+    verificationCode = pulumi
+      .output(args.verificationCode)
+      .apply((code) =>
+        code.toLowerCase().startsWith(prefix) ? code : `${prefix}${code}`,
+      );
+  }
 
-  return { mxRecord, verificationRecord };
+  if (verificationCode !== undefined) {
+    new aws.route53.Record(ctx.id("verification"), {
+      name: args.domain,
+      zoneId,
+      type: "TXT",
+      ttl: 300,
+      records: [verificationCode],
+    });
+  }
+
+  return mxRecord;
 }
