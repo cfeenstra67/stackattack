@@ -1,6 +1,19 @@
+/**
+ * @packageDocumentation
+ *
+ * Stack configuration templates for common AWS infrastructure patterns.
+ *
+ * Provides predefined stack functions for infrastructure and application deployment,
+ * including VPC, VPN, load balancer, ECS cluster, and database configurations.
+ */
+
 import * as saws from "./src/index.js";
 import * as pulumi from '@pulumi/pulumi';
 
+/**
+ * Creates core infrastructure components including VPC, VPN, load balancer, ECS cluster, and database.
+ * @returns Infrastructure component IDs and configuration for use by application stacks
+ */
 function infra() {
   const ctx = saws.context();
 
@@ -28,6 +41,10 @@ function infra() {
   };
 };
 
+/**
+ * Creates application services that depend on infrastructure components from another stack.
+ * @returns Application URLs and service endpoints
+ */
 function app() {
   const ctx = saws.context();
   const config = new pulumi.Config();

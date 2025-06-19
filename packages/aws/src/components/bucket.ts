@@ -19,7 +19,8 @@ export type BucketInput =
   | string
   | aws.s3.BucketV2
   | aws.s3.Bucket
-  | aws.s3.GetBucketResult;
+  | aws.s3.GetBucketResult
+  | BucketOutput;
 
 /**
  * Extracts the bucket ID from various bucket input types.
@@ -33,6 +34,9 @@ export function getBucketId(
     if (typeof value === "string") {
       return pulumi.output(value);
     }
+    if ("url" in value) {
+      return value.bucket.bucket;
+    }
     return pulumi.output(value.bucket);
   });
 }
@@ -45,6 +49,9 @@ export function getBucketAttributes(
       return aws.s3.getBucketOutput({
         bucket: value,
       });
+    }
+    if ("url" in value) {
+      return pulumi.output(value.bucket);
     }
     return pulumi.output(value);
   });
@@ -323,13 +330,18 @@ export type BucketArgs = Pick<
   noPrefix?: boolean;
 };
 
+export interface BucketOutput {
+  bucket: aws.s3.BucketV2;
+  url: pulumi.Output<string>;
+}
+
 /**
  * Creates an S3 bucket with optional versioning, encryption, CORS, lifecycle rules, and policies.
  * @param ctx - The context for resource naming and tagging
  * @param args - Optional configuration arguments for the bucket
  * @returns An object containing the bucket resource and its S3 URL
  */
-export function bucket(ctx: Context, args?: BucketArgs) {
+export function bucket(ctx: Context, args?: BucketArgs): BucketOutput {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("bucket");
   }

@@ -1,3 +1,12 @@
+/**
+ * @packageDocumentation
+ *
+ * Static site hosting components for deploying static websites to AWS using S3, CloudFront, and Lambda@Edge.
+ *
+ * Provides functions for creating static site distributions with custom domain support, SSL certificates,
+ * caching policies, and framework-specific adapters for routing and path handling.
+ */
+
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
@@ -5,13 +14,24 @@ import { serviceAssumeRolePolicy } from "../policies.js";
 import { BucketInput, bucket, getBucketAttributes } from "./bucket.js";
 import { certificate, getZoneFromDomain } from "./certificate.js";
 
+/**
+ * Configuration interface for static site framework adapters.
+ */
 export interface StaticSiteAdapter {
+  /** Function to transform URI paths to S3 object keys */
   getKey?: (uri: string) => string;
+  /** Function to get redirect path for domain redirects */
   getRedirectPath?: (uri: string) => string;
+  /** Glob patterns for static resources that should be cached longer */
   staticPaths?: string[];
+  /** Mapping of HTTP error codes to custom error page paths */
   errorPages?: Record<number, string>;
 }
 
+/**
+ * Creates a static site adapter configured for Astro framework conventions.
+ * @returns Static site adapter with Astro-specific routing and caching rules
+ */
 export function astroAdapter(): StaticSiteAdapter {
   return {
     getKey: (uri) => {
@@ -35,19 +55,38 @@ export function astroAdapter(): StaticSiteAdapter {
   };
 }
 
+/**
+ * Configuration arguments for creating a static site with CloudFront distribution.
+ */
 export interface StaticSiteArgs {
+  /** The S3 bucket containing the static site files */
   bucket: BucketInput;
+  /** The primary domain name for the static site */
   domain: pulumi.Input<string>;
+  /** Additional domains that should redirect to the primary domain */
   redirectDomains?: pulumi.Input<string>[];
+  /** Framework-specific adapter for routing and caching behavior */
   adapter?: StaticSiteAdapter;
+  /** ARN of existing SSL certificate (creates new one if not provided) */
   certificate?: pulumi.Input<string>;
+  /** Route53 hosted zone ID (auto-detected from domain if not provided) */
   zoneId?: pulumi.Input<string>;
+  /** S3 bucket for CloudFront access logs (creates new one if undefined, disables if null) */
   logsBucket?: null | pulumi.Input<BucketInput>;
+  /** Prefix for CloudFront access log files */
   logsPrefix?: pulumi.Input<string>;
+  /** Whether to skip creating the S3 bucket policy for CloudFront access */
   noBucketPolicy?: boolean;
+  /** Whether to skip adding 'static-site' prefix to resource names */
   noPrefix?: boolean;
 }
 
+/**
+ * Creates a complete static site hosting solution with S3, CloudFront, and Lambda@Edge.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the static site
+ * @returns CloudFront distribution configured for static site hosting
+ */
 export function staticSite(ctx: Context, args: StaticSiteArgs) {
   if (!args.noPrefix) {
     ctx = ctx.prefix("static-site");
