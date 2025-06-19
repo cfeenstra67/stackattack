@@ -7,7 +7,7 @@ import { BucketInput, getBucketId } from "./components/bucket.js";
  */
 export interface S3BucketArnArgs {
   /** The S3 bucket to generate an ARN for */
-  bucket: BucketInput;
+  bucket: pulumi.Input<BucketInput>;
 }
 
 /**

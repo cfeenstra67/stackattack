@@ -16,7 +16,7 @@ import { Context } from "../context.js";
  * Union type representing different ways to reference an S3 bucket.
  */
 export type BucketInput =
-  | pulumi.Input<string>
+  | string
   | aws.s3.BucketV2
   | aws.s3.Bucket
   | aws.s3.GetBucketResult;
@@ -34,6 +34,19 @@ export function getBucketId(
       return pulumi.output(value);
     }
     return pulumi.output(value.bucket);
+  });
+}
+
+export function getBucketAttributes(
+  input: pulumi.Input<BucketInput>,
+): pulumi.Output<aws.s3.Bucket | aws.s3.BucketV2 | aws.s3.GetBucketResult> {
+  return pulumi.output(input).apply((value) => {
+    if (typeof value === "string") {
+      return aws.s3.getBucketOutput({
+        bucket: value,
+      });
+    }
+    return pulumi.output(value);
   });
 }
 

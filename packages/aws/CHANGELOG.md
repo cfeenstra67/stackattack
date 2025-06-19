@@ -1,5 +1,13 @@
 # @stackattack/aws
 
+## 0.1.0-dev.33
+
+### Patch Changes
+
+- Added static site component + bucket directory
+- 3120390: Improve google domain
+- Bucket directory resource
+
 ## 0.1.0-dev.32
 
 ### Patch Changes
