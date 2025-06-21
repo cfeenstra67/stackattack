@@ -98,6 +98,12 @@ importers:
       '@biomejs/biome':
         specifier: ^1.5.0
         version: 1.5.0
+      '@pulumi/pulumi':
+        specifier: ^3.157.0
+        version: 3.157.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+      '@stackattack/aws':
+        specifier: workspace:*
+        version: link:../aws
       sharp:
         specifier: ^0.34.2
         version: 0.34.2

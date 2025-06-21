@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.36
+
+### Patch Changes
+
+- Add provider arg to certificate component
+
 ## 0.1.0-dev.35
 
 ### Patch Changes

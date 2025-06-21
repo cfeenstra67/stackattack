@@ -1,5 +1,11 @@
 # @stackattack/docs
 
+## 0.0.2-dev.1
+
+### Patch Changes
+
+- Add provider arg to certificate component
+
 ## 0.0.2-dev.0
 
 ### Patch Changes

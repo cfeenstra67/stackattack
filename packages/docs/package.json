@@ -2,7 +2,7 @@
   "name": "@stackattack/docs",
   "type": "module",
   "private": true,
-  "version": "0.0.2-dev.0",
+  "version": "0.0.2-dev.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.5.0",
+    "@pulumi/pulumi": "^3.157.0",
+    "@stackattack/aws": "workspace:*",
     "sharp": "^0.34.2",
     "tsx": "^4.19.3",
     "typedoc": "^0.27.6"

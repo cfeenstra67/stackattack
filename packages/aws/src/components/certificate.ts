@@ -39,6 +39,8 @@ export interface CertificateArgs {
   noValidate?: boolean;
   /** Specific Route53 zone ID (auto-detected from domain if not provided) */
   zone?: pulumi.Input<string>;
+  /** Use a specific provider instance to create certificate resources. This can allow you to create certificate in different region(s) or account(s) */
+  provider?: aws.Provider;
   /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
@@ -58,6 +60,8 @@ export function certificate(
   }
 
   const zoneId = args.zone ?? getZoneFromDomain(args.domain);
+
+  const provider = args.provider;
 
   const additionalDomains = pulumi
     .all([
@@ -82,6 +86,7 @@ export function certificate(
       validationMethod: "DNS",
     },
     {
+      provider,
       deleteBeforeReplace: true,
     },
   );
@@ -101,6 +106,7 @@ export function certificate(
         ttl: 600,
       },
       {
+        provider,
         deleteBeforeReplace: true,
       },
     );
@@ -115,6 +121,7 @@ export function certificate(
       validationRecordFqdns: fqdns,
     },
     {
+      provider,
       deleteBeforeReplace: true,
     },
   );

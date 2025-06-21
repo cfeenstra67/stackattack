@@ -1,0 +1,4 @@
+config:
+  stackattack:domain-name: stackattack.camfeenstra.com
+  aws:region: us-east-2
+  aws-native:region: us-east-2
