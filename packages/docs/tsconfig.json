@@ -1,6 +1,11 @@
 {
     // Included with "astro/tsconfigs/strict" or "astro/tsconfigs/strictest"
     "extends": "astro/tsconfigs/strict",
+    "ts-node": {
+        "swc": false,
+        "ignore": ["\\/node_modules\\/(?!.*shared-infra)"]
+    },
+    "include": ["./src", "*.ts", "./node_modules/shared-infra/*.ts"],
     "compilerOptions": {
       "strictNullChecks": true, // add if using `base` template
       "allowJs": true, // required, and included with all Astro templates

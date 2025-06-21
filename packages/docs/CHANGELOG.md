@@ -1,5 +1,11 @@
 # @stackattack/docs
 
+## 0.0.2-dev.2
+
+### Patch Changes
+
+- Fix static site component, deploy docs
+
 ## 0.0.2-dev.1
 
 ### Patch Changes

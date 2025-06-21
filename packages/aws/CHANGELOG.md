@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.37
+
+### Patch Changes
+
+- Fix static site component, deploy docs
+
 ## 0.1.0-dev.36
 
 ### Patch Changes

@@ -3,6 +3,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://stackattack.camfeenstra.com',
   integrations: [starlight({
     title: 'StackAttack AWS',
     description: 'AWS infrastructure components for Pulumi',

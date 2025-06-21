@@ -62,7 +62,7 @@ export function getBucketAttributes(
  */
 export interface BucketVersioningArgs {
   /** The S3 bucket to configure versioning for */
-  bucket: BucketInput;
+  bucket: pulumi.Input<BucketInput>;
   /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
@@ -112,7 +112,7 @@ export function bucketEncryption(ctx: Context, args: BucketVersioningArgs) {
  */
 export interface BucketCorsArgs {
   /** The S3 bucket to configure CORS for */
-  bucket: BucketInput;
+  bucket: pulumi.Input<BucketInput>;
   /** Custom CORS rules (defaults to permissive rules if not specified) */
   corsRules?: aws.s3.BucketCorsConfigurationV2Args["corsRules"];
   /** Whether to skip adding a prefix to the resource name */
@@ -158,7 +158,7 @@ export interface BucketLifecycleRule {
  */
 export interface BucketLifecycleRulesArgs {
   /** The S3 bucket to configure lifecycle rules for */
-  bucket: BucketInput;
+  bucket: pulumi.Input<BucketInput>;
   /** Array of lifecycle rules to apply */
   rules: BucketLifecycleRule[];
   /** Whether to skip adding a prefix to the resource name */
@@ -227,10 +227,10 @@ export function bucketPublicAccessBlock(
  * @returns An IAM policy document granting the services bucket access
  */
 export function bucketServiceAccessPolicy(
-  bucket: BucketInput,
+  bucket: pulumi.Input<BucketInput>,
   services: pulumi.Input<string>[],
 ) {
-  const bucketObj = aws.s3.getBucketOutput({ bucket: getBucketId(bucket) });
+  const bucketObj = getBucketAttributes(bucket);
   return aws.iam.getPolicyDocumentOutput({
     statements: [
       {
@@ -252,7 +252,7 @@ export function bucketServiceAccessPolicy(
  */
 export interface BucketPolicyArgs {
   /** The S3 bucket to create a policy for */
-  bucket: BucketInput;
+  bucket: pulumi.Input<BucketInput>;
   /** AWS services that should be granted access to the bucket */
   services?: pulumi.Input<string>[];
   /** AWS account IDs that should be granted access to the bucket */
@@ -305,6 +305,30 @@ export function bucketPolicy(ctx: Context, args: BucketPolicyArgs) {
   });
 }
 
+export interface BucketObjectOwnershipArgs {
+  /** The S3 bucket to create an ownership resource for */
+  bucket: pulumi.Input<BucketInput>;
+  /** Object ownership setting */
+  objectOwnership: pulumi.Input<string>;
+  /** Whether to skip adding a prefix to the resource name */
+  noPrefix?: boolean;
+}
+
+export function bucketObjectOwnership(
+  ctx: Context,
+  args: BucketObjectOwnershipArgs,
+) {
+  if (!args.noPrefix) {
+    ctx = ctx.prefix("object-ownership");
+  }
+  return new aws.s3.BucketOwnershipControls(ctx.id(), {
+    bucket: getBucketId(args.bucket),
+    rule: {
+      objectOwnership: args.objectOwnership,
+    },
+  });
+}
+
 /**
  * Configuration arguments for creating an S3 bucket with optional features.
  */
@@ -322,6 +346,8 @@ export type BucketArgs = Pick<
   public?: boolean;
   /** Whether to disable deletion protection */
   noProtect?: boolean;
+  /** The object ownership setting for the bucket */
+  objectOwnership?: pulumi.Input<string>;
   /** Lifecycle rules to automatically manage object expiration */
   lifecycleRules?: BucketLifecycleRule[];
   /** Policy configuration for granting access to services and accounts */
@@ -380,6 +406,13 @@ export function bucket(ctx: Context, args?: BucketArgs): BucketOutput {
 
   if (args?.policy) {
     bucketPolicy(ctx, { bucket, ...args?.policy });
+  }
+
+  if (args?.objectOwnership) {
+    bucketObjectOwnership(ctx, {
+      bucket,
+      objectOwnership: args.objectOwnership,
+    });
   }
 
   const url = pulumi.interpolate`s3://${bucket.bucket}`;

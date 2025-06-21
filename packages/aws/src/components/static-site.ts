@@ -260,14 +260,16 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
 
   let logsBucketDomain: pulumi.Input<string> | undefined = undefined;
   if (args.logsBucket === undefined) {
-    logsBucketDomain = bucket(ctx.prefix("logs")).bucket.bucketDomainName;
+    logsBucketDomain = bucket(ctx.prefix("logs"), {
+      objectOwnership: "BucketOwnerPreferred",
+    }).bucket.bucketDomainName;
   } else if (args.logsBucket !== null) {
     const logsBucketAttrs = getBucketAttributes(args.logsBucket);
     logsBucketDomain = logsBucketAttrs.bucketDomainName;
   }
 
   const cloudfrontDistribution = new aws.cloudfront.Distribution(
-    "distribution",
+    ctx.id(),
     {
       enabled: true,
       isIpv6Enabled: false,
