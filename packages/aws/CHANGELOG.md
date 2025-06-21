@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.41
+
+### Patch Changes
+
+- Added github role component
+
 ## 0.1.0-dev.40
 
 ### Patch Changes

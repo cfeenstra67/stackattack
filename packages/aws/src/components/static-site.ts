@@ -399,6 +399,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
             prefix: args.logsPrefix ?? pulumi.interpolate`${domain}/`,
           }
         : undefined,
+      tags: ctx.tags(),
     },
     { deleteBeforeReplace: true },
   );
