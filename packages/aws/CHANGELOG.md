@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.38
+
+### Patch Changes
+
+- Fix BucketInput -> pulumi.Input<BucketInput>
+
 ## 0.1.0-dev.37
 
 ### Patch Changes

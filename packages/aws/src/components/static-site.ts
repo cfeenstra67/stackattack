@@ -60,14 +60,14 @@ export function astroAdapter(): StaticSiteAdapter {
  */
 export interface StaticSiteArgs {
   /** The S3 bucket containing the static site files */
-  bucket: BucketInput;
+  bucket: pulumi.Input<BucketInput>;
   /** The primary domain name for the static site */
   domain: pulumi.Input<string>;
   /** Additional domains that should redirect to the primary domain */
   redirectDomains?: pulumi.Input<string>[];
   /** Framework-specific adapter for routing and caching behavior */
   adapter?: StaticSiteAdapter;
-  /** ARN of existing SSL certificate (creates new one if not provided) */
+  /** ARN of existing SSL certificate (creates new one if not provided). Note that the certificate must be created in the us-east-1 region. */
   certificate?: pulumi.Input<string>;
   /** Route53 hosted zone ID (auto-detected from domain if not provided) */
   zoneId?: pulumi.Input<string>;
