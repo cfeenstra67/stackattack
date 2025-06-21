@@ -1,5 +1,11 @@
 # @stackattack/docs
 
+## 0.0.2-dev.3
+
+### Patch Changes
+
+- 3f61818: bucketDirectory -> bucketFiles
+
 ## 0.0.2-dev.2
 
 ### Patch Changes

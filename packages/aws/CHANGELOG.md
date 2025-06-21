@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.39
+
+### Patch Changes
+
+- 3f61818: bucketDirectory -> bucketFiles
+
 ## 0.1.0-dev.38
 
 ### Patch Changes
