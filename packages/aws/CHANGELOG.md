@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.40
+
+### Patch Changes
+
+- Make static site component more general
+
 ## 0.1.0-dev.39
 
 ### Patch Changes

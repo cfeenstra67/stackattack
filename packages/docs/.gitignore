@@ -1,3 +1,4 @@
 /.astro
 src/content/docs/components/
 src/content/docs/utilities/
+/dist

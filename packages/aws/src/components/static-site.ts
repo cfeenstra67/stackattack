@@ -18,22 +18,34 @@ import { certificate, getZoneFromDomain } from "./certificate.js";
  * Configuration interface for static site framework adapters.
  */
 export interface StaticSiteAdapter {
+  index?: string;
   /** Function to transform URI paths to S3 object keys */
   getKey?: (uri: string) => string;
   /** Function to get redirect path for domain redirects */
   getRedirectPath?: (uri: string) => string;
-  /** Glob patterns for static resources that should be cached longer */
-  staticPaths?: string[];
+  /** Default headers to include in every response */
+  defaultHeaders?: Record<string, pulumi.Input<string>>;
+  /** A list of patterns and headers to include in response for keys that match each pattern */
+  headers?: {
+    patterns: string[];
+    headers: Record<string, pulumi.Input<string>>;
+    inherit?: boolean;
+  }[];
   /** Mapping of HTTP error codes to custom error page paths */
-  errorPages?: Record<number, string>;
+  errorPages?: { code: number; key: string }[];
+}
+
+export interface AstroAdapterArgs {
+  staticPaths?: string[];
 }
 
 /**
  * Creates a static site adapter configured for Astro framework conventions.
  * @returns Static site adapter with Astro-specific routing and caching rules
  */
-export function astroAdapter(): StaticSiteAdapter {
+export function astroAdapter(args?: AstroAdapterArgs): StaticSiteAdapter {
   return {
+    index: "index.html",
     getKey: (uri) => {
       // Check whether the URI is missing a file name.
       if (uri.endsWith("/")) {
@@ -48,10 +60,21 @@ export function astroAdapter(): StaticSiteAdapter {
     getRedirectPath: (uri) => {
       return uri === "/index.html" ? "" : uri;
     },
-    errorPages: {
-      404: "/404.html",
-    },
-    staticPaths: ["*.jpg", "*.png", "*.js", "*.css", "*.svg"],
+    errorPages: [{ code: 404, key: "/404.html" }],
+    headers: [
+      {
+        patterns: args?.staticPaths ?? [
+          "*.jpg",
+          "*.png",
+          "*.js",
+          "*.css",
+          "*.svg",
+        ],
+        headers: {
+          "Cache-Control": `max-age=${30 * 24 * 3600}`,
+        },
+      },
+    ],
   };
 }
 
@@ -117,16 +140,17 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
   });
 
   const domain = pulumi.output(args.domain);
+  const getRedirectPath = args.adapter?.getRedirectPath;
+  const getKey = args.adapter?.getKey;
+
   const lambdaFunctionAssociations: aws.types.input.cloudfront.DistributionDefaultCacheBehaviorLambdaFunctionAssociation[] =
     [];
-  if (args.redirectDomains?.length || args.adapter) {
+  if (args.redirectDomains?.length || getRedirectPath || getKey) {
     const eastProvider = new aws.Provider(ctx.id("provider"), {
       region: "us-east-1",
     });
 
     const redirectDomains = pulumi.all(args.redirectDomains ?? []);
-    const getRedirectPath = args.adapter?.getRedirectPath;
-    const getKey = args.adapter?.getKey;
 
     const edgeFunction = new aws.lambda.CallbackFunction(
       ctx.id("lambda-function"),
@@ -207,11 +231,14 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     },
   });
 
-  const headers: aws.types.input.cloudfront.ResponseHeadersPolicyCustomHeadersConfigItem[] =
-    [];
-  if (args.headers) {
-    for (const [name, value] of Object.entries(args.headers)) {
-      headers.push({
+  const defaultHeaders: {
+    header: string;
+    override: boolean;
+    value: pulumi.Input<string>;
+  }[] = [];
+  if (args.adapter?.defaultHeaders) {
+    for (const [name, value] of Object.entries(args.adapter.defaultHeaders)) {
+      defaultHeaders.push({
         header: name,
         override: true,
         value,
@@ -219,30 +246,18 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     }
   }
 
-  const defaultHeadersPolicy = new aws.cloudfront.ResponseHeadersPolicy(
-    ctx.id("response-headers"),
-    {
-      customHeadersConfig: {
-        items: headers,
+  let defaultHeadersPolicyId: pulumi.Input<string> | undefined = undefined;
+  if (defaultHeaders.length > 0) {
+    const defaultHeadersPolicy = new aws.cloudfront.ResponseHeadersPolicy(
+      ctx.id("response-headers"),
+      {
+        customHeadersConfig: {
+          items: defaultHeaders,
+        },
       },
-    },
-  );
-
-  const cacheStaticResourcesPolicy = new aws.cloudfront.ResponseHeadersPolicy(
-    ctx.id("static-response-headers"),
-    {
-      customHeadersConfig: {
-        items: [
-          {
-            header: "Cache-Control",
-            override: false,
-            value: `max-age=${30 * 24 * 3600}`,
-          },
-          ...headers,
-        ],
-      },
-    },
-  );
+    );
+    defaultHeadersPolicyId = defaultHeadersPolicy.id;
+  }
 
   const accessControl = new aws.cloudfront.OriginAccessControl(
     ctx.id("access-control"),
@@ -274,20 +289,6 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     });
   }
 
-  function staticCacheBehaviorForPattern(pattern: string) {
-    return {
-      pathPattern: pattern,
-      targetOriginId: bucketAttrs.arn,
-      viewerProtocolPolicy: "redirect-to-https",
-      allowedMethods: ["GET", "HEAD", "OPTIONS"],
-      cachedMethods: ["GET", "HEAD", "OPTIONS"],
-      compress: true,
-      cachePolicyId: cachePolicy.id,
-      lambdaFunctionAssociations,
-      responseHeadersPolicyId: cacheStaticResourcesPolicy.id,
-    };
-  }
-
   let certificateArn = args.certificate;
   if (args.certificate === undefined) {
     certificateArn = certificate(ctx, {
@@ -306,6 +307,50 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     logsBucketDomain = logsBucketAttrs.bucketDomainName;
   }
 
+  const orderedCacheBehaviors: aws.types.input.cloudfront.DistributionOrderedCacheBehavior[] =
+    [];
+  if (args.adapter?.headers) {
+    for (const [
+      idx,
+      { patterns, headers, inherit },
+    ] of args.adapter.headers.entries()) {
+      const keys = new Set(Object.keys(headers));
+      const defaultSubset =
+        inherit === false
+          ? []
+          : defaultHeaders.filter((header) => !keys.has(header.header));
+
+      const headersPolicy = new aws.cloudfront.ResponseHeadersPolicy(
+        ctx.id(`response-headers-${idx}`),
+        {
+          customHeadersConfig: {
+            items: [
+              ...defaultSubset,
+              ...Object.entries(headers).map(([header, value]) => ({
+                header,
+                override: false,
+                value,
+              })),
+            ],
+          },
+        },
+      );
+      for (const pattern of patterns) {
+        orderedCacheBehaviors.push({
+          pathPattern: pattern,
+          targetOriginId: bucketAttrs.arn,
+          viewerProtocolPolicy: "redirect-to-https",
+          allowedMethods: ["GET", "HEAD", "OPTIONS"],
+          cachedMethods: ["GET", "HEAD", "OPTIONS"],
+          compress: true,
+          cachePolicyId: cachePolicy.id,
+          lambdaFunctionAssociations,
+          responseHeadersPolicyId: headersPolicy.id,
+        });
+      }
+    }
+  }
+
   const cloudfrontDistribution = new aws.cloudfront.Distribution(
     ctx.id(),
     {
@@ -322,7 +367,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
         },
       ],
       comment: "",
-      defaultRootObject: "index.html",
+      defaultRootObject: args.adapter?.index,
       defaultCacheBehavior: {
         targetOriginId: bucketAttrs.arn,
         viewerProtocolPolicy: "redirect-to-https",
@@ -331,17 +376,15 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
         lambdaFunctionAssociations,
         compress: true,
         cachePolicyId: cachePolicy.id,
-        responseHeadersPolicyId: defaultHeadersPolicy.id,
+        responseHeadersPolicyId: defaultHeadersPolicyId,
       },
-      orderedCacheBehaviors: args.adapter?.staticPaths?.map(
-        staticCacheBehaviorForPattern,
-      ),
+      orderedCacheBehaviors,
       priceClass: "PriceClass_100",
-      customErrorResponses: Object.entries(args.adapter?.errorPages ?? {}).map(
-        ([code, page]) => ({
-          errorCode: Number(code),
-          responseCode: Number(code),
-          responsePagePath: page,
+      customErrorResponses: (args.adapter?.errorPages ?? []).map(
+        ({ code, key }) => ({
+          errorCode: code,
+          responseCode: code,
+          responsePagePath: key,
         }),
       ),
       restrictions: { geoRestriction: { restrictionType: "none" } },
