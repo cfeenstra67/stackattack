@@ -99,6 +99,8 @@ const app = saws.service(ctx.prefix('api'), {
 });
 ```
 
+After deployment, this will give you a service running in ECS at https://api.mysite.com.
+
 ## Next Steps
 
 Ready to get started? Here's your path forward:
