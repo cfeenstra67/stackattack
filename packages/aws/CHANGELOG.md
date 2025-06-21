@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.35
+
+### Patch Changes
+
+- 953a21b: Added docs to new components
+
 ## 0.1.0-dev.34
 
 ### Patch Changes

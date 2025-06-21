@@ -5,7 +5,6 @@
     "@stackattack/metabase-example": "0.0.1",
     "@stackattack/aws": "0.0.1",
     "@stackattack/docs": "0.0.1",
-    "@stackattack/shared-infra": "0.0.0",
     "@stackattack/simple-api-example": "1.0.0"
   },
   "changesets": [
@@ -15,6 +14,7 @@
     "clever-words-learn",
     "curly-birds-draw",
     "dark-buckets-write",
+    "deep-jars-find",
     "dirty-peas-cough",
     "dull-mammals-cough",
     "eager-impalas-smash",
@@ -26,7 +26,6 @@
     "four-shoes-sin",
     "fuzzy-rules-poke",
     "great-goats-show",
-    "green-beds-strive",
     "happy-dodos-see",
     "happy-results-sing",
     "heavy-carrots-grin",
@@ -43,7 +42,6 @@
     "pretty-wolves-teach",
     "purple-places-deny",
     "ready-dogs-dress",
-    "sad-bats-serve",
     "six-signs-stop",
     "small-mice-invite",
     "sour-streets-cry",
