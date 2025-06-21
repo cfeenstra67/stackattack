@@ -10,7 +10,8 @@
       "strictNullChecks": true, // add if using `base` template
       "allowJs": true, // required, and included with all Astro templates
       "resolveJsonModule": true,
-      "verbatimModuleSyntax": true
+      "verbatimModuleSyntax": true,
+      "skipLibCheck": true
     }
   }
   

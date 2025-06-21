@@ -67,6 +67,8 @@ export interface StaticSiteArgs {
   redirectDomains?: pulumi.Input<string>[];
   /** Framework-specific adapter for routing and caching behavior */
   adapter?: StaticSiteAdapter;
+  /** Response headers to include in every response for a file in the bucket */
+  headers?: Record<string, pulumi.Input<string>>;
   /** ARN of existing SSL certificate (creates new one if not provided). Note that the certificate must be created in the us-east-1 region. */
   certificate?: pulumi.Input<string>;
   /** Route53 hosted zone ID (auto-detected from domain if not provided) */
@@ -114,56 +116,76 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     ],
   });
 
-  const eastProvider = new aws.Provider(ctx.id("provider"), {
-    region: "us-east-1",
-  });
-
   const domain = pulumi.output(args.domain);
-  const redirectDomains = pulumi.all(args.redirectDomains ?? []);
-  const getRedirectPath = args.adapter?.getRedirectPath;
-  const getKey = args.adapter?.getKey;
+  const lambdaFunctionAssociations: aws.types.input.cloudfront.DistributionDefaultCacheBehaviorLambdaFunctionAssociation[] =
+    [];
+  if (args.redirectDomains?.length || args.adapter) {
+    const eastProvider = new aws.Provider(ctx.id("provider"), {
+      region: "us-east-1",
+    });
 
-  const edgeFunction = new aws.lambda.CallbackFunction(
-    ctx.id("lambda-function"),
-    {
-      role: lambdaExecutionRole,
-      // The `async` is important here, it significantly changes the generated
-      // code and this doesn't work without it.
-      // biome-ignore lint/suspicious/noExplicitAny: don't know how to type this
-      callback: async (event: any) => {
-        const resolvedDomain = domain.get();
-        const resolvedRedirectDomains = redirectDomains.get();
+    const redirectDomains = pulumi.all(args.redirectDomains ?? []);
+    const getRedirectPath = args.adapter?.getRedirectPath;
+    const getKey = args.adapter?.getKey;
 
-        const request = event.Records[0].cf.request;
+    const edgeFunction = new aws.lambda.CallbackFunction(
+      ctx.id("lambda-function"),
+      {
+        role: lambdaExecutionRole,
+        // The `async` is important here, it significantly changes the generated
+        // code and this doesn't work without it.
+        // biome-ignore lint/suspicious/noExplicitAny: don't know how to type this
+        callback: async (event: any) => {
+          const resolvedDomain = domain.get();
+          const resolvedRedirectDomains = redirectDomains.get();
 
-        const host = request.headers.host[0].value;
-        if (resolvedRedirectDomains.includes(host)) {
-          const path = getRedirectPath?.(request.uri) ?? request.uri;
-          return {
-            status: 302,
-            statusDescription: "Found",
-            headers: {
-              location: [
-                { key: "Location", value: `https://${resolvedDomain}${path}` },
-              ],
-            },
-          };
-        }
-        request.headers.host = [
-          { key: "Host", value: request.origin.s3.domainName },
-        ];
+          const request = event.Records[0].cf.request;
 
-        const uri = request.uri;
-        request.uri = getKey?.(uri) ?? uri;
+          const host = request.headers.host[0].value;
+          if (resolvedRedirectDomains.includes(host)) {
+            const path = getRedirectPath?.(request.uri) ?? request.uri;
+            return {
+              status: 302,
+              statusDescription: "Found",
+              headers: {
+                location: [
+                  {
+                    key: "Location",
+                    value: `https://${resolvedDomain}${path}`,
+                  },
+                ],
+              },
+            };
+          }
+          request.headers.host = [
+            { key: "Host", value: request.origin.s3.domainName },
+          ];
 
-        return request;
+          const uri = request.uri;
+          request.uri = getKey?.(uri) ?? uri;
+
+          return request;
+        },
+        runtime: "nodejs20.x",
+        publish: true,
+        timeout: 10,
+        tags: ctx.tags(),
       },
-      runtime: "nodejs20.x",
-      publish: true,
-      timeout: 10,
-    },
-    { provider: eastProvider },
-  );
+      // retainOnDelete is here is because edge lambda function cannot
+      // be deleted normally, and attempting to do so will simply hang for
+      // a long time. The docs indicate these functions can be deleted
+      // "a few hours later" after any associations with cloudfront distributions
+      // have been removed.
+      // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-edge-delete-replicas.html
+      { provider: eastProvider, retainOnDelete: true },
+    );
+
+    lambdaFunctionAssociations.push({
+      eventType: "origin-request",
+      lambdaArn: edgeFunction.qualifiedArn,
+      includeBody: false,
+    });
+  }
 
   const cachePolicy = new aws.cloudfront.CachePolicy(ctx.id("cache-policy"), {
     defaultTtl: 600,
@@ -185,6 +207,27 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     },
   });
 
+  const headers: aws.types.input.cloudfront.ResponseHeadersPolicyCustomHeadersConfigItem[] =
+    [];
+  if (args.headers) {
+    for (const [name, value] of Object.entries(args.headers)) {
+      headers.push({
+        header: name,
+        override: true,
+        value,
+      });
+    }
+  }
+
+  const defaultHeadersPolicy = new aws.cloudfront.ResponseHeadersPolicy(
+    ctx.id("response-headers"),
+    {
+      customHeadersConfig: {
+        items: headers,
+      },
+    },
+  );
+
   const cacheStaticResourcesPolicy = new aws.cloudfront.ResponseHeadersPolicy(
     ctx.id("static-response-headers"),
     {
@@ -195,6 +238,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
             override: false,
             value: `max-age=${30 * 24 * 3600}`,
           },
+          ...headers,
         ],
       },
     },
@@ -239,13 +283,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
       cachedMethods: ["GET", "HEAD", "OPTIONS"],
       compress: true,
       cachePolicyId: cachePolicy.id,
-      lambdaFunctionAssociations: [
-        {
-          eventType: "origin-request",
-          lambdaArn: edgeFunction.qualifiedArn,
-          includeBody: false,
-        },
-      ],
+      lambdaFunctionAssociations,
       responseHeadersPolicyId: cacheStaticResourcesPolicy.id,
     };
   }
@@ -274,7 +312,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
       enabled: true,
       isIpv6Enabled: false,
       aliases: pulumi
-        .all([domain, redirectDomains])
+        .all([domain, args.redirectDomains ?? []])
         .apply(([domain, redirectDomains]) => [domain, ...redirectDomains]),
       origins: [
         {
@@ -290,15 +328,10 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
         viewerProtocolPolicy: "redirect-to-https",
         allowedMethods: ["GET", "HEAD", "OPTIONS"],
         cachedMethods: ["GET", "HEAD", "OPTIONS"],
-        lambdaFunctionAssociations: [
-          {
-            eventType: "origin-request",
-            lambdaArn: edgeFunction.qualifiedArn,
-            includeBody: false,
-          },
-        ],
+        lambdaFunctionAssociations,
         compress: true,
         cachePolicyId: cachePolicy.id,
+        responseHeadersPolicyId: defaultHeadersPolicy.id,
       },
       orderedCacheBehaviors: args.adapter?.staticPaths?.map(
         staticCacheBehaviorForPattern,
