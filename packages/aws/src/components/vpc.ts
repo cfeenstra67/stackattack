@@ -165,6 +165,14 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
       },
     );
 
+    new aws.ec2transitgateway.InstanceConnectEndpoint(
+      ctx.id(`instance-connect-endpoint-${idx}`),
+      {
+        subnetId: privateSubnet.id,
+        tags: ctx.tags(),
+      },
+    );
+
     const publicSubnet = new aws.ec2.Subnet(ctx.id(`public-${idx}`), {
       vpcId,
       cidrBlock: args.cidrAllocator.allocate(24),

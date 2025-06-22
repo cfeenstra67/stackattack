@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.45
+
+### Patch Changes
+
+- Added ec2 instance connect endpoint per subnet to vpc
+
 ## 0.1.0-dev.44
 
 ### Patch Changes
