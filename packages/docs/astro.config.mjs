@@ -8,7 +8,7 @@ export default defineConfig({
   site: 'https://stackattack.camfeenstra.com',
   integrations: [starlight({
     title: 'StackAttack AWS',
-    description: 'AWS infrastructure components for Pulumi',
+    description: 'Production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal infrastructure as code',
     logo: {
       src: './src/assets/logo.svg',
       replacesTitle: true,
@@ -55,7 +55,43 @@ export default defineConfig({
       },
     ],
     head: [
-      // Adding google analytics
+      // SEO meta tags
+      {
+        tag: 'meta',
+        attrs: {
+          name: 'keywords',
+          content: 'pulumi, aws, infrastructure as code, typescript, devops, cloud, serverless, containers, ecs, s3, rds, vpc, terraform alternative',
+        },
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          name: 'author',
+          content: 'StackAttack',
+        },
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          property: 'og:type',
+          content: 'website',
+        },
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          property: 'og:site_name',
+          content: 'StackAttack AWS',
+        },
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          name: 'twitter:card',
+          content: 'summary_large_image',
+        },
+      },
+      // Google Analytics
       {
         tag: 'script',
         attrs: {

@@ -1,0 +1,11 @@
+
+- [x] Create an inventory of the package's purpose, structure, and components and store it in CLAUDE.md so that other assistants don't need to start from scratch each time.
+- [x] Clicking the "components" button on the home page gives a 404
+- [x] Buckets are encrypted by default, examples do not need to specify encrypted: true
+- [x] For each component, we should improve the package documentation to include a few sections for each component:
+	- A self-contained example of a working stack including that component (top-level components only). This may need to create other related resources, but they should always be the minimal requirements to create this component. It should have as an output anything needed for the usage example. This should be as realistic as possible w/o sacrificing simplicity
+	- Usage example(s). This means an example of the "end state" of a component i.e. after this deploys what should I be able to do? For a service this might mean making a request to its URL, or for an S3 bucket it might mean being able to copy files to it with `aws s3 cp local-file s3://bucket-name/name`
+	- Pricing. This should provide a minimal explanation of what resources that have pricing implications will be created from the example, and an idea of how that pricing works. Don't make this too detailed, though, it should ultimately link to the relevant AWS pricing pages for updated information
+- [x] Ensure that SEO works well--make sure that title/description metadata works well for all docs pages and make sure to include some mention of key search terms like "pulumi", "aws", "infrastructure as code", etc.
+- [x] Take the information in the docs and use it to write a good, short README for the repo that links to the docs at https://stackattack.camfeenstra.com
+- [x] There should be a link on every component page to the source code of that component.

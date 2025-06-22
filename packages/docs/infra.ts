@@ -8,7 +8,7 @@ export default () => {
   const domainName = config.require("domain-name");
 
   const bucket = saws.bucket(ctx, {
-    paths: ["./dist"]
+    paths: ["./dist"],
   });
 
   saws.staticSite(ctx, {

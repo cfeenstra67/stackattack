@@ -46,7 +46,6 @@ const network = vpc(ctx, {
 // Create an S3 bucket with best practices enabled
 const storage = bucket(ctx, {
   versioned: true,
-  encrypted: true,
   allowCors: false,
 });
 

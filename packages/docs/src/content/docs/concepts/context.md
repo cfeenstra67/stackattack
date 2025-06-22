@@ -40,7 +40,6 @@ Every StackAttack component takes a Context as its first parameter:
 ```typescript
 const storage = bucket(ctx, {
   versioned: true,
-  encrypted: true,
 });
 
 const network = vpc(ctx, {

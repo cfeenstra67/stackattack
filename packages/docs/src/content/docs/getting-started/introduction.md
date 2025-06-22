@@ -47,10 +47,9 @@ const vpc = saws.vpc(ctx, {
   cidr: '10.0.0.0/16' 
 });
 
-// Create an encrypted S3 bucket
+// Create an S3 bucket with versioning
 const storage = saws.bucket(ctx, { 
-  versioned: true, 
-  encrypted: true 
+  versioned: true
 });
 
 const cluster = saws.cluster(ctx, {

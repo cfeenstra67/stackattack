@@ -1,6 +1,6 @@
 ---
-title: StackAttack AWS
-description: Production-ready AWS infrastructure components for Pulumi
+title: StackAttack AWS - Production-Ready Infrastructure Components for Pulumi
+description: Deploy secure, scalable AWS infrastructure with minimal code. TypeScript components for VPC, ECS, RDS, S3, and more. Infrastructure as code made simple.
 template: splash
 hero:
   title: StackAttack AWS
@@ -38,10 +38,9 @@ const network = vpc(ctx, {
   availabilityZones: ["us-east-1a", "us-east-1b"],
 });
 
-// Create an S3 bucket with encryption and versioning
+// Create an S3 bucket with versioning
 const storage = bucket(ctx, {
   versioned: true,
-  encrypted: true,
 });
 
 // Create a PostgreSQL database
