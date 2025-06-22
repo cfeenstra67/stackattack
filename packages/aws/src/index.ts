@@ -17,7 +17,6 @@ export * from "./components/email-domain.js";
 export * from "./components/topic-webhook.js";
 export * from "./components/gmail-domain.js";
 export * from "./components/vercel-domain.js";
-export * from "./components/bucket-files.js";
 export * from "./components/static-site.js";
 export * from "./components/github-role.js";
 export * from "./policies.js";

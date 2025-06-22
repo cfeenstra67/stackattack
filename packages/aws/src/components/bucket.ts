@@ -9,8 +9,10 @@
 
 import aws from "@pulumi/aws";
 import pulumi from "@pulumi/pulumi";
+import * as mime from "mime-types";
 import { s3BucketArn } from "../arns.js";
 import { Context } from "../context.js";
+import { walkFiles } from "../functions/walk-files.js";
 
 /**
  * Union type representing different ways to reference an S3 bucket.
@@ -330,6 +332,53 @@ export function bucketObjectOwnership(
 }
 
 /**
+ * Configuration arguments for uploading a directory to an S3 bucket.
+ */
+export interface BucketFilesArgs {
+  /** The target S3 bucket for the directory upload */
+  bucket: BucketInput;
+  /** Local filesystem path to the directory to upload */
+  paths: string[];
+  /** Optional prefix to prepend to all S3 object keys */
+  keyPrefix?: pulumi.Input<string>;
+  /** Whether to skip adding 'bucket-directory' prefix to resource names */
+  noPrefix?: boolean;
+}
+
+/**
+ * Uploads all files from a local directory to an S3 bucket with proper MIME types.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for the directory upload
+ * @returns Record mapping relative file paths to their corresponding S3 bucket objects
+ */
+export function bucketFiles(
+  ctx: Context,
+  args: BucketFilesArgs,
+): Record<string, aws.s3.BucketObjectv2> {
+  if (!args.noPrefix) {
+    ctx = ctx.prefix("files");
+  }
+
+  const bucket = getBucketId(args.bucket);
+  const out: Record<string, aws.s3.BucketObjectv2> = {};
+
+  for (const root of args.paths) {
+    for (const [relPath, filePath] of walkFiles(root)) {
+      const key = pulumi.interpolate`${args.keyPrefix ?? ""}${relPath}`;
+
+      out[relPath] = new aws.s3.BucketObjectv2(ctx.id(relPath), {
+        bucket,
+        key,
+        source: new pulumi.asset.FileAsset(filePath),
+        contentType: mime.lookup(filePath) || "binary/octet-stream",
+      });
+    }
+  }
+
+  return out;
+}
+
+/**
  * Configuration arguments for creating an S3 bucket with optional features.
  */
 export type BucketArgs = Pick<
@@ -340,6 +389,8 @@ export type BucketArgs = Pick<
   versioned?: boolean;
   /** Whether to enable server-side encryption (defaults to true) */
   encrypted?: boolean;
+  /** Provide an array of path(s) to upload to the bucket */
+  paths?: string[];
   /** Whether to allow CORS requests */
   allowCors?: boolean;
   /** Whether the bucket should allow public access */
@@ -413,6 +464,10 @@ export function bucket(ctx: Context, args?: BucketArgs): BucketOutput {
       bucket,
       objectOwnership: args.objectOwnership,
     });
+  }
+
+  if (args?.paths) {
+    bucketFiles(ctx, { bucket, paths: args.paths });
   }
 
   const url = pulumi.interpolate`s3://${bucket.bucket}`;

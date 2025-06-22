@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.44
+
+### Patch Changes
+
+- Make bucketFiles part of bucket component
+
 ## 0.1.0-dev.43
 
 ### Patch Changes

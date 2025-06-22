@@ -8,6 +8,7 @@
     "@stackattack/simple-api-example": "1.0.0"
   },
   "changesets": [
+    "bright-pets-draw",
     "chatty-pets-smash",
     "chilly-seas-send",
     "clever-rings-lie",
