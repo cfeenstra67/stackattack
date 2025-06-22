@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.42
+
+### Patch Changes
+
+- Create static site certificate in us-east-1
+
 ## 0.1.0-dev.41
 
 ### Patch Changes

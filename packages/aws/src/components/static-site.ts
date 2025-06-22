@@ -291,9 +291,14 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
 
   let certificateArn = args.certificate;
   if (args.certificate === undefined) {
+    const provider = new aws.Provider(ctx.id("certificate-provider"), {
+      region: "us-east-1",
+    });
+
     certificateArn = certificate(ctx, {
       domain: args.domain,
       additionalDomains: args.redirectDomains,
+      provider,
     });
   }
 
