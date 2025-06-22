@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.46
+
+### Patch Changes
+
+- Fix cluster instances security group
+
 ## 0.1.0-dev.45
 
 ### Patch Changes

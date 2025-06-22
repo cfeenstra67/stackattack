@@ -12,7 +12,13 @@ import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
 import { getEc2InstanceConnectCidr } from "../functions/ec2-instance-connect-cidr.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
-import { NetworkInput, VpcInput, getVpcAttributes, getVpcId } from "./vpc.js";
+import {
+  NetworkInput,
+  VpcInput,
+  getVpcAttributes,
+  getVpcDefaultSecurityGroup,
+  getVpcId,
+} from "./vpc.js";
 
 /**
  * Union type representing different ways to specify an ECS cluster.
@@ -254,6 +260,10 @@ function cloudwatchAgentConfig() {
 export interface ClusterSecurityGroupArgs {
   /** The VPC to create the security group in */
   vpc: pulumi.Input<VpcInput>;
+  /** Source security group ID to allow access from (defaults to VPC default security group) */
+  sourceSecurityGroupId?: pulumi.Input<string>;
+  /** Indicate whether the instances should be configured to allow SSH traffic from EC2 instance connect */
+  noInstanceConnect?: boolean;
   /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
 }
@@ -279,10 +289,14 @@ export function clusterSecurityGroup(
 
   const vpcAttrs = getVpcAttributes(args.vpc);
 
-  const extraAccessCidrs: pulumi.Input<string>[] = [
-    getEc2InstanceConnectCidr(),
-    vpcAttrs.cidrBlock,
-  ];
+  let sourceSecurityGroupId: pulumi.Input<string>;
+  if (args.sourceSecurityGroupId) {
+    sourceSecurityGroupId = args.sourceSecurityGroupId;
+  } else {
+    const defaultSecurityGroup = getVpcDefaultSecurityGroup(vpcAttrs.id);
+    sourceSecurityGroupId = defaultSecurityGroup.id;
+  }
+
   new aws.ec2.SecurityGroupRule(
     ctx.id("ingress-ssh"),
     {
@@ -291,12 +305,29 @@ export function clusterSecurityGroup(
       protocol: "tcp",
       fromPort: 22,
       toPort: 22,
-      cidrBlocks: extraAccessCidrs,
+      sourceSecurityGroupId,
     },
     {
       deleteBeforeReplace: true,
     },
   );
+
+  if (!args.noInstanceConnect) {
+    new aws.ec2.SecurityGroupRule(
+      ctx.id("ingress-ec2-instance-connect"),
+      {
+        type: "ingress",
+        securityGroupId: group.id,
+        protocol: "-1",
+        fromPort: 0,
+        toPort: 0,
+        cidrBlocks: [getEc2InstanceConnectCidr()],
+      },
+      {
+        deleteBeforeReplace: true,
+      },
+    );
+  }
 
   new aws.ec2.SecurityGroupRule(
     ctx.id("egress"),
@@ -395,6 +426,8 @@ export interface ClusterCapacityConfig {
   onDemandPercentage?: number;
   /** Strategy for allocating spot instances */
   spotAllocationStrategy?: string;
+  /** Security group ID that should be allowed SSH access to the instances */
+  sourceSecurityGroupId?: pulumi.Input<string>;
   /** Minimum number of instances in the auto scaling group */
   minSize?: pulumi.Input<number>;
   /** Maximum number of instances in the auto scaling group */
@@ -520,6 +553,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
 
   const securityGroup = clusterSecurityGroup(ctx, {
     vpc: args.network.vpc,
+    sourceSecurityGroupId: args.sourceSecurityGroupId
   });
 
   const instanceRole = clusterInstanceRole(ctx);
