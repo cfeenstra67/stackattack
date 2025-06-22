@@ -219,10 +219,15 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
       cookiesConfig: {
         cookieBehavior: "none",
       },
-      headersConfig: {
-        headerBehavior: "whitelist",
-        headers: { items: ["Host"] },
-      },
+      headersConfig:
+        lambdaFunctionAssociations.length === 0
+          ? {
+              headerBehavior: "none",
+            }
+          : {
+              headerBehavior: "whitelist",
+              headers: { items: ["Host"] },
+            },
       queryStringsConfig: {
         queryStringBehavior: "none",
       },

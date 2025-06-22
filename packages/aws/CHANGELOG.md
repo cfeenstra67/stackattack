@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.43
+
+### Patch Changes
+
+- headerBehavior: none w/ no lambda function in static site
+
 ## 0.1.0-dev.42
 
 ### Patch Changes
