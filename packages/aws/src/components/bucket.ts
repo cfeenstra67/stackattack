@@ -43,6 +43,11 @@ export function getBucketId(
   });
 }
 
+/**
+ * Retrieves the full bucket attributes from various bucket input types.
+ * @param input - The bucket input (string, bucket resource, or bucket result)
+ * @returns The bucket attributes as a Pulumi output
+ */
 export function getBucketAttributes(
   input: pulumi.Input<BucketInput>,
 ): pulumi.Output<aws.s3.Bucket | aws.s3.BucketV2 | aws.s3.GetBucketResult> {
@@ -316,6 +321,12 @@ export interface BucketObjectOwnershipArgs {
   noPrefix?: boolean;
 }
 
+/**
+ * Configures object ownership controls for an S3 bucket.
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Configuration arguments for bucket object ownership
+ * @returns The bucket ownership controls resource
+ */
 export function bucketObjectOwnership(
   ctx: Context,
   args: BucketObjectOwnershipArgs,
@@ -407,8 +418,13 @@ export type BucketArgs = Pick<
   noPrefix?: boolean;
 };
 
+/**
+ * Output from creating an S3 bucket, containing the bucket resource and its S3 URL.
+ */
 export interface BucketOutput {
+  /** The created S3 bucket resource */
   bucket: aws.s3.BucketV2;
+  /** S3 URL for the bucket (s3://bucket-name) */
   url: pulumi.Output<string>;
 }
 

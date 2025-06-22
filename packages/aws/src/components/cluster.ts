@@ -553,7 +553,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
 
   const securityGroup = clusterSecurityGroup(ctx, {
     vpc: args.network.vpc,
-    sourceSecurityGroupId: args.sourceSecurityGroupId
+    sourceSecurityGroupId: args.sourceSecurityGroupId,
   });
 
   const instanceRole = clusterInstanceRole(ctx);

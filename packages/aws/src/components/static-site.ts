@@ -35,12 +35,17 @@ export interface StaticSiteAdapter {
   errorPages?: { code: number; key: string }[];
 }
 
+/**
+ * Configuration arguments for the Astro static site adapter.
+ */
 export interface AstroAdapterArgs {
+  /** Custom file patterns that should receive long-term caching headers */
   staticPaths?: string[];
 }
 
 /**
  * Creates a static site adapter configured for Astro framework conventions.
+ * @param args - Optional configuration for the adapter
  * @returns Static site adapter with Astro-specific routing and caching rules
  */
 export function astroAdapter(args?: AstroAdapterArgs): StaticSiteAdapter {
