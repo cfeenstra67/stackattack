@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
+const googleAnalyticsId = 'G-2C44VGJN2K';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://stackattack.camfeenstra.com',
@@ -50,6 +52,25 @@ export default defineConfig({
           { label: 'Security Groups', link: '/utilities/security-groups/' },
           { label: 'Stack References', link: '/utilities/stack-references/' },
         ],
+      },
+    ],
+    head: [
+      // Adding google analytics
+      {
+        tag: 'script',
+        attrs: {
+          src: `https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`,
+        },
+      },
+      {
+        tag: 'script',
+        content: `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', '${googleAnalyticsId}');
+        `,
       },
     ],
   })]
