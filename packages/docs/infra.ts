@@ -12,11 +12,8 @@ export default () => {
   const sharedRef = saws.stackRef(sharedStack, shared);
   const certificate = sharedRef.require("camFeenstraEastCertificate");
 
-  const bucket = saws.bucket(ctx);
-
-  saws.bucketFiles(ctx, {
-    bucket,
-    paths: ["./dist"],
+  const bucket = saws.bucket(ctx, {
+    paths: ["./dist"]
   });
 
   saws.staticSite(ctx, {
