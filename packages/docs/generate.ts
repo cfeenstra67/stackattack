@@ -55,10 +55,17 @@ async function generateDocs() {
   }
 
   // Helper function to format parameter documentation
-  function formatParameters(parameters?: ParameterReflection[]): string {
+  function formatParameters(
+    parameters?: ParameterReflection[],
+    isUtility = false,
+    hasMainFunction = true,
+  ): string {
     if (!parameters || parameters.length === 0) return "";
 
-    let result = "\n### Parameters\n\n";
+    // Determine heading level: for utilities or when no main function, use ####
+    // For components with main function, functions are ### so parameters should be ####
+    const headingLevel = isUtility || !hasMainFunction ? "###" : "####";
+    let result = `\n${headingLevel} Parameters\n\n`;
     for (const param of parameters) {
       const name = param.name;
       const typeStr = param.type?.toString() || "unknown";
@@ -312,7 +319,7 @@ async function generateDocs() {
     }
 
     if (mainFunction && mainFunction.kind === ReflectionKind.Function) {
-      markdown += `# ${mainFunction.name}\n\n`;
+      markdown += `## ${mainFunction.name}\n\n`;
       // Try to get comment from signature if not on function itself
       const comment =
         mainFunction.comment || mainFunction.signatures?.[0]?.comment;
@@ -323,6 +330,8 @@ async function generateDocs() {
       markdown += `${formatFunctionSignature(mainFunction)}\n`;
       markdown += `${formatParameters(
         mainFunction.signatures?.[0]?.parameters,
+        isUtility,
+        true,
       )}\n`;
     }
 
@@ -337,6 +346,29 @@ async function generateDocs() {
       (d) => d.kind === ReflectionKind.TypeAlias,
     );
 
+    // Document functions
+    if (functions.length > 0) {
+      const heading =
+        isUtility || !mainFunction ? "# Functions" : "## Functions";
+      markdown += `${heading}\n\n`;
+      for (const func of functions) {
+        const funcHeading = isUtility || !mainFunction ? "## " : "### ";
+        markdown += `${funcHeading}${func.name}\n\n`;
+        // Try to get comment from signature if not on function itself
+        const comment = func.comment || func.signatures?.[0]?.comment;
+        const funcDescription = formatComment(comment);
+        if (funcDescription) {
+          markdown += `${funcDescription}\n\n`;
+        }
+        markdown += `${formatFunctionSignature(func)}\n`;
+        markdown += `${formatParameters(
+          func.signatures?.[0]?.parameters,
+          isUtility,
+          !!mainFunction,
+        )}\n`;
+      }
+    }
+
     // Document interfaces
     if (interfaces.length > 0) {
       markdown += "## Interfaces\n\n";
@@ -347,24 +379,6 @@ async function generateDocs() {
           markdown += `${ifaceDescription}\n\n`;
         }
         markdown += `${formatInterfaceProperties(iface)}\n`;
-      }
-    }
-
-    // Document functions
-    if (functions.length > 0) {
-      const heading =
-        isUtility || !mainFunction ? "# Functions" : "## Functions";
-      markdown += `${heading}\n\n`;
-      for (const func of functions) {
-        markdown += `## ${func.name}\n\n`;
-        // Try to get comment from signature if not on function itself
-        const comment = func.comment || func.signatures?.[0]?.comment;
-        const funcDescription = formatComment(comment);
-        if (funcDescription) {
-          markdown += `${funcDescription}\n\n`;
-        }
-        markdown += `${formatFunctionSignature(func)}\n`;
-        markdown += `${formatParameters(func.signatures?.[0]?.parameters)}\n`;
       }
     }
 
@@ -401,6 +415,48 @@ async function generateDocs() {
     fs.writeFileSync(outputPath, markdown);
     console.log(`Generated utility documentation for ${utilityName}`);
   }
+
+  // Generate components index file
+  const componentNames = Array.from(componentFiles.keys()).sort();
+  const indexMarkdown = `---
+title: Components
+description: AWS infrastructure components for Pulumi
+---
+
+# Components
+
+StackAttack provides opinionated, secure-by-default AWS infrastructure components built on top of Pulumi.
+
+## Available Components
+
+${componentNames
+  .map((name) => {
+    // Convert kebab-case to title case for display
+    const displayName = name
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+    return `- [${displayName}](/components/${name}/)`;
+  })
+  .join("\n")}
+
+## Getting Started
+
+All components follow the same basic pattern:
+
+\`\`\`typescript
+import * as saws from "@stackattack/aws";
+
+const ctx = saws.context();
+const component = saws.componentName(ctx, args);
+\`\`\`
+
+Each component is designed with secure defaults and can be customized through configuration arguments.
+`;
+
+  const indexPath = "./src/content/docs/components.md";
+  fs.writeFileSync(indexPath, indexMarkdown);
+  console.log("Generated components index file");
 
   console.log("Documentation generation complete!");
 }

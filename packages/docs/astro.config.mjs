@@ -9,6 +9,7 @@ export default defineConfig({
   integrations: [starlight({
     title: 'StackAttack AWS',
     description: 'Production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal infrastructure as code',
+    favicon: '/favicon.ico',
     logo: {
       src: './src/assets/logo.svg',
       replacesTitle: true,
@@ -31,7 +32,7 @@ export default defineConfig({
       {
         label: 'Working with Pulumi',
         items: [
-          { label: 'Choosing a Backend', link: '/working-with-pulumi/choosing-a-backend' },
+          { label: 'Setting up Pulumi', link: '/working-with-pulumi/setting-up-pulumi' },
           { label: 'Structuring Stacks', link: '/working-with-pulumi/structuring-stacks' },
         ]
       },

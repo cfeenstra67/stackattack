@@ -1,4 +1,5 @@
 /.astro
 src/content/docs/components/
+src/content/docs/components.md
 src/content/docs/utilities/
 /dist
