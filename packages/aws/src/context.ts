@@ -22,7 +22,7 @@ export interface Context {
  */
 export interface ContextOpts {
   /** Optional prefix for resource naming (defaults to project-stack combination) */
-  prefix?: string;
+  prefix?: string | null;
   /** Optional tags to apply to all resources created with this context */
   tags?: Record<string, string>;
 }
@@ -39,7 +39,7 @@ function defaultContextPrefix(): string {
  * @returns A Context instance with id, shortId, tags, prefix, and withTags methods
  */
 export function context(opts?: ContextOpts): Context {
-  let prefix: string;
+  let prefix: string | null;
   if (opts?.prefix !== undefined) {
     prefix = opts.prefix;
   } else {
@@ -49,7 +49,7 @@ export function context(opts?: ContextOpts): Context {
   const tagsObj = opts?.tags ?? {};
 
   const id = (value?: string) =>
-    [prefix, value].filter((v) => v !== undefined).join("-");
+    [prefix, value].filter((v) => v !== undefined && v !== null).join("-");
 
   const shortId = (value: string) => {
     const hashVal = crypto

@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.1.0-dev.47
+
+### Patch Changes
+
+- Allow no prefix in context
+
 ## 0.1.0-dev.46
 
 ### Patch Changes

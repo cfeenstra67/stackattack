@@ -1,5 +1,11 @@
 # @stackattack/docs
 
+## 0.0.2-dev.4
+
+### Patch Changes
+
+- aa407a3: Docs improvements
+
 ## 0.0.2-dev.3
 
 ### Patch Changes
