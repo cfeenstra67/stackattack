@@ -1,38 +1,52 @@
-# StackAttack AWS
+# StackAttack
 
 Production-ready AWS infrastructure components for Pulumi. Deploy complex applications with minimal code using secure, opinionated defaults.
 
-🚀 **[Get Started →](https://stackattack.camfeenstra.com)** | 📚 **[Documentation](https://stackattack.camfeenstra.com/components/)** | 💡 **[Examples](https://stackattack.camfeenstra.com/getting-started/quick-start/)**
+**[Get Started →](https://stackattack.camfeenstra.com)** | **[Documentation](https://stackattack.camfeenstra.com/components/)** | **[Examples](https://stackattack.camfeenstra.com/getting-started/quick-start/)**
 
 ## What is StackAttack?
 
 StackAttack eliminates infrastructure boilerplate by providing battle-tested AWS components built on Pulumi. Instead of writing hundreds of lines of infrastructure code, deploy production-ready applications in under 100 lines.
 
 ```typescript
-import { context, vpc, database, service, loadBalancer } from "@stackattack/aws";
+import * as saws from "@stackattack/aws";
 
-const ctx = context({ prefix: "my-app" });
+const ctx = saws.context();
+const domain = "api.mydomain.com";
 
 // Create complete infrastructure in ~20 lines
-const network = vpc(ctx, { cidr: "10.0.0.0/16" });
-const db = database(ctx, { network, engine: "postgres" });
-const lb = loadBalancer(ctx, { network: network.network("public") });
+const vpc = saws.vpc(ctx, { cidr: "10.0.0.0/16" });
 
-const app = service(ctx, {
-  cluster: cluster(ctx, { network: network.network("private") }),
+const db = saws.database(ctx, { network: vpc.network("private") });
+
+const certificate = saws.certificate(ctx, { domain });
+
+const loadBalancer = saws.loadBalancer(ctx, {
+  network: vpc.network("public"),
+  cerificate
+});
+
+const cluster = saws.cluster(ctx, { network: vpc.network("private") });
+
+const app = saws.service(ctx, {
+  cluster,
+  domain,
   image: "my-app:latest",
-  loadBalancer: lb,
+  loadBalancer,
+  port: 3000,
   env: { DATABASE_URL: db.url }
 });
+
+export const appUrl = app.url;
 ```
 
 ## Key Features
 
-- **🔒 Secure by Default** - Encryption, private subnets, least-privilege IAM
-- **⚡ Deploy in Minutes** - From zero to production infrastructure
-- **🎯 TypeScript First** - Full type safety and excellent IDE support  
-- **🔧 Composable** - Mix and match components for any architecture
-- **📖 Well Documented** - Comprehensive guides and examples
+- **Secure by Default** - Encryption, private subnets, least-privilege IAM
+- **Deploy in Minutes** - From zero to production infrastructure
+- **TypeScript First** - Full type safety and excellent IDE support  
+- **Composable** - Mix and match components for any architecture
+- **Well Documented** - Comprehensive guides and examples
 
 ## Available Components
 
@@ -49,18 +63,23 @@ const app = service(ctx, {
 npm install @stackattack/aws
 ```
 
-Create your first stack:
+Create a stack, or use the components within an existing stack:
 
 ```typescript
-import { context, vpc, bucket } from "@stackattack/aws";
+import * as saws from "@stackattack/aws";
 
-const ctx = context({ prefix: "hello-world" });
+const ctx = saws.context();
+const domain = "my.astro.site";
 
-const network = vpc(ctx, { cidr: "10.0.0.0/16" });
-const storage = bucket(ctx, { versioned: true });
+const bucket = saws.bucket(ctx, { paths: ["./dist"] })
 
-export const vpcId = network.vpc.id;
-export const bucketName = storage.bucket.bucket;
+saws.staticSite(ctx, {
+  bucket,
+  domain,
+  adapter: saws.astroAdapter(),
+});
+
+export const url = `https://${domain}`;
 ```
 
 Deploy with Pulumi:
@@ -69,25 +88,13 @@ Deploy with Pulumi:
 pulumi up
 ```
 
-## Why StackAttack?
+Test your deployed resources:
 
-**Before StackAttack** (200+ lines):
-```typescript
-// Dozens of AWS resources with complex interdependencies
-// Security groups, subnets, route tables, IAM roles...
-// Easy to misconfigure, hard to maintain
+```bash
+curl https://my.astro.site
 ```
 
-**With StackAttack** (20 lines):
-```typescript
-const ctx = context({ prefix: "my-app" });
-const network = vpc(ctx, { cidr: "10.0.0.0/16" });
-const app = service(ctx, { network, image: "my-app:latest" });
-```
-
-## Documentation
-
-**[📚 Full Documentation →](https://stackattack.camfeenstra.com)**
+**[Full Documentation →](https://stackattack.camfeenstra.com)**
 
 - [Getting Started Guide](https://stackattack.camfeenstra.com/getting-started/introduction/)
 - [Component Reference](https://stackattack.camfeenstra.com/components/)
@@ -104,7 +111,3 @@ Most infrastructure-as-code requires too much boilerplate. StackAttack provides 
 ## License
 
 MIT - Use it, modify it, ship it.
-
----
-
-*Built with ❤️ for the Pulumi community*

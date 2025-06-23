@@ -1,10 +1,60 @@
 /**
  * @packageDocumentation
  *
- * S3 bucket components for creating and configuring AWS S3 buckets with secure defaults.
+ * S3 buckets in AWS are the standard way to store files within "buckets". StackAttack creates S3 buckets with secure defaults including encryption and public access blocking.
  *
- * Includes functions for bucket creation, encryption, versioning, CORS configuration, lifecycle rules,
- * and access policies. All security features are enabled by default (encryption, public access blocking).
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ * 
+ * const ctx = saws.context();
+ * const storage = saws.bucket(ctx);
+ * 
+ * export const storageUrl = storage.url;
+ * ```
+ *
+ * ## Usage
+ *
+ * After deploying a bucket, you can interact with it using:
+ *
+ * **AWS CLI:**
+ * ```bash
+ * # Upload a single file
+ * aws s3 cp ./local-file.txt s3://your-bucket-name/remote-file.txt
+ * 
+ * # Upload an entire directory
+ * aws s3 sync ./local-directory s3://your-bucket-name/ --delete
+ * 
+ * # List bucket contents
+ * aws s3 ls s3://your-bucket-name/
+ * ```
+ *
+ * **AWS SDK:**
+ * ```javascript
+ * import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+ * 
+ * const s3 = new S3Client({ region: "us-east-1" });
+ * 
+ * await s3.send(new PutObjectCommand({
+ *   Bucket: "your-bucket-name",
+ *   Key: "path/to/file.json",
+ *   Body: JSON.stringify({ message: "Hello World" }),
+ *   ContentType: "application/json"
+ * }));
+ * ```
+ *
+ * ## Costs
+ * 
+ * S3 costs are all **usage-based** so you will not be charged if you create a bucket and never use it. S3 costs are broken down by:
+ * 
+ * - **Data Transfer** - This is the component that often makes costs really blow up unless handled carefully. Sending data **to** S3 is always free. However, transferring data **out of** S3 to the internet incurs charges of ~$0.09/GB. If data is transferred from S3 to many clients, this can add up quickly. Consider these cost reduction strategies:
+ *   - Use S3 endpoints - The [vpc](/components/vpc) component sets up VPC endpoints by default, so requests to S3 from your VPC will be made internally in AWS's network and will not incur data transfer charges.
+ *   - Consider CloudFront - Use the [staticSite](/components/static-site) component or create your own CloudFront distribution to serve files publicly. The first 1TB of data transfer out to the internet from CloudFront is free each month; [see CloudFront pricing for details](https://aws.amazon.com/cloudfront/pricing/).
+ * 
+ * - **Data stored** - The storage itself is relatively cheap, ~$0.023/GB/month. If you store 100GB of data in S3 and leave it there, you'll be billed ~$2.30 each month. If you delete the data (including all versions, if versioning is enabled) from S3, you will not be charged for its storage anymore.
+ * 
+ * - **Requests** - You'll be charged for each API call made to your S3 buckets, but this is also relatively cheap: ~$0.0004/1000 read (GET, SELECT) and ~$0.0005/1000 write (POST, PUT, etc.) requests. You will not be charged unless the requests can successfully pass authorization checks.
+ * 
+ * Note: Prices vary by region. See [S3 Pricing](https://aws.amazon.com/s3/pricing/) for current rates.
  */
 
 import aws from "@pulumi/aws";
@@ -429,7 +479,8 @@ export interface BucketOutput {
 }
 
 /**
- * Creates an S3 bucket with optional versioning, encryption, CORS, lifecycle rules, and policies.
+ * Creates an S3 bucket with security best practices enabled by default, including encryption, public access blocking, and optional versioning.
+ * 
  * @param ctx - The context for resource naming and tagging
  * @param args - Optional configuration arguments for the bucket
  * @returns An object containing the bucket resource and its S3 URL

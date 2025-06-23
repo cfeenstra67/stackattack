@@ -1,10 +1,85 @@
 /**
  * @packageDocumentation
  *
- * RDS database components for creating PostgreSQL database instances with secure networking.
+ * RDS databases in AWS provide managed relational database instances. StackAttack creates PostgreSQL databases with secure networking, automatic backups, encryption at rest, and SSL connections enabled by default.
  *
- * Creates RDS instances with subnet groups, parameter groups, and security groups for database access.
- * Includes automatic password generation, encryption at rest, and deletion protection by default.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ * 
+ * const ctx = saws.context();
+ * const network = saws.vpc(ctx);
+ * const db = saws.database(ctx, {
+ *   network: network.network("private")
+ * });
+ * 
+ * export const dbUrl = db.url;
+ * ```
+ *
+ * ## Usage
+ *
+ * After deploying a database, you can connect to it using:
+ *
+ * **AWS CLI:**
+ * ```bash
+ * # View database instance details
+ * aws rds describe-db-instances --db-instance-identifier your-db-identifier
+ * 
+ * # Create a manual snapshot
+ * aws rds create-db-snapshot --db-instance-identifier your-db-identifier --db-snapshot-identifier my-snapshot-$(date +%Y%m%d)
+ * 
+ * # View database logs
+ * aws rds describe-db-log-files --db-instance-identifier your-db-identifier
+ * ```
+ *
+ * **Direct Connection:**
+ * ```bash
+ * # Connect using psql (PostgreSQL)
+ * psql "postgresql://root:password@your-db-endpoint:5432/main?sslmode=require"
+ * 
+ * # Or using environment variables
+ * export PGHOST=your-db-endpoint
+ * export PGPORT=5432
+ * export PGDATABASE=main
+ * export PGUSER=root
+ * export PGPASSWORD=your-password
+ * psql
+ * ```
+ *
+ * **Application Code:**
+ * ```javascript
+ * import { Client } from "pg";
+ * 
+ * const client = new Client({
+ *   connectionString: "postgresql://root:password@your-db-endpoint:5432/main?sslmode=require"
+ * });
+ * 
+ * await client.connect();
+ * const result = await client.query("SELECT NOW()");
+ * await client.end();
+ * ```
+ *
+ * ## Costs
+ * 
+ * RDS costs are **fixed monthly charges** based on instance type plus **usage-based storage**:
+ * 
+ * - **Instance costs** - The default `db.t4g.micro` costs ~$12.41/month if running 24/7. Larger instances like `db.t4g.small` (~$24.82/month) or `db.r7g.large` (~$158.40/month) provide more CPU and memory.
+ * 
+ * - **Storage costs** - General Purpose SSD storage is ~$0.115/GB/month. The default 30GB allocation costs ~$3.45/month. Storage automatically scales as your database grows.
+ * 
+ * - **Backup storage** - StackAttack enables 7-day backup retention. Backups within your allocated storage are free; additional backup storage is ~$0.095/GB/month.
+ * 
+ * - **Data transfer** - Minimal costs for database connections within the same VPC (typically free). Cross-region replication incurs standard AWS data transfer rates.
+ * 
+ * - **Snapshots** - Manual snapshots cost the same as backup storage (~$0.095/GB/month) and persist until manually deleted.
+ * 
+ * Cost optimization strategies:
+ * - Use `db.t4g.micro` for development/small workloads
+ * - Monitor storage growth and set CloudWatch alerts for unexpected increases
+ * - Consider Aurora Serverless for intermittent workloads that can pause/resume
+ * - Delete old manual snapshots regularly
+ * - Use Multi-AZ only for production workloads requiring high availability
+ * 
+ * See [RDS Pricing](https://aws.amazon.com/rds/pricing/) for current rates.
  */
 
 import * as aws from "@pulumi/aws";
