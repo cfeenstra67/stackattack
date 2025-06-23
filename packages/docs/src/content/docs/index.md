@@ -27,26 +27,20 @@ hero:
 
 ## Quick Example
 
-```typescript
-import { context, bucket, database, vpc } from "@stackattack/aws";
+This configuration deploys an Astro site served on a custom domain with HTTPS:
 
-const ctx = context({ prefix: "my-app" });
+```ts
+import * as saws from '@stackattack/aws';
 
-// Create a VPC with public and private subnets
-const network = vpc(ctx, {
-  cidr: "10.0.0.0/16",
-  availabilityZones: ["us-east-1a", "us-east-1b"],
-});
+const ctx = saws.context();
 
-// Create an S3 bucket with versioning
-const storage = bucket(ctx, {
-  versioned: true,
-});
+const bucket = saws.bucket(ctx, { paths: ["./dist"] });
 
-// Create a PostgreSQL database
-const db = database(ctx, {
-  network,
-  engine: "postgres",
-  instanceType: "db.t4g.micro",
+saws.staticSite(ctx, {
+  bucket,
+  domain: "www.mysite.com",
+  adapter: saws.astroAdapter(),
 });
 ```
+
+Check out the [quick start](/getting-started/quick-start) for an example of deploying a containerized services, or the [components](/components) for a listing of all of the components that Stackattack provides.

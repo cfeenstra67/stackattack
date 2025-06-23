@@ -17,12 +17,12 @@ A Context is an object that encapsulates:
 ## Creating a Context
 
 ```typescript
-import { context } from "@stackattack/aws";
+import * as saws from "@stackattack/aws";
 
-// Basic context with just a prefix
-const ctx = context({ prefix: "my-app" });
+// Default context, will generate a prefix based on your project + stack name
+const ctx = saws.context();
 
-// Context with tags
+// Context with custom prefix and tags
 const ctx = context({ 
   prefix: "my-app",
   tags: {
@@ -38,12 +38,11 @@ const ctx = context({
 Every StackAttack component takes a Context as its first parameter:
 
 ```typescript
-const storage = bucket(ctx, {
+const storage = saws.bucket(ctx, {
   versioned: true,
 });
 
-const network = vpc(ctx, {
-  cidr: "10.0.0.0/16",
+const network = saws.vpc(ctx, {
   availabilityZones: ["us-east-1a", "us-east-1b"],
 });
 ```
@@ -53,20 +52,11 @@ const network = vpc(ctx, {
 You can create nested contexts for different parts of your infrastructure:
 
 ```typescript
-const baseCtx = context({ 
-  prefix: "my-app",
-  tags: { Environment: "prod" }
-});
-
-// Create a context for storage resources
-const storageCtx = baseCtx.prefix("storage");
-
-// Create a context for database resources  
-const dbCtx = baseCtx.prefix("database");
+const baseCtx = saws.context();
 
 // Each will have appropriate naming: my-app-storage-*, my-app-database-*
-const s3 = bucket(storageCtx, { versioned: true });
-const db = database(dbCtx, { network, engine: "postgres" });
+const s3 = saws.bucket(baseCtx.prefix("storage"), { versioned: true });
+const db = saws.database(baseCtx.refix("database"), { network, engine: "postgres" });
 ```
 
 ## Adding Tags
@@ -74,7 +64,7 @@ const db = database(dbCtx, { network, engine: "postgres" });
 You can add additional tags to a context:
 
 ```typescript
-const baseCtx = context({ prefix: "my-app" });
+const baseCtx = saws.context();
 
 const prodCtx = baseCtx.withTags({ 
   Environment: "production",
@@ -84,10 +74,10 @@ const prodCtx = baseCtx.withTags({
 
 ## Context Methods
 
-- `id(value?)` - Generate a resource ID with the context prefix
-- `shortId(value)` - Generate a short ID with hash for uniqueness
-- `tags(others?)` - Get tags with optional additional tags merged in
-- `prefix(value)` - Create a new context with extended prefix
-- `withTags(others)` - Create a new context with additional tags
+- `id(value?: string)` - Generate a resource ID with the context prefix
+- `shortId(value: string)` - Generate a short ID with hash for uniqueness
+- `tags(others?: Record<string, string>)` - Get tags with optional additional tags merged in
+- `prefix(value: string)` - Create a new context with extended prefix
+- `withTags(others: Record<string, string>)` - Create a new context with additional tags
 
 This system ensures all your resources follow consistent naming and tagging patterns, making them easier to manage, monitor, and organize.

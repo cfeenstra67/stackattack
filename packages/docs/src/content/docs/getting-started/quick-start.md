@@ -7,7 +7,9 @@ description: Build your first infrastructure with StackAttack AWS
 
 This guide will help you create your first infrastructure using StackAttack AWS components.
 
-## Create a New Pulumi Project
+## (If needed) Create a New Pulumi Project
+
+Stackattack can be easily added to any existing pulumi project that's using typescript. If you want to 
 
 ```bash
 mkdir my-infrastructure
@@ -23,61 +25,112 @@ npm install @stackattack/aws @pulumi/aws
 
 ## Create Basic Infrastructure
 
-Replace the contents of `index.ts` with:
+The following is a complete configuration for two stacks, one providing shared, stateful resources like a VPC, database instance, ECS cluster, and S3 bucket. Then a second one deploys an application on that ECS cluster; for more information on why the stacks are structured this way check out [Structuring Stacks](/components/structuring-stacks/).
 
 ```typescript
-import { context, vpc, bucket, database } from "@stackattack/aws";
+import * as saws from '@stackattack/aws';
 
-// Create a context for consistent naming and tagging
-const ctx = context({ 
-  prefix: "my-app",
-  tags: {
-    Environment: "development",
-    Project: "my-project"
-  }
-});
+function env() {
+  const ctx = saws.context();
 
-// Create a VPC with public and private subnets
-const network = vpc(ctx, {
-  cidr: "10.0.0.0/16",
-  availabilityZones: ["us-east-1a", "us-east-1b"],
-});
+  // Create a VPC with public and private subnets
+  const vpc = saws.vpc(ctx);
 
-// Create an S3 bucket with best practices enabled
-const storage = bucket(ctx, {
-  versioned: true,
-  allowCors: false,
-});
+  // Create a private S3 bucket
+  const storage = saws.bucket(ctx);
 
-// Create a PostgreSQL database
-const db = database(ctx, {
-  network,
-  engine: "postgres",
-  version: "15",
-  instanceType: "db.t4g.micro",
-});
+  // Create an ECS cluster w/ an auto-scaling group
+  const cluster = saws.cluster(ctx, {
+    network: vpc.network("private"),
+    maxSize: 3,
+  });
 
-// Export important values
-export const vpcId = network.vpc.id;
-export const bucketName = storage.bucket.bucket;
-export const databaseUrl = db.url;
+  // Create a PostgreSQL database
+  const database = saws.database(ctx, {
+    network: vpc.network("private")
+  });
+
+  // Create an ACM signing certificate for HTTPS support
+  const certificate = saws.certificate(ctx, {
+    domain: "mysite.com",
+    wildcard: true,
+  });
+
+  // Create a load balancer to route external requests to your service
+  const loadBalancer = saws.loadBalancer(ctx, {
+    network: vpc.network("public"),
+    certificate,
+  });
+
+  return {
+    cluster: saws.clusterToIds(cluster),
+    loadBalancer: saws.loadBalancerToIds(loadBalancer),
+    vpc: saws.vpcToIds(vpc),
+    database: saws.databaseToIds(database),
+    storageBucket: storage.bucket.bucket,
+  };
+}
+
+function app() {
+  // type-safe stack reference
+  const envRef = saws.stackRef('username/project/prod', env);
+
+  const cluster = sharedRef.require('cluster');
+  const vpc = saws.vpcFromIds(sharedRef.require('vpc'));
+  const loadBalancer = sharedRef.require('loadBalancer');
+
+  // Deploy a containerized service
+  const app = saws.service(ctx.prefix('api'), {
+    cluster,
+    name: 'mysite-api',
+    replicas: 1,
+    image: 'mysite-api:latest',
+    network: vpc.network('private'),
+    domain: 'api.mysite.com',
+    loadBalancer,
+    cpu: 256,
+    memory: 256,
+    port: 3000,
+    healthcheck: {
+      path: '/healthcheck'
+    },
+    env: {
+      DATABASE_URL: database.url,
+      STORAGE_URL: storage.url
+    },
+    // Run a specific command in a separate container instance; 
+    init: {
+      command: ['init']
+    }
+  });
+
+  return {
+    url: app.url,
+    internalUrl: app.internalUrl
+  };
+}
+
+export default () => saws.select({ env, app });
 ```
 
-## Deploy Your Infrastructure
-
+You should then create two pulumi stacks:
 ```bash
-pulumi up
+ENV_STACK=prod
+API_STACK=api-prod
+pulumi stack init $ENV_STACK
+pulumi config set stack-type env -s $ENV_STACK
+pulumi stack init $API_STACK
+pulumi config set stack-type api -s $API_STACK
 ```
-
-Review the planned changes and select "yes" to create the resources.
-
-## Clean Up
-
-When you're done experimenting, clean up the resources:
-
+And deploy them:
 ```bash
-pulumi destroy
+# This will take a while (>10 minutes)
+pulumi up -s $ENV_STACK
+# This should take <5 minutes
+pulumi up -s $API_STACK 
 ```
+
+After deployment, this will give you a service running in ECS at https://api.mysite.com.
 
 ## What You Built
 
@@ -87,10 +140,8 @@ In just a few lines of code, you created:
 - Route tables and internet gateway for connectivity
 - An S3 bucket with encryption and versioning enabled
 - A PostgreSQL database with proper security groups
-- All resources properly tagged and named
 
 ## Next Steps
 
-- Learn about the [Context concept](/concepts/context/)
-- Explore individual [Components](/components/)
-- Check out the [Utilities](/utilities/) for additional helpers
+- Learn about [contexts](/concepts/context/)
+- Explore individual [components](/components/)
