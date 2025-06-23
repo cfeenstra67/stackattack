@@ -1,10 +1,53 @@
 /**
  * @packageDocumentation
  *
- * AWS Client VPN components for creating secure VPN connections with certificate-based authentication.
+ * AWS Client VPN endpoints provide secure remote access to VPC resources using SSL/TLS certificate-based authentication. They enable secure connections for remote workers, contractors, or administrators who need access to private AWS resources without exposing them to the internet.
  *
- * Creates Client VPN endpoints with certificate generation, network associations, and authorization rules.
- * Includes automated certificate management using Easy-RSA and configurable client access policies.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const vpc = saws.vpc(ctx);
+ * const vpnEndpoint = saws.vpn(ctx, {
+ *   vpc: vpc.vpc,
+ *   privateSubnetIds: vpc.privateSubnetIds,
+ *   publicSubnetIds: vpc.publicSubnetIds,
+ *   cidrAllocator: vpc.cidrAllocator,
+ * });
+ *
+ * export const vpnClientConfig = vpnEndpoint.clientConfig;
+ * ```
+ *
+ * ## Usage
+ *
+ * After deployment, use the AWS CLI to download the client configuration:
+ *
+ * ```bash
+ * # Export the client config from Pulumi outputs
+ * pulumi stack output vpnClientConfig --show-secrets > client.ovpn
+ *
+ * # Connect using OpenVPN client
+ * sudo openvpn --config client.ovpn
+ *
+ * # Or use AWS CLI to manage the VPN endpoint
+ * aws ec2 describe-client-vpn-endpoints
+ * aws ec2 describe-client-vpn-connections --client-vpn-endpoint-id cvpn-endpoint-123
+ * ```
+ *
+ * The generated `.ovpn` configuration file includes embedded certificates and can be used with any OpenVPN-compatible client (OpenVPN Connect, Tunnelblick, etc.).
+ *
+ * ## Costs
+ *
+ * Client VPN pricing includes both endpoint charges and connection hours:
+ * - **Endpoint charge**: $0.10/hour (~$73/month) whether connections are active or not
+ * - **Connection charge**: $0.05/hour per concurrent connection (~$36/month per user)
+ * - **Data transfer**: Standard AWS data transfer rates apply
+ *
+ * Cost optimization strategies:
+ * - Use split tunneling (enabled by default) to avoid routing all traffic through AWS
+ * - Consider AWS Site-to-Site VPN for persistent office connections instead of multiple Client VPN connections
+ * - Monitor concurrent connections and implement automatic disconnection policies
+ * - Use security groups and authorization rules to limit access scope
  */
 
 import * as path from "node:path";

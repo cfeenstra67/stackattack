@@ -1,10 +1,68 @@
 /**
  * @packageDocumentation
  *
- * GitHub role components for creating IAM roles with GitHub Actions OIDC integration.
+ * GitHub Actions IAM roles enable secure deployment from GitHub workflows to AWS without storing long-term credentials. Using OpenID Connect (OIDC), GitHub Actions can assume AWS IAM roles with fine-grained permissions and repository-scoped access controls.
  *
- * Creates IAM roles that can be assumed by GitHub Actions workflows using OpenID Connect (OIDC).
- * Includes OpenID Connect provider setup, assume role policies, and repository-scoped access control.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const deploymentRole = saws.githubRole(ctx, {
+ *   repo: "myorg/myapp",
+ *   policy: JSON.stringify({
+ *     Version: "2012-10-17",
+ *     Statement: [{
+ *       Effect: "Allow",
+ *       Action: "s3:*",
+ *       Resource: "*"
+ *     }]
+ *   })
+ * });
+ *
+ * export const roleArn = deploymentRole.arn;
+ * ```
+ *
+ * ## Usage
+ *
+ * In your GitHub Actions workflow, configure the role assumption:
+ *
+ * ```yaml
+ * name: Deploy
+ * on:
+ *   push:
+ *     branches: [main]
+ *
+ * permissions:
+ *   id-token: write
+ *   contents: read
+ *
+ * jobs:
+ *   deploy:
+ *     runs-on: ubuntu-latest
+ *     steps:
+ *       - uses: aws-actions/configure-aws-credentials@v4
+ *         with:
+ *           role-to-assume: arn:aws:iam::123456789012:role/my-github-role
+ *           role-session-name: GitHubActions
+ *           aws-region: us-east-1
+ *       - run: aws s3 ls  # Now authenticated with AWS
+ * ```
+ *
+ * Use AWS CLI to verify role configuration:
+ *
+ * ```bash
+ * aws iam get-role --role-name my-github-role
+ * aws iam list-attached-role-policies --role-name my-github-role
+ * ```
+ *
+ * ## Costs
+ *
+ * GitHub Actions OIDC integration has no additional AWS costs beyond standard IAM usage:
+ * - **IAM roles and policies**: Free (no charges for creation or storage)
+ * - **STS AssumeRole calls**: $0.01 per 1,000 requests (typically negligible)
+ * - **Resource usage**: Costs depend on what AWS services the role accesses
+ *
+ * This approach eliminates the security risks and management overhead of storing AWS access keys as GitHub secrets, making it both more secure and cost-effective than alternatives.
  */
 
 import * as aws from "@pulumi/aws";

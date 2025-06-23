@@ -1,10 +1,58 @@
 /**
  * @packageDocumentation
  *
- * Vercel domain configuration components for setting up DNS records for Vercel-hosted applications.
+ * Vercel custom domain configuration enables using your own domain with Vercel-hosted applications by creating the necessary DNS records in Route53. This component sets up CNAME records that point to Vercel's edge infrastructure for optimal performance and SSL certificate management.
  *
- * Provides functions for creating CNAME records that point to Vercel's DNS infrastructure,
- * enabling custom domains for Vercel deployments.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const vercelRecord = saws.vercelDomain(ctx, {
+ *   domain: "app.example.com"
+ * });
+ *
+ * export const domainRecord = vercelRecord.id;
+ * ```
+ *
+ * ## Usage
+ *
+ * After deployment, configure the domain in your Vercel project:
+ *
+ * 1. **In Vercel Dashboard**:
+ *    - Go to your project settings
+ *    - Add "app.example.com" as a custom domain
+ *    - Vercel will automatically issue SSL certificates
+ *
+ * 2. **Using Vercel CLI**:
+ *    ```bash
+ *    # Add domain to your project
+ *    vercel domains add app.example.com
+ *
+ *    # Verify domain configuration
+ *    vercel domains ls
+ *
+ *    # Check SSL certificate status
+ *    vercel certs ls
+ *    ```
+ *
+ * 3. **Verify DNS propagation**:
+ *    ```bash
+ *    # Check CNAME record
+ *    dig CNAME app.example.com
+ *
+ *    # Test HTTPS access
+ *    curl -I https://app.example.com
+ *    ```
+ *
+ * ## Costs
+ *
+ * Vercel domain configuration through AWS Route53 has minimal infrastructure costs:
+ * - **Route53 hosted zone**: $0.50/month per domain
+ * - **DNS queries**: $0.40 per million queries (typically <$1/month for most apps)
+ * - **Vercel hosting**: Free tier available, Pro starts at $20/month per user
+ * - **SSL certificates**: Free via Vercel (Let's Encrypt)
+ *
+ * This setup provides enterprise-grade edge performance with minimal operational overhead. Vercel handles SSL certificate renewal, CDN distribution, and edge caching automatically, making it cost-effective for modern web applications.
  */
 
 import * as aws from "@pulumi/aws";

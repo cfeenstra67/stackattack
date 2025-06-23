@@ -1,10 +1,88 @@
 /**
  * @packageDocumentation
  *
- * Application Load Balancer components for HTTP/HTTPS traffic routing and SSL termination.
+ * Application Load Balancers (ALBs) in AWS distribute incoming HTTP/HTTPS traffic across multiple targets. StackAttack creates ALBs with SSL termination, health checks, and integration with ECS services for high availability web applications.
  *
- * Creates ALBs with target groups, listeners, and SSL certificate integration for secure traffic handling.
- * Includes utilities for load balancer management, health checks, and traffic distribution across services.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const network = saws.vpc(ctx);
+ * const lb = saws.loadBalancer(ctx, {
+ *   network: network.network("public")
+ * });
+ *
+ * export const loadBalancerUrl = lb.url;
+ * ```
+ *
+ * ## Related Components
+ *
+ * Load balancers work together with other StackAttack components:
+ * - [vpc](/components/vpc) - Provides public networking for internet-facing load balancers
+ * - [service](/components/service) - Receives traffic routed through load balancers
+ * - [certificate](/components/certificate) - Enables HTTPS termination at the load balancer
+ *
+ * ## Usage
+ *
+ * After deploying a load balancer, you can manage it using:
+ *
+ * **AWS CLI:**
+ * ```bash
+ * # View load balancer details
+ * aws elbv2 describe-load-balancers --names your-load-balancer-name
+ *
+ * # List target groups and their health
+ * aws elbv2 describe-target-groups --load-balancer-arn arn:aws:elasticloadbalancing:...
+ * aws elbv2 describe-target-health --target-group-arn arn:aws:elasticloadbalancing:...
+ *
+ * # View listener rules and routing
+ * aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:...
+ * aws elbv2 describe-rules --listener-arn arn:aws:elasticloadbalancing:...
+ *
+ * # View access logs (if enabled)
+ * aws s3 ls s3://your-alb-logs-bucket/AWSLogs/123456789012/elasticloadbalancing/
+ * ```
+ *
+ * **Testing Load Balancer:**
+ * ```bash
+ * # Test HTTP endpoint
+ * curl -I http://your-alb-dns-name.us-east-1.elb.amazonaws.com
+ *
+ * # Test HTTPS with custom domain
+ * curl -I https://your-domain.com
+ *
+ * # Test with custom headers for routing rules
+ * curl -H "Host: api.example.com" http://your-alb-dns-name.us-east-1.elb.amazonaws.com
+ * ```
+ *
+ * **CloudWatch Metrics:**
+ * ```bash
+ * # View request count and latency metrics
+ * aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB --metric-name RequestCount --dimensions Name=LoadBalancer,Value=app/your-lb-name/1234567890abcdef
+ * ```
+ *
+ * ## Costs
+ *
+ * ALB costs are **fixed hourly charges** plus **usage-based** request processing:
+ *
+ * - **Hourly rate** - Each ALB costs ~$16.43/month (730 hours × $0.0225/hour) just for existing, regardless of traffic.
+ *
+ * - **Load Balancer Capacity Units (LCUs)** - You pay for the highest of: new connections/sec, active connections, bandwidth, or rule evaluations. Typical costs:
+ *   - Light traffic: ~$5-10/month additional
+ *   - Medium traffic (1000 req/min): ~$15-25/month additional
+ *   - High traffic (10k req/min): ~$50-100/month additional
+ *
+ * - **Data transfer** - Standard AWS data transfer rates apply (~$0.09/GB out to internet). Internal VPC traffic is free.
+ *
+ * - **SSL certificates** - ACM certificates are free when used with ALBs. No additional cost for SSL termination.
+ *
+ * Cost optimization strategies:
+ * - Share ALBs across multiple services using listener rules (vs one ALB per service)
+ * - Use CloudFront in front of ALBs for static content and global acceleration
+ * - Consider Network Load Balancers for TCP traffic or when you need static IPs
+ * - Monitor LCU usage to identify cost drivers (connections, bandwidth, rules)
+ *
+ * See [ALB Pricing](https://aws.amazon.com/elasticloadbalancing/pricing/) for current rates.
  */
 
 import * as aws from "@pulumi/aws";

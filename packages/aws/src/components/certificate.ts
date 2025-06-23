@@ -1,10 +1,77 @@
 /**
  * @packageDocumentation
  *
- * ACM certificate components for creating SSL/TLS certificates with DNS validation.
+ * ACM certificates in AWS provide SSL/TLS certificates for secure HTTPS connections. StackAttack creates certificates with automatic DNS validation through Route53, supporting wildcards and multiple domains.
  *
- * Creates ACM certificates with Route53 DNS validation, supports wildcard domains and additional SANs.
- * Automatically handles certificate validation and includes utilities for Route53 zone management.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const certArn = saws.certificate(ctx, {
+ *   domain: "example.com",
+ *   wildcard: true
+ * });
+ *
+ * export const certificateArn = certArn;
+ * ```
+ *
+ * ## Related Components
+ *
+ * Certificates work together with other StackAttack components:
+ * - [load-balancer](/components/load-balancer) - Uses certificates for HTTPS termination
+ * - [static-site](/components/static-site) - Uses certificates for secure CloudFront distributions
+ *
+ * ## Usage
+ *
+ * After deploying a certificate, you can use it with other AWS services:
+ *
+ * **AWS CLI:**
+ * ```bash
+ * # View certificate details
+ * aws acm describe-certificate --certificate-arn arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012
+ *
+ * # List all certificates
+ * aws acm list-certificates
+ *
+ * # View certificate validation status
+ * aws acm describe-certificate --certificate-arn arn:aws:acm:... --query 'Certificate.DomainValidationOptions'
+ * ```
+ *
+ * **Use with Load Balancers:**
+ * ```typescript
+ * const lb = saws.loadBalancer(ctx, {
+ *   network: network.network("public"),
+ *   certificate: certArn
+ * });
+ * ```
+ *
+ * **Use with CloudFront:**
+ * ```typescript
+ * const site = saws.staticSite(ctx, {
+ *   domain: "example.com",
+ *   certificate: certArn
+ * });
+ * ```
+ *
+ *
+ * ## Costs
+ *
+ * ACM certificates are **completely free** when used with AWS services:
+ *
+ * - **Certificate issuance** - No cost for requesting, renewing, or using ACM certificates with AWS services like ALB, CloudFront, or API Gateway.
+ *
+ * - **DNS validation** - Route53 DNS queries during validation are minimal and typically cost less than $0.01.
+ *
+ * - **Automatic renewal** - ACM automatically renews certificates before expiration at no cost.
+ *
+ * - **Wildcard certificates** - No additional cost for wildcard (`*.example.com`) or multi-domain certificates.
+ *
+ * **Important limitations:**
+ * - ACM certificates can only be used with AWS services (ALB, CloudFront, API Gateway, etc.)
+ * - You cannot export private keys for use on non-AWS infrastructure
+ * - For external use cases, consider Let's Encrypt or commercial certificate authorities
+ *
+ * See [ACM Pricing](https://aws.amazon.com/certificate-manager/pricing/) for details.
  */
 
 import * as aws from "@pulumi/aws";

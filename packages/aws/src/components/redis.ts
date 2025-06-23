@@ -1,10 +1,98 @@
 /**
  * @packageDocumentation
  *
- * ElastiCache Redis components for creating Redis clusters with secure networking.
+ * ElastiCache Redis in AWS provides managed Redis instances for caching and session storage. StackAttack creates Redis clusters with secure networking, parameter groups, and proper security group configuration.
  *
- * Creates ElastiCache clusters with subnet groups, parameter groups, and security groups for Redis access.
- * Supports configurable node types, engine versions, and custom parameter configurations.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const network = saws.vpc(ctx);
+ * const cache = saws.redis(ctx, {
+ *   network: network.network("private")
+ * });
+ *
+ * export const redisUrl = cache.url;
+ * ```
+ *
+ * ## Related Components
+ *
+ * Redis clusters work together with other StackAttack components:
+ * - [vpc](/components/vpc) - Provides secure private networking for Redis access
+ * - [service](/components/service) - Connects to Redis for caching and session storage
+ *
+ * ## Usage
+ *
+ * After deploying a Redis cluster, you can connect and manage it using:
+ *
+ * **AWS CLI:**
+ * ```bash
+ * # View cluster details
+ * aws elasticache describe-cache-clusters --cache-cluster-id your-redis-cluster
+ *
+ * # View cluster status and endpoints
+ * aws elasticache describe-cache-clusters --cache-cluster-id your-redis-cluster --show-cache-node-info
+ *
+ * # View parameter group settings
+ * aws elasticache describe-cache-parameter-groups --cache-parameter-group-name your-param-group
+ *
+ * # Create manual snapshot
+ * aws elasticache create-snapshot --cache-cluster-id your-redis-cluster --snapshot-name manual-snapshot-$(date +%Y%m%d)
+ * ```
+ *
+ * **Direct Connection:**
+ * ```bash
+ * # Connect using redis-cli from an EC2 instance in the same VPC
+ * redis-cli -h your-redis-endpoint.cache.amazonaws.com -p 6379
+ *
+ * # Test basic operations
+ * SET mykey "Hello Redis"
+ * GET mykey
+ * ```
+ *
+ * **Application Code:**
+ * ```javascript
+ * import Redis from "ioredis";
+ *
+ * const redis = new Redis({
+ *   host: "your-redis-endpoint.cache.amazonaws.com",
+ *   port: 6379,
+ *   retryDelayOnFailover: 100,
+ *   maxRetriesPerRequest: 3
+ * });
+ *
+ * await redis.set("session:123", JSON.stringify({ userId: 456 }));
+ * const session = await redis.get("session:123");
+ * ```
+ *
+ * ## Costs
+ *
+ * ElastiCache Redis costs are **fixed hourly charges** based on node type:
+ *
+ * - **Instance costs** - The default `cache.t4g.micro` costs ~$11.68/month if running 24/7. Larger instances provide more memory and performance:
+ *   - `cache.t4g.small` (~$23.36/month) - 1.37GB RAM
+ *   - `cache.r7g.large` (~$146.83/month) - 13.07GB RAM
+ *   - `cache.r7g.xlarge` (~$293.66/month) - 26.32GB RAM
+ *
+ * - **Backup storage** - Automatic snapshots are free within the allocated memory size. Additional backup storage is ~$0.085/GB/month.
+ *
+ * - **Data transfer** - Connections within the same VPC are free. Cross-AZ data transfer costs ~$0.01/GB in each direction.
+ *
+ * - **Multi-AZ** - If you enable replication groups for high availability, you pay for each additional node.
+ *
+ * **Memory requirements planning:**
+ * - Session storage: ~1KB per user session
+ * - Application caching: Depends on cache hit ratio and object sizes
+ * - Database query caching: Can range from MBs to GBs depending on query complexity
+ *
+ * Cost optimization strategies:
+ * - Use `cache.t4g.micro` for development and small applications
+ * - Monitor memory utilization and scale instance type as needed
+ * - Set appropriate TTL values to prevent memory leaks
+ * - Use Redis eviction policies like `allkeys-lru` for automatic cleanup
+ * - Consider reserved instances for predictable workloads (up to 56% savings)
+ *
+ * See [ElastiCache Pricing](https://aws.amazon.com/elasticache/pricing/) for current rates.
  */
 
 import * as aws from "@pulumi/aws";

@@ -1,23 +1,31 @@
 /**
  * @packageDocumentation
  *
- * ECS services in AWS are the standard way to run containerized applications. StackAttack creates ECS services with task definitions, load balancer integration, health checks, and service discovery.
+ * ECS services in AWS provide a managed way to run containerized applications. StackAttack creates ECS services with task definitions, load balancer integration, health checks, and service discovery.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
- * 
+ *
  * const ctx = saws.context();
- * const network = saws.vpc(ctx);
- * const cluster = saws.cluster(ctx, { network });
+ * const vpc = saws.vpc(ctx);
+ * const cluster = saws.cluster(ctx, { network: vpc.network("private") });
  * const app = saws.service(ctx, {
  *   name: "my-app",
  *   image: "nginx:latest",
- *   network,
+ *   network: vpc.network("private"),
  *   cluster
  * });
- * 
+ *
  * export const appUrl = app.internalUrl;
  * ```
+ *
+ * ## Related Components
+ *
+ * Services work together with other StackAttack components:
+ * - [cluster](/components/cluster) - Provides compute capacity for running services
+ * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
+ * - [load-balancer](/components/load-balancer) - Routes external traffic to services
+ * - [database](/components/database) - Provides persistent data storage for services
  *
  * ## Usage
  *
@@ -27,45 +35,32 @@
  * ```bash
  * # View service status and tasks
  * aws ecs describe-services --cluster your-cluster-name --services your-service-name
- * 
+ *
  * # View service logs
  * aws logs tail /aws/ecs/your-service-name --follow
- * 
+ *
  * # Scale the service
  * aws ecs update-service --cluster your-cluster-name --service your-service-name --desired-count 3
  * ```
  *
- * **AWS SDK:**
- * ```javascript
- * import { ECSClient, UpdateServiceCommand } from "@aws-sdk/client-ecs";
- * 
- * const ecs = new ECSClient({ region: "us-east-1" });
- * 
- * // Scale service to 5 replicas
- * await ecs.send(new UpdateServiceCommand({
- *   cluster: "your-cluster-name",
- *   service: "your-service-name",
- *   desiredCount: 5
- * }));
- * ```
  *
  * ## Costs
- * 
+ *
  * ECS service costs depend on the underlying compute resources and are **usage-based**:
- * 
+ *
  * - **EC2 instances** - If using EC2 capacity providers, you pay for the underlying EC2 instances (~$0.0116/hour for t3.micro). The [cluster](/components/cluster) component manages auto-scaling groups that can scale to zero when no tasks are running.
- * 
+ *
  * - **Fargate** - If using Fargate capacity providers, you pay per vCPU-hour (~$0.04048/vCPU/hour) and per GB-hour (~$0.004445/GB/hour). A 0.5 vCPU, 1GB task running 24/7 costs ~$15/month.
- * 
+ *
  * - **Data transfer** - Minimal costs for service-to-service communication within the same VPC (typically free). External data transfer follows standard AWS rates.
- * 
+ *
  * - **CloudWatch Logs** - Log storage is ~$0.50/GB/month. Use the `logRetention` parameter to automatically delete old logs and control costs.
- * 
+ *
  * Cost optimization strategies:
  * - Use the [cluster](/components/cluster) component's auto-scaling features to scale EC2 instances to zero during low usage
  * - Set appropriate `logRetention` periods (default: 30 days)
  * - Consider spot instances for non-critical workloads through capacity provider configuration
- * 
+ *
  * See [ECS Pricing](https://aws.amazon.com/ecs/pricing/) for current rates.
  */
 

@@ -1,10 +1,71 @@
 /**
  * @packageDocumentation
  *
- * Kinesis Data Firehose components for streaming data to S3 with optional Parquet conversion.
+ * Amazon Kinesis Data Firehose is a fully managed service for streaming data to S3 with automatic scaling, data transformation, and format conversion. It enables real-time analytics by delivering streaming data to data lakes, with built-in compression, partitioning, and optional Parquet conversion for cost-effective storage.
  *
- * Creates Firehose delivery streams with S3 destinations, CloudWatch logging, and optional Glue integration.
- * Supports data transformation, compression, and format conversion from JSON to Parquet using Glue tables.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const firehose = saws.s3Firehose(ctx, {
+ *   bucket: "my-analytics-bucket",
+ *   prefix: "events/"
+ * });
+ *
+ * export const deliveryStreamArn = firehose.firehose.arn;
+ * ```
+ *
+ * ## Usage
+ *
+ * Send data to Firehose using AWS SDK or other AWS services:
+ *
+ * ```javascript
+ * // Using AWS SDK
+ * import { FirehoseClient, PutRecordCommand } from "@aws-sdk/client-firehose";
+ *
+ * const client = new FirehoseClient({ region: "us-east-1" });
+ * await client.send(new PutRecordCommand({
+ *   DeliveryStreamName: "my-s3-firehose",
+ *   Record: {
+ *     Data: JSON.stringify({
+ *       timestamp: new Date().toISOString(),
+ *       userId: "user123",
+ *       event: "page_view",
+ *       properties: { page: "/home" }
+ *     })
+ *   }
+ * }));
+ * ```
+ *
+ * Monitor delivery and analyze data:
+ *
+ * ```bash
+ * # Check delivery stream status
+ * aws firehose describe-delivery-stream --delivery-stream-name my-s3-firehose
+ *
+ * # View delivered data in S3
+ * aws s3 ls s3://my-analytics-bucket/events/ --recursive
+ *
+ * # Query with Amazon Athena (if using Parquet)
+ * aws athena start-query-execution --query-string \
+ *   "SELECT * FROM events WHERE year='2024' LIMIT 10"
+ * ```
+ *
+ * ## Costs
+ *
+ * Firehose pricing is based on data volume with no upfront costs:
+ * - **Data ingestion**: $0.029 per GB ingested
+ * - **Format conversion**: $0.018 per GB converted (JSON to Parquet)
+ * - **Data transfer**: Standard AWS transfer rates
+ * - **S3 storage**: Standard S3 pricing for stored data
+ * - **Compression**: Can reduce storage costs by 70-90%
+ *
+ * Cost optimization strategies:
+ * - Use GZIP compression (default) to reduce S3 storage costs
+ * - Implement appropriate buffering (size/time) to optimize delivery efficiency
+ * - Use Parquet format for analytics workloads to reduce query costs in Athena
+ * - Partition data by timestamp to enable efficient querying and lifecycle policies
+ * - Monitor error rates to avoid paying for failed delivery attempts
  */
 
 import * as aws from "@pulumi/aws";

@@ -1,10 +1,71 @@
 /**
  * @packageDocumentation
  *
- * Email domain components for setting up AWS SES email logging and delivery to S3.
+ * Amazon SES (Simple Email Service) domain configuration enables sending transactional emails from your custom domain with full deliverability tracking. This component sets up domain verification, DKIM authentication, SPF/DMARC records, and event logging for production email sending.
  *
- * Creates SNS topic subscriptions that stream email events to S3 via Kinesis Firehose.
- * Includes IAM roles and policies for secure email event delivery and webhook integration.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const emailSetup = saws.emailDomain(ctx, {
+ *   domain: "mail.example.com",
+ *   dmarcInbox: "dmarc-reports@example.com"
+ * });
+ *
+ * export const configurationSet = emailSetup.configurationSet.name;
+ * ```
+ *
+ * ## Usage
+ *
+ * After deployment, send emails using the AWS SDK or SMTP:
+ *
+ * ```javascript
+ * // Using AWS SDK
+ * import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2";
+ *
+ * const client = new SESv2Client({ region: "us-east-1" });
+ * await client.send(new SendEmailCommand({
+ *   FromEmailAddress: "noreply@mail.example.com",
+ *   Destination: { ToAddresses: ["user@example.com"] },
+ *   Content: {
+ *     Simple: {
+ *       Subject: { Data: "Welcome!" },
+ *       Body: { Text: { Data: "Hello from SES!" } }
+ *     }
+ *   },
+ *   ConfigurationSetName: "my-email-config-set"
+ * }));
+ * ```
+ *
+ * Monitor email events and deliverability:
+ *
+ * ```bash
+ * # Check domain verification status
+ * aws sesv2 get-email-identity --email-identity mail.example.com
+ *
+ * # View sending statistics
+ * aws sesv2 get-account-sending-enabled
+ * aws sesv2 get-configuration-set --configuration-set-name my-config-set
+ * ```
+ *
+ * ## Important Setup Notes
+ *
+ * - **Production Access**: You must request production access in the AWS SES console to send emails to unverified addresses. This component sets up the domain but does not automatically grant production sending access.
+ * - **Dedicated IP**: This component does not include dedicated IP setup. For high-volume sending requiring dedicated IPs, additional configuration is needed.
+ *
+ * ## Costs
+ *
+ * SES pricing is usage-based with no upfront costs:
+ * - **Free tier**: 200 emails/day for applications hosted on AWS
+ * - **Standard pricing**: $0.10 per 1,000 emails sent
+ * - **Dedicated IP**: $24.95/month per IP (for high-volume senders, not included in this component)
+ * - **Data transfer**: Standard AWS rates for attachments
+ *
+ * Cost optimization strategies:
+ * - Use SES configuration sets to track bounce/complaint rates and maintain sender reputation
+ * - Implement email validation to avoid sending to invalid addresses
+ * - Consider bulk sending features for newsletters vs transactional emails
+ * - Monitor sending quotas to avoid throttling in production
  */
 
 import * as aws from "@pulumi/aws";

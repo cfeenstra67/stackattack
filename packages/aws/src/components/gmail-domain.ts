@@ -1,10 +1,55 @@
 /**
  * @packageDocumentation
  *
- * Gmail domain components for configuring custom domains with Gmail/Google Workspace.
+ * Gmail custom domain configuration enables using your own domain (like mail@yourcompany.com) with Gmail/Google Workspace email services. This component creates the necessary DNS records in Route53 for domain verification and email routing to Google's mail servers.
  *
- * Creates Route53 DNS records for domain verification and MX records for Gmail integration.
- * Handles automatic zone detection and domain ownership verification for Google services.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const gmailSetup = saws.gmailDomain(ctx, {
+ *   domain: "mail.example.com",
+ *   verificationCode: "google-site-verification=abc123..."
+ * });
+ *
+ * export const mxRecord = gmailSetup.id;
+ * ```
+ *
+ * ## Usage
+ *
+ * After deployment, complete the Gmail/Google Workspace setup:
+ *
+ * 1. **In Google Admin Console** (for Google Workspace):
+ *    - Add your domain and verify ownership
+ *    - Configure user accounts with your custom domain
+ *    - Set up email routing and aliases
+ *
+ * 2. **Verify DNS propagation**:
+ *    ```bash
+ *    # Check MX records
+ *    dig MX mail.example.com
+ *
+ *    # Verify TXT record for domain verification
+ *    dig TXT mail.example.com
+ *
+ *    # Test email delivery
+ *    nslookup -q=MX mail.example.com
+ *    ```
+ *
+ * 3. **Configure email clients**:
+ *    - IMAP: imap.gmail.com:993 (SSL)
+ *    - SMTP: smtp.gmail.com:587 (TLS)
+ *    - Use your custom domain email address and Google account password
+ *
+ * ## Costs
+ *
+ * Gmail custom domain setup through AWS Route53 has minimal infrastructure costs:
+ * - **Route53 hosted zone**: $0.50/month per domain
+ * - **DNS queries**: $0.40 per million queries (typically <$1/month)
+ * - **Google Workspace**: $6-$18/user/month (separate Google billing)
+ * - **Domain registration**: Varies by registrar and TLD
+ *
+ * This approach is cost-effective for small to medium businesses wanting professional email addresses without managing email servers. The primary cost is the Google Workspace subscription, not the AWS infrastructure.
  */
 
 import * as aws from "@pulumi/aws";

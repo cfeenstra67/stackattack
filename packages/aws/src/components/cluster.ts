@@ -1,10 +1,67 @@
 /**
  * @packageDocumentation
  *
- * ECS cluster components for creating and managing AWS ECS clusters with EC2 capacity.
+ * ECS clusters in AWS provide compute capacity for running containerized applications. StackAttack creates ECS clusters with auto-scaling EC2 instances, service discovery, and secure SSH access through Instance Connect.
  *
- * Creates ECS clusters with auto scaling groups, launch templates, and EC2 instance connect endpoints.
- * Includes utilities for cluster management, capacity provider configuration, and instance access control.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const vpc = saws.vpc(ctx);
+ * const compute = saws.cluster(ctx, { network: vpc.network("private") });
+ *
+ * export const clusterName = compute.cluster.name;
+ * ```
+ *
+ * ## Related Components
+ *
+ * Clusters work together with other StackAttack components:
+ * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
+ * - [service](/components/service) - Runs containerized applications on the cluster
+ * - [load-balancer](/components/load-balancer) - Routes external traffic to services on the cluster
+ *
+ * ## Usage
+ *
+ * After deploying a cluster, you can manage it using:
+ *
+ * **AWS CLI:**
+ * ```bash
+ * # View cluster details and running tasks
+ * aws ecs describe-clusters --clusters your-cluster-name
+ * ```
+ *
+ * **SSH Access to EC2 Instances:**
+ * ```bash
+ * # Find instance IDs in the cluster
+ * aws ec2 describe-instances --filters "Name=tag:aws:autoscaling:groupName,Values=your-asg-name" --query 'Reservations[].Instances[].InstanceId' --output text
+ *
+ * # Connect to an instance using Instance Connect (no key pairs needed)
+ * aws ec2-instance-connect ssh --instance-id i-1234567890abcdef0 --region us-east-1
+ * ```
+ *
+ * ## Costs
+ *
+ * ECS cluster costs depend on the underlying EC2 instances and are **usage-based**:
+ *
+ * - **EC2 instances** - The default `t3.micro` instances cost ~$8.47/month each when running 24/7. Auto-scaling can reduce costs by scaling to zero during low usage periods.
+ *
+ * - **Auto Scaling** - The cluster automatically scales based on CPU and memory reservations. Empty clusters can scale down to zero instances, costing nothing for compute.
+ *
+ * - **EBS storage** - Each instance gets 8GB GP3 storage (~$0.96/month per instance). Storage persists even when instances terminate.
+ *
+ * - **Data transfer** - Service-to-service communication within the VPC is free. External data transfer follows standard AWS rates (~$0.09/GB out).
+ *
+ * - **Service Discovery** - The private DNS namespace is free. Route 53 health checks (if used) cost ~$0.50/month each.
+ *
+ * - **Instance Connect** - SSH access through Instance Connect endpoints costs ~$3.60/month per endpoint + $0.10/hour when in use.
+ *
+ * Cost optimization strategies:
+ * - Use spot instances for non-critical workloads (up to 90% savings)
+ * - Enable cluster auto-scaling to scale to zero during low usage
+ * - Monitor instance utilization and rightsize instance types
+ * - Use [service](/components/service) placement strategies to maximize instance utilization
+ *
+ * See [ECS Pricing](https://aws.amazon.com/ecs/pricing/) for current rates.
  */
 
 import * as aws from "@pulumi/aws";

@@ -1,10 +1,81 @@
 /**
  * @packageDocumentation
  *
- * SNS topic webhook components for delivering messages to HTTP/HTTPS endpoints.
+ * Amazon SNS (Simple Notification Service) webhook subscriptions deliver messages from SNS topics to HTTP/HTTPS endpoints with configurable retry policies and delivery guarantees. This enables integration with external services, monitoring systems, and event-driven architectures.
  *
- * Creates SNS subscriptions with configurable retry policies, throttling, and delivery settings.
- * Supports webhook integrations with customizable backoff strategies and request formatting options.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const webhook = saws.topicWebhook(ctx, {
+ *   topic: "arn:aws:sns:us-east-1:123456789012:my-topic",
+ *   url: "https://api.example.com/webhooks/sns"
+ * });
+ *
+ * export const subscriptionArn = webhook.arn;
+ * ```
+ *
+ * ## Usage
+ *
+ * Your webhook endpoint must handle SNS HTTP/HTTPS notifications:
+ *
+ * ```javascript
+ * import { SNSClient, ConfirmSubscriptionCommand } from "@aws-sdk/client-sns";
+ *
+ * // Express.js webhook handler
+ * app.post('/webhooks/sns', express.raw({ type: 'text/plain' }), async (req, res) => {
+ *   const message = JSON.parse(req.body);
+ *   const messageType = req.headers['x-amz-sns-message-type'] || message.Type;
+ *
+ *   // Handle subscription confirmation programmatically
+ *   if (messageType === 'SubscriptionConfirmation') {
+ *     const sns = new SNSClient({ region: "us-east-1" });
+ *     await sns.send(new ConfirmSubscriptionCommand({
+ *       Token: message.Token,
+ *       AuthenticateOnUnsubscribe: 'true',
+ *       TopicArn: message.TopicArn
+ *     }));
+ *     return res.status(200).send('Subscription confirmed');
+ *   }
+ *
+ *   // Handle actual notifications
+ *   if (messageType === 'Notification') {
+ *     console.log('SNS Message:', message.Message);
+ *     // Process your webhook logic here
+ *     return res.status(200).send('OK');
+ *   }
+ *
+ *   res.status(400).send('Unknown message type');
+ * });
+ * ```
+ *
+ * Monitor webhook delivery using AWS CLI:
+ *
+ * ```bash
+ * # Check subscription status
+ * aws sns get-subscription-attributes --subscription-arn arn:aws:sns:...
+ *
+ * # View delivery policy
+ * aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:...
+ *
+ * # Test webhook delivery
+ * aws sns publish --topic-arn arn:aws:sns:... --message "Test message"
+ * ```
+ *
+ * ## Costs
+ *
+ * SNS webhook delivery costs are based on message volume and delivery attempts:
+ * - **HTTP/HTTPS notifications**: $0.60 per million notifications
+ * - **Failed delivery retries**: Additional charges for retry attempts
+ * - **Data transfer**: Standard AWS data transfer rates apply
+ * - **No setup costs**: Pay only for successful and failed deliveries
+ *
+ * Cost optimization strategies:
+ * - Implement proper HTTP status codes (2xx) to avoid unnecessary retries
+ * - Use exponential backoff in your webhook handlers to reduce retry storms
+ * - Monitor dead letter queues to identify and fix failing endpoints
+ * - Consider SNS message filtering to reduce unnecessary webhook calls
+ * - Set appropriate retry policies to balance reliability with cost
  */
 
 import * as aws from "@pulumi/aws";

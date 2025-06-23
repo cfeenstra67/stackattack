@@ -1,10 +1,97 @@
 /**
  * @packageDocumentation
  *
- * Static site hosting components for deploying static websites to AWS using S3, CloudFront, and Lambda@Edge.
+ * Static sites in AWS combine S3 storage with CloudFront CDN for fast global content delivery. StackAttack creates static websites with custom domains, SSL certificates, and framework-specific routing (like Astro).
  *
- * Provides functions for creating static site distributions with custom domain support, SSL certificates,
- * caching policies, and framework-specific adapters for routing and path handling.
+ * ```typescript
+ * import * as saws from "@stackattack/aws";
+ *
+ * const ctx = saws.context();
+ * const storage = saws.bucket(ctx, { paths: ["./dist"] });
+ * const site = saws.staticSite(ctx, {
+ *   bucket: storage,
+ *   domain: "example.com"
+ * });
+ *
+ * export const siteUrl = site.url;
+ * ```
+ *
+ * ## Related Components
+ *
+ * Static sites work together with other StackAttack components:
+ * - [bucket](/components/bucket) - Stores website files in S3
+ * - [certificate](/components/certificate) - Provides SSL certificates for HTTPS domains
+ *
+ * ## Usage
+ *
+ * After deploying a static site, you can manage it using:
+ *
+ * **AWS CLI:**
+ * ```bash
+ * # View CloudFront distribution details
+ * aws cloudfront get-distribution --id E1234567890ABC
+ *
+ * # Invalidate CloudFront cache after updating files
+ * aws cloudfront create-invalidation --distribution-id E1234567890ABC --paths "/*"
+ *
+ * # Check distribution status and configuration
+ * aws cloudfront list-distributions --query 'DistributionList.Items[?Comment==`my-site`]'
+ * ```
+ *
+ * **Content Updates:**
+ * ```bash
+ * # Sync new files to S3 bucket
+ * aws s3 sync ./dist s3://your-bucket-name --delete
+ *
+ * # Invalidate specific files in CloudFront
+ * aws cloudfront create-invalidation --distribution-id E1234567890ABC --paths "/index.html" "/css/*"
+ * ```
+ *
+ * **Custom Error Pages:**
+ * ```bash
+ * # Upload custom 404 page
+ * aws s3 cp ./404.html s3://your-bucket-name/404.html
+ * ```
+ *
+ * **Framework-Specific Deployment:**
+ * ```typescript
+ * // For Astro sites with proper routing
+ * const site = saws.staticSite(ctx, {
+ *   bucket: storage,
+ *   domain: "example.com",
+ *   adapter: saws.astroAdapter()
+ * });
+ * ```
+ *
+ * ## Costs
+ *
+ * Static site costs are **usage-based** with significant free tiers:
+ *
+ * - **S3 storage** - ~$0.023/GB/month for file storage. A typical 100MB website costs ~$0.002/month.
+ *
+ * - **CloudFront** - First 1TB of data transfer out is free each month, then ~$0.085/GB. Includes:
+ *   - Free tier: 10,000,000 HTTP requests/month
+ *   - Free tier: 2,000,000 CloudFront Function invocations/month
+ *   - Additional requests: ~$0.0075 per 10,000 requests
+ *
+ * - **SSL certificate** - Free through ACM when used with CloudFront.
+ *
+ * - **Route53 DNS** - ~$0.50/month per hosted zone + $0.40 per million queries.
+ *
+ * - **Lambda@Edge** (for advanced routing) - Only if used: ~$0.60 per million requests + compute time.
+ *
+ * **Typical monthly costs:**
+ * - Small personal site (<1GB traffic): $0.50-2.00/month (mostly DNS)
+ * - Medium business site (<10GB traffic): $2-5/month
+ * - Large site (>50GB traffic): $5-15/month
+ *
+ * Cost optimization strategies:
+ * - Use CloudFront caching effectively to reduce origin requests
+ * - Optimize images and assets to reduce storage and transfer costs
+ * - Set up proper Cache-Control headers for static assets
+ * - Consider using `astroAdapter()` for optimized caching of framework builds
+ *
+ * See [CloudFront Pricing](https://aws.amazon.com/cloudfront/pricing/) for current rates.
  */
 
 import * as aws from "@pulumi/aws";
