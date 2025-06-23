@@ -21,9 +21,6 @@
  * # Upload a single file
  * aws s3 cp ./local-file.txt s3://your-bucket-name/remote-file.txt
  *
- * # Upload an entire directory
- * aws s3 sync ./local-directory s3://your-bucket-name/ --delete
- *
  * # List bucket contents
  * aws s3 ls s3://your-bucket-name/
  * ```
@@ -41,6 +38,11 @@
  *   ContentType: "application/json"
  * }));
  * ```
+ * ## Related Components
+ *
+ * Buckets are a foundational component in AWS and integrate with several other components:
+ * - [static-site](/components/static-site) - Serves files stored in S3 publicly using Cloudfront as a CDN with support for framework-specific routing.
+ * - [s3-firehose](/components/s3-firehose) - Sets up a Kinesis Firehose that can be used to buffer data and write it to S3 in chunks. This can be used to query it efficiently with tools that can read data directly from S3 such as Athena or Apache Spark.
  *
  * ## Costs
  *

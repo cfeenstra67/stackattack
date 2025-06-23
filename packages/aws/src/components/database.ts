@@ -15,12 +15,6 @@
  * export const dbUrl = db.url;
  * ```
  *
- * ## Related Components
- *
- * Databases work together with other StackAttack components:
- * - [vpc](/components/vpc) - Provides secure private networking for database access
- * - [service](/components/service) - Connects to databases for persistent data storage
- *
  * ## Usage
  *
  * After deploying a database, you can connect to it using:
@@ -63,6 +57,12 @@
  * const result = await client.query("SELECT NOW()");
  * await client.end();
  * ```
+ *
+ * ## Related Components
+ *
+ * Databases work together with other StackAttack components:
+ * - [vpc](/components/vpc) - Provides secure private networking for database access
+ * - [service](/components/service) - Connects to databases for persistent data storage
  *
  * ## Costs
  *

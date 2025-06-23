@@ -12,15 +12,6 @@
  * export const vpcId = network.vpc.id;
  * ```
  *
- * ## Related Components
- *
- * VPCs provide the networking foundation for other StackAttack components:
- * - [cluster](/components/cluster) - Requires VPC networking for ECS instances
- * - [service](/components/service) - Runs in VPC private subnets
- * - [database](/components/database) - Deployed in VPC private subnets for security
- * - [load-balancer](/components/load-balancer) - Uses VPC public subnets for internet access
- * - [redis](/components/redis) - Deployed in VPC private subnets
- *
  * ## Usage
  *
  * After deploying a VPC, you can manage it using:
@@ -50,6 +41,15 @@
  *   VpcIds: ["vpc-1234567890abcdef0"]
  * }));
  * ```
+ *
+ * ## Related Components
+ *
+ * VPCs provide the networking foundation for other StackAttack components:
+ * - [cluster](/components/cluster) - Requires VPC networking for ECS instances
+ * - [service](/components/service) - Runs in VPC private subnets
+ * - [database](/components/database) - Deployed in VPC private subnets for security
+ * - [load-balancer](/components/load-balancer) - Uses VPC public subnets for internet access
+ * - [redis](/components/redis) - Deployed in VPC private subnets
  *
  * ## Costs
  *

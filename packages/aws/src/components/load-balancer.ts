@@ -15,13 +15,6 @@
  * export const loadBalancerUrl = lb.url;
  * ```
  *
- * ## Related Components
- *
- * Load balancers work together with other StackAttack components:
- * - [vpc](/components/vpc) - Provides public networking for internet-facing load balancers
- * - [service](/components/service) - Receives traffic routed through load balancers
- * - [certificate](/components/certificate) - Enables HTTPS termination at the load balancer
- *
  * ## Usage
  *
  * After deploying a load balancer, you can manage it using:
@@ -60,6 +53,13 @@
  * # View request count and latency metrics
  * aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB --metric-name RequestCount --dimensions Name=LoadBalancer,Value=app/your-lb-name/1234567890abcdef
  * ```
+ *
+ * ## Related Components
+ *
+ * Load balancers work together with other StackAttack components:
+ * - [vpc](/components/vpc) - Provides public networking for internet-facing load balancers
+ * - [service](/components/service) - Receives traffic routed through load balancers
+ * - [certificate](/components/certificate) - Enables HTTPS termination at the load balancer
  *
  * ## Costs
  *

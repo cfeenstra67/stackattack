@@ -13,13 +13,6 @@
  * export const clusterName = compute.cluster.name;
  * ```
  *
- * ## Related Components
- *
- * Clusters work together with other StackAttack components:
- * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
- * - [service](/components/service) - Runs containerized applications on the cluster
- * - [load-balancer](/components/load-balancer) - Routes external traffic to services on the cluster
- *
  * ## Usage
  *
  * After deploying a cluster, you can manage it using:
@@ -38,6 +31,13 @@
  * # Connect to an instance using Instance Connect (no key pairs needed)
  * aws ec2-instance-connect ssh --instance-id i-1234567890abcdef0 --region us-east-1
  * ```
+ *
+ * ## Related Components
+ *
+ * Clusters work together with other StackAttack components:
+ * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
+ * - [service](/components/service) - Runs containerized applications on the cluster
+ * - [load-balancer](/components/load-balancer) - Routes external traffic to services on the cluster
  *
  * ## Costs
  *

@@ -16,11 +16,6 @@
  * export const siteUrl = site.url;
  * ```
  *
- * ## Related Components
- *
- * Static sites work together with other StackAttack components:
- * - [bucket](/components/bucket) - Stores website files in S3
- * - [certificate](/components/certificate) - Provides SSL certificates for HTTPS domains
  *
  * ## Usage
  *
@@ -62,6 +57,12 @@
  *   adapter: saws.astroAdapter()
  * });
  * ```
+ *
+ * ## Related Components
+ *
+ * Static sites work together with other StackAttack components:
+ * - [bucket](/components/bucket) - Stores website files in S3
+ * - [certificate](/components/certificate) - Provides SSL certificates for HTTPS domains
  *
  * ## Costs
  *

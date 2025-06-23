@@ -15,12 +15,6 @@
  * export const certificateArn = certArn;
  * ```
  *
- * ## Related Components
- *
- * Certificates work together with other StackAttack components:
- * - [load-balancer](/components/load-balancer) - Uses certificates for HTTPS termination
- * - [static-site](/components/static-site) - Uses certificates for secure CloudFront distributions
- *
  * ## Usage
  *
  * After deploying a certificate, you can use it with other AWS services:
@@ -29,30 +23,13 @@
  * ```bash
  * # View certificate details
  * aws acm describe-certificate --certificate-arn arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012
- *
- * # List all certificates
- * aws acm list-certificates
- *
- * # View certificate validation status
- * aws acm describe-certificate --certificate-arn arn:aws:acm:... --query 'Certificate.DomainValidationOptions'
  * ```
  *
- * **Use with Load Balancers:**
- * ```typescript
- * const lb = saws.loadBalancer(ctx, {
- *   network: network.network("public"),
- *   certificate: certArn
- * });
- * ```
+ * ## Related Components
  *
- * **Use with CloudFront:**
- * ```typescript
- * const site = saws.staticSite(ctx, {
- *   domain: "example.com",
- *   certificate: certArn
- * });
- * ```
- *
+ * Certificates work together with other StackAttack components:
+ * - [load-balancer](/components/load-balancer) - Uses certificates for HTTPS termination
+ * - [static-site](/components/static-site) - Uses certificates for secure CloudFront distributions
  *
  * ## Costs
  *

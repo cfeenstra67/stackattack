@@ -15,12 +15,6 @@
  * export const redisUrl = cache.url;
  * ```
  *
- * ## Related Components
- *
- * Redis clusters work together with other StackAttack components:
- * - [vpc](/components/vpc) - Provides secure private networking for Redis access
- * - [service](/components/service) - Connects to Redis for caching and session storage
- *
  * ## Usage
  *
  * After deploying a Redis cluster, you can connect and manage it using:
@@ -64,6 +58,12 @@
  * await redis.set("session:123", JSON.stringify({ userId: 456 }));
  * const session = await redis.get("session:123");
  * ```
+ *
+ * ## Related Components
+ *
+ * Redis clusters work together with other StackAttack components:
+ * - [vpc](/components/vpc) - Provides secure private networking for Redis access
+ * - [service](/components/service) - Connects to Redis for caching and session storage
  *
  * ## Costs
  *
