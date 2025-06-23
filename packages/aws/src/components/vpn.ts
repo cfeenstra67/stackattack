@@ -8,12 +8,7 @@
  *
  * const ctx = saws.context();
  * const vpc = saws.vpc(ctx);
- * const vpnEndpoint = saws.vpn(ctx, {
- *   vpc: vpc.vpc,
- *   privateSubnetIds: vpc.privateSubnetIds,
- *   publicSubnetIds: vpc.publicSubnetIds,
- *   cidrAllocator: vpc.cidrAllocator,
- * });
+ * const vpnEndpoint = saws.vpn(ctx, { vpc });
  *
  * export const vpnClientConfig = vpnEndpoint.clientConfig;
  * ```
@@ -38,6 +33,8 @@
  *
  * ## Costs
  *
+ * **Warning**: Using this component is quite expensive relative to other options. It's a simple way to connect to private resources in AWS, but be careful using this approach if you are cost-sensitive.
+ * 
  * Client VPN pricing includes both endpoint charges and connection hours:
  * - **Endpoint charge**: $0.10/hour (~$73/month) whether connections are active or not
  * - **Connection charge**: $0.05/hour per concurrent connection (~$36/month per user)
