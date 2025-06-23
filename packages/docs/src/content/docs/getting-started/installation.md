@@ -40,12 +40,15 @@ npm install @pulumi/aws
 Create a simple test file to verify everything is working:
 
 ```typescript
-import { context } from "@stackattack/aws";
+import * as saws from "@stackattack/aws";
 
-const ctx = context({ prefix: "test" });
-console.log("StackAttack AWS is ready!");
+const ctx = saws.context();
+
+const bucket = saws.bucket(ctx);
+
+export const bucketUrl = bucket.url;
 ```
 
 ## Next Steps
 
-- [Quick Start](/getting-started/quick-start/) - Build your first infrastructure
+- [Quick Start](/getting-started/quick-start/) - Start using StackAttack's components to deploy your application.

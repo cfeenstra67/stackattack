@@ -10,7 +10,7 @@
     "build-only": "astro build",
     "build": "pnpm generate && pnpm build-only",
     "preview": "astro preview",
-    "generate": "tsx generate.ts",
+    "generate": "rm -r src/content/docs/components && tsx generate.ts",
     "check": "biome check --apply src *.ts"
   },
   "keywords": [],

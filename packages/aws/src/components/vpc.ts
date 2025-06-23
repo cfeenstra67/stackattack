@@ -510,7 +510,7 @@ export function vpcFlowLogs(ctx: Context, args: VPCFlowLogsArgs) {
   });
 }
 
-interface VpcArgs {
+export interface VpcArgs {
   // https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html
   cidrBlock?: pulumi.Input<string>;
   availabilityZones?: number | string[];

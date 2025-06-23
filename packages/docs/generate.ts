@@ -21,6 +21,7 @@ async function generateDocs() {
     excludeExternals: true,
     excludePrivate: false,
     excludeProtected: false,
+    exclude: ["../aws/src/components/logs.ts"], // Exclude internal helper file
   });
 
   // Generate documentation
@@ -214,6 +215,18 @@ async function generateDocs() {
           fileName = fileName.replace("components/", "");
         }
 
+        // Check if this module is marked as @internal and should be excluded
+        if (child.kind === ReflectionKind.Module && child.comment) {
+          const comment = formatComment(child.comment);
+          const hasInternalTag = comment.includes("@internal") || 
+                                 child.comment.modifierTags?.has("@internal") ||
+                                 child.comment.blockTags?.some(tag => tag.tag === "@internal");
+          if (hasInternalTag) {
+            console.log(`Skipping @internal module: ${fileName}`);
+            continue;
+          }
+        }
+
         // Determine if this is a component or utility file
         const isUtility = Object.hasOwn(utilityNameMap, fileName);
         const targetMap = isUtility ? utilityFiles : componentFiles;
@@ -282,12 +295,17 @@ async function generateDocs() {
     // For components, find the main component function
     let mainFunction: DeclarationReflection | undefined;
     if (!isUtility) {
+      // Convert kebab-case file name to camelCase for function matching
+      const camelCaseName = name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+      
       mainFunction = nonModuleDeclarations.find(
         (d) =>
-          d.name === name ||
-          d.name === name.replace(/-/g, "") ||
-          (d.kind === ReflectionKind.Function &&
-            d.name.toLowerCase().includes(name.toLowerCase())),
+          d.kind === ReflectionKind.Function && (
+            d.name === name ||                    // exact match: "vpc" -> "vpc"
+            d.name === camelCaseName ||           // camelCase: "email-domain" -> "emailDomain"
+            d.name === name.replace(/-/g, "") ||  // no dashes: "load-balancer" -> "loadbalancer"
+            d.name.toLowerCase() === name.toLowerCase().replace(/-/g, "") // case insensitive
+          )
       );
     }
 

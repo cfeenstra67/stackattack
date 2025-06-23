@@ -5,25 +5,11 @@ description: Production-ready AWS infrastructure components for Pulumi
 
 <div class="intro-hero">
 
-# Welcome to StackAttack AWS
+# Welcome to StackAttack
 
-**Production-ready infrastructure components for the modern cloud**
-
-StackAttack AWS provides a curated collection of battle-tested infrastructure components built on top of Pulumi. Say goodbye to boilerplate and hello to infrastructure that just works.
+StackAttack provides a curated collection of high-level infrastructure components built on top of Pulumi. It allows you to deploy your applications on robust, secure infrastructure without giving up any control or spending days putting it together.
 
 </div>
-
-## Why StackAttack AWS?
-
-**Reduced boilerplate**: Common patterns are abstracted into reusable components that eliminate repetitive infrastructure code.
-
-**Best practices built-in**: Security, monitoring, and operational best practices are included by default—no more forgetting to enable encryption or configure access logging.
-
-**Consistent patterns**: All components follow the same naming, tagging, and configuration conventions, making your infrastructure predictable and maintainable.
-
-**Type safety**: Full TypeScript support with comprehensive type definitions means fewer runtime errors and better developer experience.
-
-**Simplicity**: No abstractions, just functions. You can import the library to access them, or copy/paste them into your codebase and modify them to your heart's content.
 
 ## Philsophy
 
@@ -35,67 +21,109 @@ Stackattack exposes a set of simple, self-contained building blocks that can be 
 
 ## Quick Example
 
-This sets up a containerized API deployment, served through a load balancer with HTTPS, with access to a PostgreSQL database.
+The following is a complete configuration for two stacks, one providing shared, stateful resources like a VPC, database instance, ECS cluster, and S3 bucket. Then a second one deploys an application on that ECS cluster; for more information on why the stacks are structured this way check out [Structuring Stacks](/components/structuring-stacks/)
 
 ```typescript
 import * as saws from '@stackattack/aws';
 
-const ctx = saws.context();
+function env() {
+  const ctx = saws.context();
 
-// Create a VPC with public and private subnets
-const vpc = saws.vpc(ctx, { 
-  cidr: '10.0.0.0/16' 
-});
+  // Create a VPC with public and private subnets
+  const vpc = saws.vpc(ctx);
 
-// Create an S3 bucket with versioning
-const storage = saws.bucket(ctx, { 
-  versioned: true
-});
+  // Create a private S3 bucket
+  const storage = saws.bucket(ctx);
 
-const cluster = saws.cluster(ctx, {
-  network: vpc.network("private"),
-  instances: {
-    architecture: "arm64",
-    memoryMib: { min: 4096, max: 8192 },
-    vcpuCount: { min: 2, max: 4 },
-    memoryGibPerVcpu: { min: 2, max: 2 },
-  },
-  maxSize: 5,
-});
+  // Create an ECS cluster w/ an auto-scaling group
+  const cluster = saws.cluster(ctx, {
+    network: vpc.network("private"),
+    maxSize: 3,
+  });
 
-const database = saws.database(ctx, {
-  network: vpc.network("private")
-});
+  // Create a PostgreSQL database
+  const database = saws.database(ctx, {
+    network: vpc.network("private")
+  });
 
-const certificate = saws.certificate(ctx, {
-  domain: "mysite.com",
-  wildcard: true,
-});
+  // Create an ACM signing certificate for HTTPS support
+  const certificate = saws.certificate(ctx, {
+    domain: "mysite.com",
+    wildcard: true,
+  });
 
-const loadBalancer = saws.loadBalancer(ctx, {
-  network: vpc.network("public"),
-  certificate,
-});
+  // Create a load balancer to route external requests to your service
+  const loadBalancer = saws.loadBalancer(ctx, {
+    network: vpc.network("public"),
+    certificate,
+  });
 
-// Deploy a containerized service
-const app = saws.service(ctx.prefix('api'), {
-  cluster,
-  name: 'mysite-api',
-  replicas: 1,
-  image: 'mysite-api:latest',
-  network: vpc.network('private'),
-  domain: 'api.mysite.com',
-  loadBalancer,
-  cpu: 256,
-  memory: 256,
-  port: 3000,
-  healthcheck: {
-    path: '/healthcheck'
-  },
-  env: {
-    DATABASE_URL: database.url
-  }
-});
+  return {
+    cluster: saws.clusterToIds(cluster),
+    loadBalancer: saws.loadBalancerToIds(loadBalancer),
+    vpc: saws.vpcToIds(vpc),
+    database: saws.databaseToIds(database),
+    storageBucket: storage.bucket.bucket,
+  };
+}
+
+function app() {
+  // type-safe stack reference
+  const envRef = saws.stackRef('username/project/prod', env);
+
+  const cluster = sharedRef.require('cluster');
+  const vpc = saws.vpcFromIds(sharedRef.require('vpc'));
+  const loadBalancer = sharedRef.require('loadBalancer');
+
+  // Deploy a containerized service
+  const app = saws.service(ctx.prefix('api'), {
+    cluster,
+    name: 'mysite-api',
+    replicas: 1,
+    image: 'mysite-api:latest',
+    network: vpc.network('private'),
+    domain: 'api.mysite.com',
+    loadBalancer,
+    cpu: 256,
+    memory: 256,
+    port: 3000,
+    healthcheck: {
+      path: '/healthcheck'
+    },
+    env: {
+      DATABASE_URL: database.url,
+      STORAGE_URL: storage.url
+    },
+    // Run a specific command in a separate container instance; 
+    init: {
+      command: ['init']
+    }
+  });
+
+  return {
+    url: app.url,
+    internalUrl: app.internalUrl
+  };
+}
+
+export default () => saws.select({ env, app });
+```
+
+You should then create two pulumi stacks:
+```bash
+ENV_STACK=prod
+API_STACK=api-prod
+pulumi stack init $ENV_STACK
+pulumi config set stack-type env -s $ENV_STACK
+pulumi stack init $API_STACK
+pulumi config set stack-type api -s $API_STACK
+```
+And deploy them:
+```bash
+# This will take a while (>10 minutes)
+pulumi up -s $ENV_STACK
+# This should take <5 minutes
+pulumi up -s $API_STACK 
 ```
 
 After deployment, this will give you a service running in ECS at https://api.mysite.com.
@@ -105,10 +133,10 @@ After deployment, this will give you a service running in ECS at https://api.mys
 Ready to get started? Here's your path forward:
 
 **[Installation →](/getting-started/installation/)**  
-Set up StackAttack AWS in your project
+Set up StackAttack in your project
 
 **[Quick Start →](/getting-started/quick-start/)**  
-Build your first infrastructure with StackAttack AWS
+Build your first infrastructure with StackAttack
 
 **[Components →](/components/vpc/)**  
 Explore the available infrastructure components
