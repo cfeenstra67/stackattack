@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-StackAttack is a production-ready AWS infrastructure toolkit built on top of Pulumi. It provides opinionated, secure-by-default components for common AWS infrastructure patterns, designed for simplicity and production use.
+StackAttack is an AWS infrastructure toolkit built on top of Pulumi. It provides opinionated, secure-by-default components for common AWS infrastructure patterns, designed for simplicity and production use.
 
 **Philosophy**: 
 - Composition over inheritance
