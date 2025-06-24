@@ -1,5 +1,17 @@
 # @stackattack/docs
 
+## 0.1.0-dev.5
+
+### Minor Changes
+
+- 10e33a8: Removed BucketOutput
+
+### Patch Changes
+
+- 05d9ac3: Docs fixes
+- 05d9ac3: Docs improvements
+- 44e1b53: Docs improvements
+
 ## 0.0.2-dev.4
 
 ### Patch Changes

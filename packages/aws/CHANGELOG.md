@@ -1,5 +1,17 @@
 # @stackattack/aws
 
+## 0.1.0-dev.48
+
+### Minor Changes
+
+- 10e33a8: Removed BucketOutput
+
+### Patch Changes
+
+- 05d9ac3: Docs fixes
+- 05d9ac3: Docs improvements
+- 44e1b53: Docs improvements
+
 ## 0.1.0-dev.47
 
 ### Patch Changes
