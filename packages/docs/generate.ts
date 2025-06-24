@@ -12,8 +12,7 @@ async function generateDocs() {
   const app = await Application.bootstrapWithPlugins({
     entryPoints: [
       "../aws/src/components",
-      "../aws/src/arns.ts",
-      "../aws/src/security-groups.ts",
+      "../aws/src/select.ts",
       "../aws/src/stack-ref.ts",
     ],
     entryPointStrategy: "expand",
@@ -203,9 +202,8 @@ async function generateDocs() {
 
   // Utility file name mappings
   const utilityNameMap: Record<string, string> = {
-    arns: "arns",
-    "security-groups": "security-groups",
     "stack-ref": "stack-references",
+    select: "select",
   };
 
   // Group declarations by source file

@@ -25,6 +25,7 @@
     "@pulumi/pulumi": "^3.157.0",
     "@stackattack/aws": "workspace:*",
     "sharp": "^0.34.2",
+    "starlight-llms-txt": "^0.5.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "typedoc": "^0.27.6"

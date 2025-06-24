@@ -2,9 +2,6 @@
 title: Quick Start
 description: Build your first infrastructure with StackAttack AWS
 ---
-
-# Quick Start
-
 This guide will help you create your first infrastructure using StackAttack AWS components.
 
 ## (If needed) Create a New Pulumi Project
@@ -25,7 +22,7 @@ npm install @stackattack/aws @pulumi/aws
 
 ## Create Basic Infrastructure
 
-The following is a complete configuration for two stacks, one providing shared, stateful resources like a VPC, database instance, ECS cluster, and S3 bucket. Then a second one deploys an application on that ECS cluster; for more information on why the stacks are structured this way check out [Structuring Stacks](/components/structuring-stacks/).
+The following is a complete configuration for two stacks, one providing shared, stateful resources like a VPC, database instance, ECS cluster, and S3 bucket. Then a second one deploys an application on that ECS cluster; for more information on why the stacks are structured this way check out [Structuring Stacks](/working-with-pulumi/structuring-stacks/).
 
 ```typescript
 import * as saws from '@stackattack/aws';

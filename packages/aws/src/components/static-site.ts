@@ -454,7 +454,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     }
   }
 
-  const cloudfrontDistribution = new aws.cloudfront.Distribution(
+  const distribution = new aws.cloudfront.Distribution(
     ctx.id(),
     {
       enabled: true,
@@ -517,13 +517,15 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
       type: "A",
       aliases: [
         {
-          name: cloudfrontDistribution.domainName,
-          zoneId: cloudfrontDistribution.hostedZoneId,
+          name: distribution.domainName,
+          zoneId: distribution.hostedZoneId,
           evaluateTargetHealth: true,
         },
       ],
     });
   }
 
-  return cloudfrontDistribution;
+  const url = pulumi.interpolate`https://${args.domain}`;
+
+  return { distribution, url };
 }

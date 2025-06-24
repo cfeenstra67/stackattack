@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightLlmsTxt from 'starlight-llms-txt';
 
 const googleAnalyticsId = 'G-2C44VGJN2K';
 
@@ -49,9 +50,8 @@ export default defineConfig({
       {
         label: 'Utilities',
         items: [
-          { label: 'ARNs', link: '/utilities/arns/' },
-          { label: 'Security Groups', link: '/utilities/security-groups/' },
           { label: 'Stack References', link: '/utilities/stack-references/' },
+          { label: 'Select', link: '/utilities/select/' },
         ],
       },
     ],
@@ -110,5 +110,6 @@ export default defineConfig({
         `,
       },
     ],
+    plugins: [starlightLlmsTxt()]
   })]
 });
