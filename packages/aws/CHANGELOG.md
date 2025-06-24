@@ -1,5 +1,73 @@
 # @stackattack/aws
 
+## 0.1.0
+
+### Minor Changes
+
+- 10e33a8: Removed BucketOutput
+- 130889c: Initial release
+- 9ac7147: Added way to share resources between stacks
+- 60d6cea: Added ability to use spot instances w/ mixed instances policy to cluster, including auto-excluding instance types that do not support ENI trunking
+
+### Patch Changes
+
+- ab17c84: Make bucketFiles part of bucket component
+- 82643fd: Security group-based auth for load balancer egress
+- d8b46c1: Export serviceAssumeRolePolicy
+- cebed40: Fix build
+- 257484b: Fix ttl value
+- afbaf62: Default to no explicit security groups for service
+- 953a21b: Added docs to new components
+- 094143f: Added static site component + bucket directory
+- 5479fac: Fix redis instance id
+- 3c9d61b: Added email domain resource
+- 05d9ac3: Docs fixes
+- 123802c: Add provider arg to certificate component
+- fa859d6: Fix BucketInput -> pulumi.Input<BucketInput>
+- 5610339: service default security group
+- b5be757: Fix email domain noVerify
+- 5d6bfc3: Fix stackRef for stack functions that take arguments, fix output coercion
+- 3120390: Improve google domain
+- 8053a34: Added vercel domain
+- bf0db2d: Fix cluster instances security group
+- 4b536eb: Adding more infra from lmk
+- 58e886a: Add default group rule for load balancer group
+- 2b2c8dc: Added github role component
+- 46428ec: Initial working ECS setup
+- 07348c2: Spot instance draining
+- 435b3e7: Fix ARN parsing in s3 firehose code
+- 12e0886: Fix static site component, deploy docs
+- 17af4a8: Fixed securityGroups arg in service component
+- 05d9ac3: Docs improvements
+- 094143f: Bucket directory resource
+- eca39bd: Working on docs; formatting
+- 3b5b8fc: Add deployment check and fix excluded families for ENI trunking
+- 2dbc4ab: Fixed exports
+- 521042c: Fix stackRef type
+- 5ed1776: Limit what's in the bundle to relevant things
+- b0bd620: headerBehavior: none w/ no lambda function in static site
+- 8b62b7f: Vercel domain
+- 4c5bc94: Added ec2 instance connect endpoint per subnet to vpc
+- a84b5b4: Added s3 firehose resource
+- f0ad98e: Make static site component more general
+- 8f2279a: Add loadBalancerListenerCertificate
+- 3f61818: bucketDirectory -> bucketFiles
+- 65af758: Create static site certificate in us-east-1
+- 127663e: Added essential: false to init container
+- 69bc860: Added typedoc comments
+- 44e1b53: Docs improvements
+- 5afe431: Fix MX record
+- b3e48e1: Protect VPN certificate + do not recreate if command changes
+- b333a0d: Add more email domain options
+- 84e12a4: Export gmail domain
+- 418bb3e: Include compiled JS in bundle
+- 1b5abb0: Fix type issue
+- e7cdccc: Allow no prefix in context
+- a22d86c: Add loadBalancerListenerToIds function
+- 3e80558: Added noValidate option for certificate
+- b39f6ee: Use security-group based ingress for services
+- 2dbc4ab: export new components
+
 ## 0.1.0-dev.48
 
 ### Minor Changes
