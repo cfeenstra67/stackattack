@@ -1,5 +1,23 @@
 # @stackattack/docs
 
+## 0.1.0
+
+### Minor Changes
+
+- 10e33a8: Removed BucketOutput
+
+### Patch Changes
+
+- bbd3e78: Added working with pulumi docs, updated styles
+- 05d9ac3: Docs fixes
+- 123802c: Add provider arg to certificate component
+- 12e0886: Fix static site component, deploy docs
+- 05d9ac3: Docs improvements
+- eca39bd: Working on docs; formatting
+- aa407a3: Docs improvements
+- 3f61818: bucketDirectory -> bucketFiles
+- 44e1b53: Docs improvements
+
 ## 0.1.0-dev.5
 
 ### Minor Changes
