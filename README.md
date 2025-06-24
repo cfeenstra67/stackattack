@@ -107,7 +107,3 @@ Most infrastructure-as-code requires too much boilerplate. StackAttack provides 
 **Composition over Inheritance** - Simple functions that work together  
 **Secure Defaults** - Best practices built-in, not bolted-on  
 **Copy-Paste Friendly** - No vendor lock-in, functions you can own
-
-## License
-
-MIT - Use it, modify it, ship it.
