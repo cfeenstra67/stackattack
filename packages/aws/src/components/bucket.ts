@@ -73,8 +73,7 @@ export type BucketInput =
   | string
   | aws.s3.BucketV2
   | aws.s3.Bucket
-  | aws.s3.GetBucketResult
-  | BucketOutput;
+  | aws.s3.GetBucketResult;
 
 /**
  * Extracts the bucket ID from various bucket input types.
@@ -87,9 +86,6 @@ export function getBucketId(
   return pulumi.output(input).apply((value) => {
     if (typeof value === "string") {
       return pulumi.output(value);
-    }
-    if ("url" in value) {
-      return value.bucket.bucket;
     }
     return pulumi.output(value.bucket);
   });
@@ -108,9 +104,6 @@ export function getBucketAttributes(
       return aws.s3.getBucketOutput({
         bucket: value,
       });
-    }
-    if ("url" in value) {
-      return pulumi.output(value.bucket);
     }
     return pulumi.output(value);
   });
@@ -471,23 +464,13 @@ export type BucketArgs = Pick<
 };
 
 /**
- * Output from creating an S3 bucket, containing the bucket resource and its S3 URL.
- */
-export interface BucketOutput {
-  /** The created S3 bucket resource */
-  bucket: aws.s3.BucketV2;
-  /** S3 URL for the bucket (s3://bucket-name) */
-  url: pulumi.Output<string>;
-}
-
-/**
  * Creates an S3 bucket with security best practices enabled by default, including encryption, public access blocking, and optional versioning.
  *
  * @param ctx - The context for resource naming and tagging
  * @param args - Optional configuration arguments for the bucket
  * @returns An object containing the bucket resource and its S3 URL
  */
-export function bucket(ctx: Context, args?: BucketArgs): BucketOutput {
+export function bucket(ctx: Context, args?: BucketArgs): aws.s3.BucketV2 {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("bucket");
   }
@@ -539,7 +522,5 @@ export function bucket(ctx: Context, args?: BucketArgs): BucketOutput {
     bucketFiles(ctx, { bucket, paths: args.paths });
   }
 
-  const url = pulumi.interpolate`s3://${bucket.bucket}`;
-
-  return { bucket, url };
+  return bucket;
 }

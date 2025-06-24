@@ -167,7 +167,7 @@ export function s3FirehoseKinesisPolicy(
  */
 export interface S3FirehoseArgs {
   /** The S3 bucket to deliver data to */
-  bucket: BucketInput;
+  bucket: pulumi.Input<BucketInput>;
   /** S3 prefix for successful deliveries */
   prefix?: pulumi.Input<string>;
   /** S3 prefix for error outputs (defaults to prefix + "error/") */
@@ -216,7 +216,7 @@ export function s3Firehose(ctx: Context, args: S3FirehoseArgs) {
 
   let bucketInput = args.bucket;
   if (!bucketInput) {
-    bucketInput = bucket(ctx).bucket;
+    bucketInput = bucket(ctx);
   }
 
   const bucketName = getBucketId(bucketInput);

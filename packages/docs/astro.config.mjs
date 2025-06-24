@@ -49,10 +49,7 @@ export default defineConfig({
       },
       {
         label: 'Utilities',
-        items: [
-          { label: 'Stack References', link: '/utilities/stack-references/' },
-          { label: 'Select', link: '/utilities/select/' },
-        ],
+        autogenerate: { directory: 'utilities' },
       },
     ],
     head: [

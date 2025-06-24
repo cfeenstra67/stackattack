@@ -202,7 +202,7 @@ async function generateDocs() {
 
   // Utility file name mappings
   const utilityNameMap: Record<string, string> = {
-    "stack-ref": "stack-references",
+    "stack-ref": "stack-ref",
     select: "select",
   };
 

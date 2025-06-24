@@ -404,7 +404,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
   if (args.logsBucket === undefined) {
     logsBucketDomain = bucket(ctx.prefix("logs"), {
       objectOwnership: "BucketOwnerPreferred",
-    }).bucket.bucketDomainName;
+    }).bucketDomainName;
   } else if (args.logsBucket !== null) {
     const logsBucketAttrs = getBucketAttributes(args.logsBucket);
     logsBucketDomain = logsBucketAttrs.bucketDomainName;

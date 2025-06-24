@@ -3,8 +3,6 @@ title: Context
 description: Understanding the Context system for consistent resource management
 ---
 
-# Context
-
 The `Context` is the foundation of StackAttack AWS. It provides a consistent way to name, tag, and organize your infrastructure resources.
 
 ## What is Context?
