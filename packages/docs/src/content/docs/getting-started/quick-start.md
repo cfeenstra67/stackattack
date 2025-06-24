@@ -64,7 +64,7 @@ function env() {
     loadBalancer: saws.loadBalancerToIds(loadBalancer),
     vpc: saws.vpcToIds(vpc),
     database: saws.databaseToIds(database),
-    storageBucket: storage.bucket.bucket,
+    storageBucket: storage.bucket,
   };
 }
 
@@ -72,9 +72,10 @@ function app() {
   // type-safe stack reference
   const envRef = saws.stackRef('username/project/prod', env);
 
-  const cluster = sharedRef.require('cluster');
-  const vpc = saws.vpcFromIds(sharedRef.require('vpc'));
-  const loadBalancer = sharedRef.require('loadBalancer');
+  const cluster = envRef.require('cluster');
+  const vpc = saws.vpcFromIds(envRef.require('vpc'));
+  const loadBalancer = envRef.require('loadBalancer');
+  const storageBucket = envRef.require('storageBucket');
 
   // Deploy a containerized service
   const app = saws.service(ctx.prefix('api'), {
@@ -93,9 +94,9 @@ function app() {
     },
     env: {
       DATABASE_URL: database.url,
-      STORAGE_URL: storage.url
+      STORAGE_BUCKET: storageBucket
     },
-    // Run a specific command in a separate container instance; 
+    // Run a specific command in a separate container instance; e.g. run database migrations
     init: {
       command: ['init']
     }

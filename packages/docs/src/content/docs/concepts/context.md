@@ -40,9 +40,7 @@ const storage = saws.bucket(ctx, {
   versioned: true,
 });
 
-const network = saws.vpc(ctx, {
-  availabilityZones: ["us-east-1a", "us-east-1b"],
-});
+const vpc = saws.vpc(ctx);
 ```
 
 ## Hierarchical Contexts
@@ -54,7 +52,7 @@ const baseCtx = saws.context();
 
 // Each will have appropriate naming: my-app-storage-*, my-app-database-*
 const s3 = saws.bucket(baseCtx.prefix("storage"), { versioned: true });
-const db = saws.database(baseCtx.refix("database"), { network, engine: "postgres" });
+const db = saws.database(baseCtx.prefix("database"), { network: vpc.network("private"), engine: "postgres" });
 ```
 
 ## Adding Tags

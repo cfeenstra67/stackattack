@@ -9,7 +9,7 @@
  * const ctx = saws.context();
  * const storage = saws.bucket(ctx);
  *
- * export const storageUrl = storage.url;
+ * export const storageBucket = storage.bucket;
  * ```
  *
  * ## Usage
