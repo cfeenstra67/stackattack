@@ -168,12 +168,80 @@ export function internetGateway(ctx: Context, args: InternetGatewayArgs) {
   });
 }
 
-interface SubnetsArgs {
+/** Input parameters for s3GatewayEndpoint */
+export interface S3GatewayEndpointArgs {
+  /** The target VPC to create subnets in */
   vpc: pulumi.Input<VpcInput>;
+  /** ID of the private route table to associate the endpoint with */
+  privateRouteTableId: pulumi.Input<string>;
+  /** Do not add a prefix to the context */
+  noPrefix?: boolean;
+}
+
+/**
+ * Create an S3 Gateway VPC endpoint to connect to S3 within a VPC without going through the public internet
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Gateway route configuration arguments
+ * @returns VPC endpoint object
+ */
+export function s3GatewayEndpoint(ctx: Context, args: S3GatewayEndpointArgs) {
+  if (!args.noPrefix) {
+    ctx = ctx.prefix("s3-endpoint");
+  }
+
+  const vpcId = getVpcId(args.vpc);
+
+  const region = aws.getRegionOutput();
+
+  return new aws.ec2.VpcEndpoint(ctx.id(), {
+    serviceName: pulumi.interpolate`com.amazonaws.${region.name}.s3`,
+    vpcId,
+    autoAccept: true,
+    routeTableIds: [args.privateRouteTableId],
+    tags: { ...ctx.tags(), Name: ctx.id() },
+  });
+}
+
+/** Input parameters for ec2InstanceConnectEndpoint */
+export interface EC2InstanceConnectEndpoint {
+  /** ID of the private subnet to associate the endpoint with. You will still be able to access resources in other subnets (so long as your other configuration allows it; it does by default if you used Stackattack components to create your vpc) */
+  subnetId: pulumi.Input<string>;
+  /** Do not add a prefix to the context */
+  noPrefix?: boolean;
+}
+
+/**
+ * Create an EC2 instance connect endpoint for SSH access to instances without public IP addresses
+ * @param ctx - The context for resource naming and tagging
+ * @param args - Endpoint configuration parameters
+ * @returns Instance connect endpoint object
+ */
+export function ec2InstanceConnectEndpoint(
+  ctx: Context,
+  args: EC2InstanceConnectEndpoint,
+) {
+  if (!args.noPrefix) {
+    ctx = ctx.prefix("ec2-instance-connect-endpoint");
+  }
+
+  return new aws.ec2transitgateway.InstanceConnectEndpoint(ctx.id(), {
+    subnetId: args.subnetId,
+    tags: { ...ctx.tags(), Name: ctx.id() },
+  });
+}
+
+export interface SubnetsArgs {
+  /** The target VPC to create subnets in */
+  vpc: pulumi.Input<VpcInput>;
+  /** CIDR allocator for getting new cidrs */
   cidrAllocator: CidrAllocator;
+  /** Whether to create a NAT gateway or not; `single` (the default) creates a single NAT gateway in the first subnet in your VPC */
   nat?: "single" | "none";
+  /** Specify availability zones--if a number is passed this will be the first two availability zones in the current region */
   availabilityZones: number | pulumi.Input<string>[];
+  /** Specify the netmask to use for allocating CIDRs to subnets. This determines how many IP addresses are available in the subnet. */
   subnetMask?: number;
+  /** Do not add a prefix to the context */
   noPrefix?: boolean;
 }
 
@@ -216,14 +284,14 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
     },
   );
 
-  const region = aws.getRegionOutput();
-  new aws.ec2.VpcEndpoint(ctx.id("s3-endpoint"), {
-    serviceName: pulumi.interpolate`com.amazonaws.${region.name}.s3`,
-    vpcId,
-    autoAccept: true,
-    routeTableIds: [privateRouteTable.id],
-    tags: { ...ctx.tags(), Name: ctx.id("s3-endpoint") },
-  });
+  // const region = aws.getRegionOutput();
+  // new aws.ec2.VpcEndpoint(ctx.id("s3-endpoint"), {
+  //   serviceName: pulumi.interpolate`com.amazonaws.${region.name}.s3`,
+  //   vpcId,
+  //   autoAccept: true,
+  //   routeTableIds: [privateRouteTable.id],
+  //   tags: { ...ctx.tags(), Name: ctx.id("s3-endpoint") },
+  // });
 
   const subnetMask = args.subnetMask ?? 20;
 
@@ -242,14 +310,6 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
       {
         routeTableId: privateRouteTable.id,
         subnetId: privateSubnet.id,
-      },
-    );
-
-    new aws.ec2transitgateway.InstanceConnectEndpoint(
-      ctx.id(`instance-connect-endpoint-${idx}`),
-      {
-        subnetId: privateSubnet.id,
-        tags: ctx.tags(),
       },
     );
 
@@ -272,6 +332,16 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
     idx++;
   }
 
+  // if (privateSubnetIds.length > 0) {
+  //   new aws.ec2transitgateway.InstanceConnectEndpoint(
+  //     ctx.id(`instance-connect-endpoint-${idx}`),
+  //     {
+  //       subnetId: privateSubnet.id,
+  //       tags: { ...ctx.tags(), Name: ctx.id(`instance-connect-endpoint-${idx}`) },
+  //     },
+  //   );
+  // }
+
   const nat = args.nat ?? "single";
   if (nat === "single") {
     const elasticIp = new aws.ec2.Eip(ctx.id("nat-ip"), {
@@ -291,10 +361,16 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
     });
   }
 
-  return { publicSubnetIds, privateSubnetIds };
+  return {
+    publicSubnetIds,
+    privateSubnetIds,
+    privateRouteTable,
+    publicRouteTable,
+  };
 }
 
-function availabilityZones(
+/** Get an array of availability zones based on either a number or an array of either full AZ names (us-east-1a, us-west-2b, etc.) or just a single letter (a, b, etc.). If a number is provided, it will return the first N availability zones in the current region. */
+export function availabilityZones(
   zones: number | pulumi.Input<string>[],
 ): pulumi.Output<string>[] {
   if (zones === 0 || (Array.isArray(zones) && zones.length === 0)) {
@@ -513,13 +589,23 @@ export function vpcFlowLogs(ctx: Context, args: VPCFlowLogsArgs) {
   });
 }
 
+/** Input properties for the vpc component */
 export interface VpcArgs {
-  // https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html
+  /** Provide a CIDR block that defines the range of addresses for your VPC. Defaults to 10.0.0.0/16 if not provided. See https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html for details */
   cidrBlock?: pulumi.Input<string>;
+  /** Availability zone input; see [availabilityZones](#availabilityZones) for details on behavior */
   availabilityZones?: number | string[];
+  /** Indicate whether VPC Flow Logs should be enabled */
   flowLogs?: boolean;
+  /** Indicate the netmask to use for subnets, which defines how many IP addresses are available. Defaults to 20 (4096 IP addresses available per subnet) */
   subnetMask?: number;
+  /** By default, an s3 gateway endpoint will be created for internal access to S3. Passing true disables this behavior. */
+  noS3Endpoint?: boolean;
+  /** By default, an EC2 Instance Connect endpoint will be created for SSH access to EC2 instances without a public IP address. Passing true disables this behavior. */
+  noInstanceConnectEndpoint?: boolean;
+  /** By default, VPCs are created with protect: true, which prevent accidental deletion. To disable this behavior, pass `true`. */
   noProtect?: boolean;
+  /** Do not add a name prefix to the context */
   noPrefix?: boolean;
 }
 
@@ -609,7 +695,8 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
 
   let publicSubnetIds: pulumi.Output<string>[] = [];
   let privateSubnetIds: pulumi.Output<string>[] = [];
-  const zones = availabilityZones(args?.availabilityZones ?? 1);
+  let privateRouteTableId: pulumi.Input<string> | undefined = undefined;
+  const zones = availabilityZones(args?.availabilityZones ?? 2);
   if (zones.length > 0) {
     const results = subnets(ctx, {
       vpc,
@@ -619,10 +706,19 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
     });
     publicSubnetIds = results.publicSubnetIds;
     privateSubnetIds = results.privateSubnetIds;
+    privateRouteTableId = results.privateRouteTable.id;
   }
 
   if (args?.flowLogs) {
     vpcFlowLogs(ctx, { vpc });
+  }
+
+  if (!args?.noS3Endpoint && privateRouteTableId !== undefined) {
+    s3GatewayEndpoint(ctx, { vpc, privateRouteTableId });
+  }
+
+  if (!args?.noInstanceConnectEndpoint && privateSubnetIds.length > 0) {
+    ec2InstanceConnectEndpoint(ctx, { subnetId: privateSubnetIds[0] });
   }
 
   return {

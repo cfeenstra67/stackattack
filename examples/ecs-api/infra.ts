@@ -16,7 +16,9 @@ function env() {
   });
 
   const database = saws.database(ctx, {
-    network: vpc.network("private")
+    network: vpc.network("private"),
+    // Disable deletion protection so we can tear down the database since this is just an example
+    noDeletionProtection: true
   });
 
   const certificate = saws.certificate(ctx, {
@@ -58,9 +60,7 @@ function api() {
   const repoUrl = envRef.require('repoUrl');
 
   const image = aws.ecr.getImageOutput({
-    repositoryName: repoUrl.apply((url) =>
-      new URL(url).pathname.slice(1)
-    ),
+    repositoryName: repoUrl.apply((url) => url.split('/')[1]),
     mostRecent: true
   });
 

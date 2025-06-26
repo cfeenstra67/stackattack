@@ -1,4 +1,4 @@
-name: ecs-api-example
+name: stackattack-ecs-api
 main: infra.ts
 runtime:
   name: nodejs
