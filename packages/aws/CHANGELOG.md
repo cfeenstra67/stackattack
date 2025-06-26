@@ -1,5 +1,15 @@
 # @stackattack/aws
 
+## 0.2.0
+
+### Minor Changes
+
+- 6a00ce2: Allow passing openIdProvider: null to github role to lookup provider
+
+### Patch Changes
+
+- c68d3a9: Improve package.json + make dependencies looser
+
 ## 0.1.0
 
 ### Minor Changes
