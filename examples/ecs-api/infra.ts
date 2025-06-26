@@ -32,6 +32,8 @@ function env() {
   });
 
   const repo = new aws.ecr.Repository(ctx.id('repo'), {
+    // So we can tear this stack cleanly since it's just an example
+    forceDelete: true,
     tags: ctx.tags()
   });
 
