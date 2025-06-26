@@ -1,12 +1,12 @@
-# StackAttack
+# Stackattack
 
 Production-ready AWS infrastructure components for Pulumi. Deploy complex applications with minimal code using secure, opinionated defaults.
 
-**[Get Started →](https://stackattack.camfeenstra.com)** | **[Documentation](https://stackattack.camfeenstra.com/components/)** | **[Examples](https://stackattack.camfeenstra.com/getting-started/quick-start/)**
+**[Get Started](https://stackattack.camfeenstra.com)** | **[Components](https://stackattack.camfeenstra.com/components/)** | **[Examples](https://stackattack.camfeenstra.com/getting-started/quick-start/)**
 
 ## What is StackAttack?
 
-StackAttack eliminates infrastructure boilerplate by providing battle-tested AWS components built on Pulumi. Instead of writing hundreds of lines of infrastructure code, deploy production-ready applications in under 100 lines.
+StackAttack eliminates infrastructure boilerplate by providing battle-tested AWS components built on Pulumi. Instead of writing hundreds of lines of infrastructure code, deploy production-ready applications with a fraction of the effort it takes to wire it all up yourself. The following config deploys service to ECS with a database in ~30 lines:
 
 ```typescript
 import * as saws from "@stackattack/aws";
@@ -55,7 +55,7 @@ export const appUrl = app.url;
 **Storage**: S3 Buckets, RDS Databases, Redis  
 **Integration**: Email Domains, GitHub Actions, Webhooks
 
-[→ View all components](https://stackattack.camfeenstra.com/components/)
+[View all components](https://stackattack.camfeenstra.com/components/)
 
 ## Quick Start
 
@@ -94,7 +94,7 @@ Test your deployed resources:
 curl https://my.astro.site
 ```
 
-**[Full Documentation →](https://stackattack.camfeenstra.com)**
+**[Full Documentation](https://stackattack.camfeenstra.com)**
 
 - [Getting Started Guide](https://stackattack.camfeenstra.com/getting-started/introduction/)
 - [Component Reference](https://stackattack.camfeenstra.com/components/)

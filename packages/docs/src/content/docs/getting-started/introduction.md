@@ -41,11 +41,11 @@ saws.staticSite(ctx, {
 
 Ready to get started? Here's your path forward:
 
-**[Installation →](/getting-started/installation/)**  
+**[Installation](/getting-started/installation/)**  
 Set up StackAttack in your project
 
-**[Quick Start →](/getting-started/quick-start/)**  
+**[Quick Start](/getting-started/quick-start/)**  
 Build your first infrastructure with StackAttack
 
-**[Components →](/components/)**  
+**[Components](/components/)**  
 Explore the available infrastructure components

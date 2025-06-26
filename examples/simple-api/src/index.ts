@@ -33,4 +33,4 @@ app.post("/todos/:id/toggle", async (req, res) => {
   res.json(updated);
 });
 
-app.listen(3000, () => console.log("API ready → http://localhost:3000"));
+app.listen(3000, () => console.log("API ready at http://localhost:3000"));
