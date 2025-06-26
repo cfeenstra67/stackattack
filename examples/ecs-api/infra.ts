@@ -69,6 +69,7 @@ function api() {
     cluster,
     name: 'ecs-api-example',
     replicas: 1,
+    command: ['api'],
     image: image.imageUri,
     network: vpc.network('private'),
     domain,
@@ -80,7 +81,7 @@ function api() {
       path: '/healthcheck'
     },
     env: {
-      DATABASE_URL: database.url,
+      DATABASE_URL: pulumi.interpolate`${database.url}?sslmode=verify-full`,
     },
     init: {
       command: ['init']

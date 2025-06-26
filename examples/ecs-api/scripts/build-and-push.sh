@@ -2,12 +2,14 @@
 
 set -eo pipefail
 
+ENV_STACK=env
+
 ACCOUNT_ID=$(aws sts get-caller-identity | jq -r .Account)
-REGION=$(pulumi config get aws:region)
+REGION=$(pulumi -s $ENV_STACK config get aws:region)
 
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
-REPO_URL=$(pulumi stack output repoUrl --show-secrets)
+REPO_URL=$(pulumi -s $ENV_STACK stack output repoUrl --show-secrets)
 
 TAG=$(git rev-parse --short=8 HEAD)
 

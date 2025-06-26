@@ -76,6 +76,8 @@
  *
  * - **SSL certificates** - ACM certificates are free when used with ALBs. No additional cost for SSL termination.
  *
+ * Also note that (external) load balancers require a **public ip address per subnet**, and load balancers **must be deployed in at least two subnets**. Each public IP costs ~$3.60/month, so that adds an additional ~$7.40 minimum for the public IP addresses for external load balancers.
+ *
  * Cost optimization strategies:
  * - Share ALBs across multiple services using listener rules (vs one ALB per service)
  * - Use CloudFront in front of ALBs for static content and global acceleration

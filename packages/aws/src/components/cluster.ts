@@ -485,9 +485,9 @@ export interface ClusterCapacityConfig {
   spotAllocationStrategy?: string;
   /** Security group ID that should be allowed SSH access to the instances */
   sourceSecurityGroupId?: pulumi.Input<string>;
-  /** Minimum number of instances in the auto scaling group */
+  /** Minimum number of instances in the auto scaling group; defaults to 0 */
   minSize?: pulumi.Input<number>;
-  /** Maximum number of instances in the auto scaling group */
+  /** Maximum number of instances in the auto scaling group; defaults to `minSize` unless `minSize` is 0, then it defaults to 1 */
   maxSize?: pulumi.Input<number>;
   /** Size of the root disk in GB */
   diskSize?: number;
@@ -550,10 +550,10 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
   }
 
   const instances = args.instances ?? {
-    architecture: "x86_64",
-    memoryMib: { min: 1, max: 2 },
-    memoryGibPerVcpu: { min: 1, max: 2 },
+    architecture: "arm64",
+    memoryMib: { min: 1024, max: 2048 },
     vcpuCount: { min: 1, max: 2 },
+    memoryGibPerVcpu: { min: 2, max: 2 },
   };
 
   let architecture: pulumi.Input<string>;
@@ -659,10 +659,10 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
 
   const sizes = pulumi.all([args.minSize, args.maxSize]).apply(([min, max]) => {
     if (min === undefined) {
-      min = 1;
+      min = 0;
     }
     if (max === undefined) {
-      max = min;
+      max = min || 1;
     }
     return { min, max };
   });
