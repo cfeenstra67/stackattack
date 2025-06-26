@@ -6,7 +6,7 @@ function githubRolePolicy(bucketArn: pulumi.Input<string>) {
   return aws.iam.getPolicyDocumentOutput({
     statements: [
       {
-        actions: ["iam", "s3", "acm", "route53", "cloudfront"].flatMap(
+        actions: ["iam", "s3", "acm", "route53", "cloudfront", "lambda"].flatMap(
           (service) => [
             `${service}:Get*`,
             `${service}:List*`,
