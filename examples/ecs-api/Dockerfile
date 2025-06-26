@@ -3,8 +3,8 @@ FROM --platform=$BUILDPLATFORM node:20-alpine AS prune
 WORKDIR /app
 
 COPY pnpm-lock.yaml package.json pnpm-workspace.yaml .npmrc ./
-COPY ./patches ./patches/
 COPY ./packages/ ./packages/
+COPY ./examples/ ./examples/
 
 RUN find packages \! -name "package.json" -mindepth 2 -maxdepth 2 -exec rm -rf {} +
 RUN find examples \! -name "package.json" -mindepth 2 -maxdepth 2 -exec rm -rf {} +
@@ -21,7 +21,7 @@ RUN CI=1 pnpm install --filter @stackattack/ecs-api-example... --frozen-lockfile
 
 COPY ./ ./
 
-RUN pnpm run --filter @lmkapp/api... build
+RUN pnpm run --filter @stackattack/ecs-api-example... build
 
 FROM node:20-alpine AS prod
 
@@ -42,9 +42,9 @@ RUN CI=1 pnpm install --filter @stackattack/ecs-api-example... --prod --frozen-l
 
 COPY ./ ./
 
-COPY --from=builder /app/examples/ecs-api-example/dist/ /app/packages/ecs-api-example/dist/
+COPY --from=builder /app/examples/ecs-api/dist/ /app/examples/ecs-api/dist/
 COPY --from=builder /app/packages/aws/dist/ /app/packages/aws/dist/
 
-WORKDIR /app/examples/ecs-api-example
+WORKDIR /app/examples/ecs-api
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

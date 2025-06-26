@@ -10,7 +10,8 @@ case $CMD in
         ./node_modules/.bin/drizzle-kit migrate --config drizzle.config.ts
         ;;
     api)
-        node ./dist/main.js
+        node ./dist/index.js
+        ;;
     sh)
         sh
         ;;

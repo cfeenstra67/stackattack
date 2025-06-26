@@ -1,0 +1,5 @@
+config:
+  ecs-api-example:stack-type: api
+  aws:region: us-east-2
+  aws-native:region: us-east-2
+  ecs-api-example:domain: api.ecs-api-example.stackattack.camfeenstra.com

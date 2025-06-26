@@ -173,6 +173,7 @@ interface SubnetsArgs {
   cidrAllocator: CidrAllocator;
   nat?: "single" | "none";
   availabilityZones: number | pulumi.Input<string>[];
+  subnetMask?: number;
   noPrefix?: boolean;
 }
 
@@ -224,11 +225,13 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
     tags: { ...ctx.tags(), Name: ctx.id("s3-endpoint") },
   });
 
+  const subnetMask = args.subnetMask ?? 20;
+
   let idx = 0;
   for (const zoneId of availabilityZones(args.availabilityZones)) {
     const privateSubnet = new aws.ec2.Subnet(ctx.id(`private-${idx}`), {
       vpcId,
-      cidrBlock: args.cidrAllocator.allocate(24),
+      cidrBlock: args.cidrAllocator.allocate(subnetMask),
       availabilityZone: zoneId,
       tags: { ...ctx.tags(), Name: ctx.id(`private-${idx}`) },
     });
@@ -515,6 +518,7 @@ export interface VpcArgs {
   cidrBlock?: pulumi.Input<string>;
   availabilityZones?: number | string[];
   flowLogs?: boolean;
+  subnetMask?: number;
   noProtect?: boolean;
   noPrefix?: boolean;
 }
@@ -605,12 +609,13 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
 
   let publicSubnetIds: pulumi.Output<string>[] = [];
   let privateSubnetIds: pulumi.Output<string>[] = [];
-  const zones = availabilityZones(args?.availabilityZones ?? 2);
+  const zones = availabilityZones(args?.availabilityZones ?? 1);
   if (zones.length > 0) {
     const results = subnets(ctx, {
       vpc,
       cidrAllocator: allocator,
       availabilityZones: zones,
+      subnetMask: args?.subnetMask,
     });
     publicSubnetIds = results.publicSubnetIds;
     privateSubnetIds = results.privateSubnetIds;

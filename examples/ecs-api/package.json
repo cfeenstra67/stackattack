@@ -14,7 +14,11 @@
     "generate": "drizzle-kit generate --config drizzle.config.ts",
     "migrate": "drizzle-kit migrate --config drizzle.config.ts"
   },
-  "keywords": ["aws", "pulumi", "ecs"],
+  "keywords": [
+    "aws",
+    "pulumi",
+    "ecs"
+  ],
   "author": "Cam Feenstra <me@camfeenstra.com>",
   "license": "MIT",
   "dependencies": {
@@ -31,6 +35,7 @@
     "@types/node": "^20.10.7",
     "@types/pg": "^8.11.14",
     "drizzle-kit": "^0.31.0",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
   }

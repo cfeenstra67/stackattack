@@ -42,7 +42,7 @@ function env() {
   };
 }
 
-function app() {
+function api() {
   const ctx = saws.context();
   const config = new pulumi.Config();
 
@@ -93,4 +93,4 @@ function app() {
   };
 }
 
-export default () => saws.select({ env, app });
+export default () => saws.select({ env, api });

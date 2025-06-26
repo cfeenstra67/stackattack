@@ -12,7 +12,7 @@ importers:
         specifier: ^2.28.1
         version: 2.28.1
 
-  examples/ecs-api-example:
+  examples/ecs-api:
     dependencies:
       dotenv:
         specifier: ^16.5.0
@@ -32,7 +32,7 @@ importers:
         version: 1.5.0
       '@pulumi/aws':
         specifier: ^6.83.0
-        version: 6.83.0(ts-node@10.9.2(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 6.83.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/pulumi':
         specifier: ^3.178.0
         version: 3.178.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
@@ -48,6 +48,9 @@ importers:
       drizzle-kit:
         specifier: ^0.31.0
         version: 0.31.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2)
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
@@ -59,7 +62,7 @@ importers:
     dependencies:
       '@pulumi/aws':
         specifier: ^6.0.0
-        version: 6.73.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 6.83.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/aws-native':
         specifier: ^1.0.0
         version: 1.26.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
@@ -68,7 +71,7 @@ importers:
         version: 1.0.2(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/pulumi':
         specifier: ^3.0.0
-        version: 3.157.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 3.178.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/random':
         specifier: ^4.0.0
         version: 4.18.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
@@ -5368,7 +5371,7 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/aws@6.83.0(ts-node@10.9.2(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
+  '@pulumi/aws@6.83.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
       '@pulumi/pulumi': 3.178.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       mime: 2.6.0
