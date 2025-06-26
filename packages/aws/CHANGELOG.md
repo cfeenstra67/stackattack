@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.2.1
+
+### Patch Changes
+
+- Update npm README
+
 ## 0.2.0
 
 ### Minor Changes
