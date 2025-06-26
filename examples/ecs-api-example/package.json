@@ -1,10 +1,10 @@
 {
-  "name": "@stackattack/simple-api-example",
+  "name": "@stackattack/ecs-api-example",
   "type": "module",
   "private": true,
   "version": "1.0.1",
-  "description": "",
-  "main": "index.js",
+  "description": "An API container served publicly and running an an ECS cluster connected to a Postgres instance.",
+  "main": "main/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
@@ -14,17 +14,20 @@
     "generate": "drizzle-kit generate --config drizzle.config.ts",
     "migrate": "drizzle-kit migrate --config drizzle.config.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["aws", "pulumi", "ecs"],
+  "author": "Cam Feenstra <me@camfeenstra.com>",
+  "license": "MIT",
   "dependencies": {
-    "@biomejs/biome": "^1.5.0",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.43.1",
     "express": "^5.1.0",
     "pg": "^8.15.6"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.5.0",
+    "@pulumi/aws": "^6.83.0",
+    "@pulumi/pulumi": "^3.178.0",
+    "@stackattack/aws": "workspace:*",
     "@types/node": "^20.10.7",
     "@types/pg": "^8.11.14",
     "drizzle-kit": "^0.31.0",

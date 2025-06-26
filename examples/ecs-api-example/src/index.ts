@@ -7,6 +7,11 @@ import { todos } from "./schema.js";
 const app = express();
 app.use(express.json());
 
+app.get("/healthcheck", async (req, res) => {
+  await db.select().from(todos).limit(1);
+  res.json({ ok: true });
+});
+
 app.get("/todos", async (req, res) => {
   const list = await db.select().from(todos);
   res.json(list);
