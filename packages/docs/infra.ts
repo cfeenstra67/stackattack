@@ -6,13 +6,18 @@ function githubRolePolicy(bucketArn: pulumi.Input<string>) {
   return aws.iam.getPolicyDocumentOutput({
     statements: [
       {
-        actions: ["iam", "s3", "acm", "route53", "cloudfront", "lambda"].flatMap(
-          (service) => [
-            `${service}:Get*`,
-            `${service}:List*`,
-            `${service}:Describe*`,
-          ],
-        ),
+        actions: [
+          "iam",
+          "s3",
+          "acm",
+          "route53",
+          "cloudfront",
+          "lambda",
+        ].flatMap((service) => [
+          `${service}:Get*`,
+          `${service}:List*`,
+          `${service}:Describe*`,
+        ]),
         resources: ["*"],
       },
       {
@@ -42,7 +47,7 @@ export default () => {
   const githubRole = saws.githubRole(ctx, {
     repo: "cfeenstra67/stackattack",
     policy: githubRolePolicy(bucket.arn).json,
-    openIdProvider: null
+    openIdProvider: null,
   });
 
   return { url: `https://${domainName}`, githubRoleArn: githubRole.arn };
