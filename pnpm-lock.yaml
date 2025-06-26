@@ -49,22 +49,22 @@ importers:
   packages/aws:
     dependencies:
       '@pulumi/aws':
-        specifier: ^6.73.0
+        specifier: ^6.0.0
         version: 6.73.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/aws-native':
-        specifier: ^1.26.0
+        specifier: ^1.0.0
         version: 1.26.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/command':
-        specifier: ^1.0.2
+        specifier: ^1.0.0
         version: 1.0.2(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/pulumi':
-        specifier: ^3.157.0
+        specifier: ^3.0.0
         version: 3.157.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/random':
-        specifier: ^4.18.0
+        specifier: ^4.0.0
         version: 4.18.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
       mime-types:
-        specifier: ^2.1.35
+        specifier: ^2.0.0
         version: 2.1.35
     devDependencies:
       '@biomejs/biome':

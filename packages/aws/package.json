@@ -2,7 +2,9 @@
   "name": "@stackattack/aws",
   "type": "module",
   "version": "0.1.0",
-  "description": "",
+  "description": "Production-ready AWS components for Pulumi",
+  "homepage": "https://stackattack.camfeenstra.com",
+  "repository": "github:cfeenstra67/stackattack",
   "main": "dist/index.js",
   "files": [
     "dist/**",
@@ -16,8 +18,8 @@
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
     "check": "biome check --apply src"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["pulumi", "aws", "iac", "infra-as-code"],
+  "author": "Cam Feenstra <me@camfeenstra.com>",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^1.5.0",
@@ -28,11 +30,11 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@pulumi/aws": "^6.73.0",
-    "@pulumi/aws-native": "^1.26.0",
-    "@pulumi/command": "^1.0.2",
-    "@pulumi/pulumi": "^3.157.0",
-    "@pulumi/random": "^4.18.0",
-    "mime-types": "^2.1.35"
+    "@pulumi/aws": "^6.0.0",
+    "@pulumi/aws-native": "^1.0.0",
+    "@pulumi/command": "^1.0.0",
+    "@pulumi/pulumi": "^3.0.0",
+    "@pulumi/random": "^4.0.0",
+    "mime-types": "^2.0.0"
   }
 }
