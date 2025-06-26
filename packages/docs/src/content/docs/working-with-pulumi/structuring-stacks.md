@@ -8,7 +8,7 @@ When deploying infrastructure with Pulumi, you often do not want to deploy all o
 - Reuse - You can use `pulumi config` to templatize your configs and deploy copies of stacks that may or may not share the same infrastructure.
 - Performance - as the number of resources in a stack grows, it takes longer and longer to do `pulumi up`, `pulumi refresh`, etc. If you add all of your resources to a single pulumi stack, deploying individual services or components will get slower and slower.  Restructuring/splitting up existing stacks can be a lot of work.
 
-You can use outputs and stack reference to pass data between stacks, and Stackattack provides the [stackRef](/utilities/stack-references) function which adds type safety. A simple example, using a shared wildcard certificate with a static Astro site deployed via Cloudfront:
+You can use outputs and stack reference to pass data between stacks, and Stackattack provides the [stackRef](/utilities/stack-ref) function which adds type safety. A simple example, using a shared wildcard certificate with a static Astro site deployed via Cloudfront:
 
 First, add the `stack-type` key to your pulumi config:
 ```bash

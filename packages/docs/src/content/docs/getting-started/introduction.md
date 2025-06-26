@@ -47,5 +47,5 @@ Set up StackAttack in your project
 **[Quick Start →](/getting-started/quick-start/)**  
 Build your first infrastructure with StackAttack
 
-**[Components →](/components/vpc/)**  
+**[Components →](/components/)**  
 Explore the available infrastructure components

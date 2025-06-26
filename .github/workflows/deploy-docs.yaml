@@ -1,0 +1,40 @@
+name: Deploy Docs
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-docs:
+    name: Deploy Docs
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-docs
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::081142152120:role/stackattack-docs-github-role-1543232
+          aws-region: us-east-2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.5.0
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Set up dependencies
+        run: pnpm --filter @stackattack/docs... install
+      - name: Build
+        run: pnpm --filter @stackattack/docs... build
+      - uses: pulumi/actions@v3
+        with:
+          command: up
+          stack-name: docs
+          work-dir: packages/docs
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

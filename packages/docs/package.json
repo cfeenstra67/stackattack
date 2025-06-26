@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.5.0",
+    "@pulumi/aws": "^6.73.0",
     "@pulumi/pulumi": "^3.157.0",
     "@stackattack/aws": "workspace:*",
     "sharp": "^0.34.2",

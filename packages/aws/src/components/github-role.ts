@@ -121,8 +121,8 @@ export interface GithubRoleArgs {
   repo: pulumi.Input<string>;
   /** Optional scope to restrict access (e.g., "ref:refs/heads/main", defaults to "*") */
   scope?: pulumi.Input<string>;
-  /** ARN of existing OpenID Connect provider (creates new one if not provided) */
-  openIdProvider?: pulumi.Input<string>;
+  /** ARN of existing OpenID Connect provider (creates new one if not provided). If not passed, a provider will be created. If you pass `null`, an existing OpenID Connect provider for https://token.actions.githubusercontent.com will be looked up in your AWS account */
+  openIdProvider?: pulumi.Input<string> | null;
   /** Optional inline policy to attach to the role */
   policy?: pulumi.Input<string>;
   /** Whether to skip adding a prefix to the resource name */
@@ -139,14 +139,20 @@ export function githubRole(ctx: Context, args: GithubRoleArgs): aws.iam.Role {
   if (!args?.noPrefix) {
     ctx = ctx.prefix("github-role");
   }
+
+  const url = "https://token.actions.githubusercontent.com";
+
   let openIdProvider: pulumi.Input<string>;
-  if (args?.openIdProvider !== undefined) {
+  if (args?.openIdProvider === null) {
+    const provider = aws.iam.getOpenIdConnectProviderOutput({ url });
+    openIdProvider = provider.arn;
+  } else if (args?.openIdProvider !== undefined) {
     openIdProvider = args.openIdProvider;
   } else {
     const githubOpenIdProvider = new aws.iam.OpenIdConnectProvider(
       ctx.id("provider"),
       {
-        url: "https://token.actions.githubusercontent.com",
+        url,
         clientIdLists: ["sts.amazonaws.com"],
         thumbprintLists: [
           "6938fd4d98bab03faadb97b34396831e3780aea1",
