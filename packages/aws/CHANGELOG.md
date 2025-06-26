@@ -1,5 +1,13 @@
 # @stackattack/aws
 
+## 0.2.2
+
+### Patch Changes
+
+- df2ae54: Tweak defaults
+- 0eb729f: Fix vpc
+- 87e3ba4: Change vpc defaults
+
 ## 0.2.1
 
 ### Patch Changes
