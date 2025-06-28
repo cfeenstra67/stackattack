@@ -66,8 +66,7 @@ function api() {
     mostRecent: true
   });
 
-  // Deploy a containerized service
-  const app = saws.service(ctx.prefix('api'), {
+  const app = saws.service(ctx, {
     cluster,
     name: 'ecs-api-example',
     replicas: 1,
