@@ -55,3 +55,7 @@ export const appUrl = app.url;
 - [Component Reference](https://stackattack.camfeenstra.com/components/)
 - [Working with Pulumi](https://stackattack.camfeenstra.com/working-with-pulumi/)
 - [View all components](https://stackattack.camfeenstra.com/components/)
+
+## Support and Feature Requests
+
+Please [open an issue](https://github.com/cfeenstra67/stackattack/issues/new) if you have any trouble using stackattack or want to request additional components.
