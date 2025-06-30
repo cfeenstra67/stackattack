@@ -7,40 +7,28 @@
  * import * as saws from "@stackattack/aws";
  *
  * const ctx = saws.context();
- * const network = saws.vpc(ctx);
+ * // NOTE: if you have multiple VPCs e.g. for different
+ * // environments you should specify the `cidrBlock` argument,
+ * // with non-overlapping CIDRs for each VPC
+ * // e.g. `10.0.0.0/16` (the default), `10.1.0.0/16`, `10.2.0.0/16`, etc.
+ * const vpc = saws.vpc(ctx);
  *
- * export const vpcId = network.vpc.id;
+ * // `vpcToIds` converts the VPC to only its serializable
+ * // identifiers suitable for stack outputs. The full VPC
+ * // object can be retrieved in other stacks by using
+ * // `saws.vpcFromIds(stackRef.require('vpc'))`
+ * export { vpc: saws.vpcToIds(vpc) };
  * ```
  *
  * ## Usage
  *
- * After deploying a VPC, you can manage it using:
+ * After deploying your VPC, you'll be able to deploy resources into it. See the [Related Components](#related-components) for examples of how resources can be deployed into VPCs.
  *
- * **AWS CLI:**
- * ```bash
- * # View VPC details
- * aws ec2 describe-vpcs --vpc-ids vpc-1234567890abcdef0
+ * One important thing you'll need to determine is how you access private resources within your VPC from your local machine--**by default the only connectivity provided to private resources is SSH access to EC2 instances via [EC2 Instance Connect](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-linux-inst-eic.html)**.
  *
- * # List subnets in the VPC
- * aws ec2 describe-subnets --filters "Name=vpc-id,Values=vpc-1234567890abcdef0"
- *
- * # View route tables
- * aws ec2 describe-route-tables --filters "Name=vpc-id,Values=vpc-1234567890abcdef0"
- *
- * # Enable VPC Flow Logs for troubleshooting
- * aws ec2 create-flow-logs --resource-type VPC --resource-ids vpc-1234567890abcdef0 --traffic-type ALL --log-destination-type cloud-watch-logs --log-group-name VPCFlowLogs
- * ```
- *
- * **AWS SDK:**
- * ```javascript
- * import { EC2Client, DescribeVpcsCommand } from "@aws-sdk/client-ec2";
- *
- * const ec2 = new EC2Client({ region: "us-east-1" });
- *
- * const vpcs = await ec2.send(new DescribeVpcsCommand({
- *   VpcIds: ["vpc-1234567890abcdef0"]
- * }));
- * ```
+ * Stackattack provides a few options:
+ * - [twingate-connector](/components/twingate-connector) - Deploys a Twingate Connector for Zero Trust access access to your resources via the Twingate client app. This is a good option: it's very easy to set up and relatively cheap.
+ * - [vpc](/components/vpn) - This sets up an AWS Client VPN endpoint that you can connect to via any OpenVPN client. This provides a way to provision a VPN for access to private resources without any third-party services. However, **this option is quite expensive**. See the [costs](/components/vpn#costs) for the VPN component for details.
  *
  * ## Related Components
  *
