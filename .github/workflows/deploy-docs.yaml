@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   create:
     tags:
-      - '**'
+      - '*'
 
 jobs:
   deploy-docs:
