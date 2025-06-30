@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.3.1
+
+### Patch Changes
+
+- 0dec3ac: Fix twingate-connector packageDocumentation
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,7 +1,7 @@
 {
   "name": "@stackattack/aws",
   "type": "module",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Production-ready AWS components for Pulumi",
   "homepage": "https://stackattack.camfeenstra.com",
   "repository": "github:cfeenstra67/stackattack",
