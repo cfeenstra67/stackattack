@@ -3,9 +3,10 @@ import icon from '../assets/external-link.svg?raw';
 
 interface Props {
     href: string;
+    class?: string;
 }
 
-const { href } = Astro.props;
+const { href, class: className } = Astro.props;
 ---
 <style scoped>
     .link {
@@ -20,7 +21,7 @@ const { href } = Astro.props;
     }
 </style>
 
-<a class="link" target="_blank" rel="nofollow" href={href}>
+<a class:list={["link", className]} target="_blank" rel="nofollow" href={href}>
     <slot />
     <div class="icon">
         <Fragment set:html={icon} />

@@ -10,13 +10,18 @@ const sourceLink = Astro.locals.starlightRoute.entry.data.sourceUrl;
         align-items: center;
         justify-content: space-between;
     }
+
+    .link {
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+    }
 </style>
 
 {
     sourceLink ? (
         <div class="header">
             <h1 id="_top">{Astro.locals.starlightRoute.entry.data.title}</h1>
-            <ExternalLink href={sourceLink}>
+            <ExternalLink class="link" href={sourceLink}>
                 View Source
             </ExternalLink>
         </div>
