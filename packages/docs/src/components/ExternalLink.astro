@@ -1,0 +1,28 @@
+---
+import icon from '../assets/external-link.svg?raw';
+
+interface Props {
+    href: string;
+}
+
+const { href } = Astro.props;
+---
+<style scoped>
+    .link {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .icon {
+        height: 1.2rem;
+        width: 1.2rem;
+    }
+</style>
+
+<a class="link" target="_blank" rel="nofollow" href={href}>
+    <slot />
+    <div class="icon">
+        <Fragment set:html={icon} />
+    </div>  
+</a>

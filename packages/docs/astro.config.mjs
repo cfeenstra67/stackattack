@@ -9,7 +9,7 @@ export default defineConfig({
   site: 'https://stackattack.camfeenstra.com',
   integrations: [starlight({
     title: 'StackAttack AWS',
-    description: 'Production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal infrastructure as code',
+    description: 'Production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal code',
     favicon: '/favicon.ico',
     logo: {
       src: './src/assets/logo.svg',
@@ -18,8 +18,15 @@ export default defineConfig({
     customCss: [
       './src/styles/custom.css',
     ],
-    social: {
-      github: 'https://github.com/cfeenstra67/stackattack',
+    social: [
+      {
+        icon: 'github',
+        label: 'GitHub',
+        href: 'https://github.com/cfeenstra67/stackattack',
+      },
+    ],
+    components: {
+      PageTitle: './src/components/PageTitle.astro'
     },
     sidebar: [
       {
@@ -106,6 +113,18 @@ export default defineConfig({
         gtag('config', '${googleAnalyticsId}');
         `,
       },
+      {
+        tag: 'script',
+        type: 'application/ld+json',
+        content: `
+          {
+            "@context" : "https://schema.org",
+            "@type" : "WebSite",
+            "name" : "Stackattack",
+            "url" : "https://stackattack.camfeenstra.com"
+          }
+        `
+      }
     ],
     plugins: [starlightLlmsTxt()]
   })]

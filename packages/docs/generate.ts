@@ -194,8 +194,14 @@ async function generateDocs() {
   }
 
   // Process component and utility files
-  const componentFiles = new Map<string, DeclarationReflection[]>();
-  const utilityFiles = new Map<string, DeclarationReflection[]>();
+  const componentFiles = new Map<
+    string,
+    { fileName: string; declarations: DeclarationReflection[] }
+  >();
+  const utilityFiles = new Map<
+    string,
+    { fileName: string; declarations: DeclarationReflection[] }
+  >();
 
   // Build a global map of all types/interfaces for cross-linking
   const typeMap = new Map<string, { componentName: string; anchor: string }>();
@@ -213,7 +219,8 @@ async function generateDocs() {
       const fileMatch = sourceFile.match(/^(.+)\.ts$/);
 
       if (fileMatch) {
-        let fileName = fileMatch[1];
+        const originalFileName = fileMatch[1];
+        let fileName = originalFileName;
 
         // Handle components/ prefix for component files
         if (fileName.startsWith("components/")) {
@@ -239,17 +246,20 @@ async function generateDocs() {
         const targetName = isUtility ? utilityNameMap[fileName] : fileName;
 
         if (!targetMap.has(targetName)) {
-          targetMap.set(targetName, []);
+          targetMap.set(targetName, {
+            fileName: `${originalFileName}.ts`,
+            declarations: [],
+          });
         }
 
         // If this is a module, get its children (the actual exports)
         if (child.kind === ReflectionKind.Module && child.children) {
           // Store the module itself for potential @packageDocumentation comment
           const moduleDecl = child as DeclarationReflection;
-          targetMap.get(targetName)!.push(moduleDecl);
+          targetMap.get(targetName)!.declarations.push(moduleDecl);
 
           for (const decl of child.children) {
-            targetMap.get(targetName)!.push(decl);
+            targetMap.get(targetName)!.declarations.push(decl);
 
             // Add to type map for cross-linking
             if (
@@ -266,7 +276,9 @@ async function generateDocs() {
             }
           }
         } else {
-          targetMap.get(targetName)!.push(child as DeclarationReflection);
+          targetMap
+            .get(targetName)!
+            .declarations.push(child as DeclarationReflection);
         }
       }
     }
@@ -275,11 +287,19 @@ async function generateDocs() {
   // Helper function to generate markdown documentation
   function generateMarkdown(
     name: string,
+    fileName: string,
     declarations: DeclarationReflection[],
     isUtility = false,
   ): string {
     const docType = isUtility ? "utility" : "component";
-    let markdown = `---\ntitle: ${name}\ndescription: ${name} ${docType} documentation\n---\n\n`;
+    let markdown = `
+---
+title: ${name}
+description: ${name} ${docType} documentation
+sourceUrl: https://github.com/cfeenstra67/stackattack/blob/main/packages/aws/src/${fileName}
+---
+
+`.trimStart();
 
     // Look for module-level documentation
     const moduleDecl = declarations.find(
@@ -399,16 +419,26 @@ async function generateDocs() {
   }
 
   // Generate component documentation
-  for (const [componentName, declarations] of componentFiles) {
-    const markdown = generateMarkdown(componentName, declarations, false);
+  for (const [componentName, { fileName, declarations }] of componentFiles) {
+    const markdown = generateMarkdown(
+      componentName,
+      fileName,
+      declarations,
+      false,
+    );
     const outputPath = path.join(componentsOutputDir, `${componentName}.md`);
     fs.writeFileSync(outputPath, markdown);
     console.log(`Generated documentation for ${componentName}`);
   }
 
   // Generate utility documentation
-  for (const [utilityName, declarations] of utilityFiles) {
-    const markdown = generateMarkdown(utilityName, declarations, true);
+  for (const [utilityName, { fileName, declarations }] of utilityFiles) {
+    const markdown = generateMarkdown(
+      utilityName,
+      fileName,
+      declarations,
+      true,
+    );
     const outputPath = path.join(utilitiesOutputDir, `${utilityName}.md`);
     fs.writeFileSync(outputPath, markdown);
     console.log(`Generated utility documentation for ${utilityName}`);
@@ -427,16 +457,7 @@ StackAttack provides opinionated, secure-by-default AWS infrastructure component
 
 ## Available Components
 
-${componentNames
-  .map((name) => {
-    // Convert kebab-case to title case for display
-    const displayName = name
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-    return `- [${displayName}](/components/${name}/)`;
-  })
-  .join("\n")}
+${componentNames.map((name) => `- [${name}](/components/${name}/)`).join("\n")}
 
 ## Getting Started
 

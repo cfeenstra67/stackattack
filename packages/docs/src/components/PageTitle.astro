@@ -1,0 +1,26 @@
+---
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+import ExternalLink from './ExternalLink.astro';
+
+const sourceLink = Astro.locals.starlightRoute.entry.data.sourceUrl;
+---
+<style scoped>
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+</style>
+
+{
+    sourceLink ? (
+        <div class="header">
+            <h1 id="_top">{Astro.locals.starlightRoute.entry.data.title}</h1>
+            <ExternalLink href={sourceLink}>
+                View Source
+            </ExternalLink>
+        </div>
+    ) : (
+        <Default><slot /></Default>
+    )
+}
