@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.3.0-dev.1
+
+### Patch Changes
+
+- 5860fa7: Add missing exports
+
 ## 0.3.0-dev.0
 
 ### Minor Changes
