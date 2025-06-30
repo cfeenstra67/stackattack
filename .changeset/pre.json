@@ -6,5 +6,10 @@
     "@stackattack/aws": "0.2.2",
     "@stackattack/docs": "0.1.0"
   },
-  "changesets": []
+  "changesets": [
+    "eager-lions-attack",
+    "loud-jars-rule",
+    "odd-poems-study",
+    "witty-pans-hunt"
+  ]
 }
