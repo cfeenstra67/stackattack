@@ -1,8 +1,8 @@
 name: Deploy Docs
 on:
-  push:
-    branches:
-      - main
+  create:
+    tags:
+      - v*
 
 jobs:
   deploy-docs:
