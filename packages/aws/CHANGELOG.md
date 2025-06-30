@@ -1,5 +1,17 @@
 # @stackattack/aws
 
+## 0.3.0-dev.0
+
+### Minor Changes
+
+- 20c4a6b: Move google site verification to separate component from gmail domain
+- 3a6ed82: Add twingate component
+
+### Patch Changes
+
+- 3a6ed82: Rename twingate to twingate-connector
+- b154d1a: Added CJS build
+
 ## 0.2.2
 
 ### Patch Changes
