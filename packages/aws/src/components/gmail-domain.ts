@@ -56,6 +56,7 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { Context } from "../context.js";
 import { getZoneFromDomain } from "./certificate.js";
+import { googleSiteVerification } from "./google-site-verification.js";
 
 /**
  * Configuration arguments for setting up Gmail domain verification and MX records.
@@ -92,23 +93,11 @@ export function gmailDomain(ctx: Context, args: GmailDomainArgs) {
     records: ["1 smtp.google.com."],
   });
 
-  let verificationCode: pulumi.Output<string> | undefined = undefined;
   if (args.verificationCode !== undefined) {
-    const prefix = "google-site-verification=";
-    verificationCode = pulumi
-      .output(args.verificationCode)
-      .apply((code) =>
-        code.toLowerCase().startsWith(prefix) ? code : `${prefix}${code}`,
-      );
-  }
-
-  if (verificationCode !== undefined) {
-    new aws.route53.Record(ctx.id("verification"), {
-      name: args.domain,
+    googleSiteVerification(ctx, {
+      domain: args.domain,
       zoneId,
-      type: "TXT",
-      ttl: 300,
-      records: [verificationCode],
+      verificationCode: args.verificationCode,
     });
   }
 
