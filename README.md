@@ -2,7 +2,7 @@
 
 Production-ready AWS infrastructure components for Pulumi. Deploy complex applications with minimal code using secure, opinionated defaults.
 
-**[Get Started](https://stackattack.camfeenstra.com)** | **[Components](https://stackattack.camfeenstra.com/components/)** | **[Examples](https://github.com/cfeenstra67/stackattack/tree/main/examples)**
+**[Get Started](https://stackattack.camfeenstra.com/getting-started/quick-start)** | **[Components](https://stackattack.camfeenstra.com/components)** | **[Examples](https://github.com/cfeenstra67/stackattack/tree/main/examples)**
 
 ## What is StackAttack?
 
@@ -47,62 +47,10 @@ export const appUrl = app.url;
 - **Composable** - Mix and match components for any architecture
 - **Well Documented** - Comprehensive guides and examples
 
-## Available Components
+## Documentation links
 
-**Networking & Security**: VPC, Load Balancer, VPN, Certificates  
-**Compute**: ECS Clusters, Services, Static Sites  
-**Storage**: S3 Buckets, RDS Databases, Redis  
-**Integration**: Email Domains, GitHub Actions, Webhooks
-
-[View all components](https://stackattack.camfeenstra.com/components/)
-
-## Quick Start
-
-```bash
-npm install @stackattack/aws
-```
-
-Create a stack, or use the components within an existing stack:
-
-```typescript
-import * as saws from "@stackattack/aws";
-
-const ctx = saws.context();
-const domain = "my.astro.site";
-
-const bucket = saws.bucket(ctx, { paths: ["./dist"] })
-
-saws.staticSite(ctx, {
-  bucket,
-  domain,
-  adapter: saws.astroAdapter(),
-});
-
-export const url = `https://${domain}`;
-```
-
-Deploy with Pulumi:
-
-```bash
-pulumi up
-```
-
-Test your deployed resources:
-
-```bash
-curl https://my.astro.site
-```
-
-**[Full Documentation](https://stackattack.camfeenstra.com)**
-
+- [Full Documentation](https://stackattack.camfeenstra.com)
 - [Getting Started Guide](https://stackattack.camfeenstra.com/getting-started/introduction/)
 - [Component Reference](https://stackattack.camfeenstra.com/components/)
 - [Working with Pulumi](https://stackattack.camfeenstra.com/working-with-pulumi/)
-
-## Philosophy
-
-Most infrastructure-as-code requires too much boilerplate. StackAttack provides the 80% solution that works for most production applications, with the flexibility to customize when needed.
-
-**Composition over Inheritance** - Simple functions that work together  
-**Secure Defaults** - Best practices built-in, not bolted-on  
-**Copy-Paste Friendly** - No vendor lock-in, functions you can own
+[View all components](https://stackattack.camfeenstra.com/components/)
