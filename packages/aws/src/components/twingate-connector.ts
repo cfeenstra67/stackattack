@@ -9,7 +9,7 @@
  * const ctx = saws.context();
  * const vpc = saws.vpc(ctx);
  * const cluster = saws.cluster(ctx, { network: vpc.network("private") });
- * const connector = saws.twingate(ctx, {
+ * const connector = saws.twingateConnector(ctx, {
  *   network: vpc.network("private"),
  *   cluster,
  *   twingateNetwork: "your-network-name",
