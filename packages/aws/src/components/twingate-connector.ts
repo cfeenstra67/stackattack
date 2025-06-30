@@ -20,13 +20,9 @@
  *
  * ## Usage
  *
- * After deploying a Twingate connector, manage it through:
+ * After deploying your Twingate connector, you should see your network available in the Twingate admin console.
  *
- * **Twingate Admin Console:**
- * - Monitor connector status and health
- * - Configure resource access policies
- * - View connection logs and analytics
- *
+ * You will be able to access the resources from your VPC from your local machine after [installing and configuring the client](https://www.twingate.com/docs/quick-start#install-the-client).
  *
  * ## Related Components
  *

@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.3.0-dev.3
+
+### Patch Changes
+
+- Docs update
+
 ## 0.3.0-dev.2
 
 ### Patch Changes
