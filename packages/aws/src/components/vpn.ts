@@ -51,7 +51,7 @@ import * as path from "node:path";
 import * as aws from "@pulumi/aws";
 import * as command from "@pulumi/command";
 import * as pulumi from "@pulumi/pulumi";
-import { srcDir } from "#dir";
+import { rootDir } from "#dir";
 import { Context } from "../context.js";
 import {
   CidrAllocator,
@@ -61,9 +61,7 @@ import {
   getVpcDnsServer,
 } from "./vpc.js";
 
-const dirname = path.join(srcDir, "components");
-
-const scriptsDir = path.normalize(path.join(dirname, "../../scripts"));
+const scriptsDir = path.normalize(path.join(rootDir, "../scripts"));
 
 const easyRsaGeneratePath = path.join(scriptsDir, "easy-rsa-generate.sh");
 

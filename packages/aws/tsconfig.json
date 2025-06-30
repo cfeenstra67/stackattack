@@ -3,6 +3,9 @@
     "compilerOptions": {
         "noEmit": true,
         "skipLibCheck": true,
-        "declarationDir": "./dist/types"
+        "declarationDir": "./dist/types",
+        "paths": {
+            "#dir": ["./src/dir.esm.ts"]
+        }
     }
 }

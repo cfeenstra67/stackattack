@@ -1,1 +1,1 @@
-export const srcDir = __dirname;
+export const rootDir = __dirname;
