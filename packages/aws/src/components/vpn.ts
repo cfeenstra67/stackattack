@@ -45,6 +45,9 @@
  * - Consider AWS Site-to-Site VPN for persistent office connections instead of multiple Client VPN connections
  * - Monitor concurrent connections and implement automatic disconnection policies
  * - Use security groups and authorization rules to limit access scope
+ *
+ * See the [AWS VPC Pricing](https://aws.amazon.com/vpn/pricing/) for current rates.
+ *
  */
 
 import * as path from "node:path";
