@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.base.json",
+    "exclude": ["src/*.cjs.ts"],
+    "include": ["src"],
+    "compilerOptions": {
+        "outDir": "./dist/esm",
+        "noEmit": false,
+        "paths": {
+            "#dir": ["./src/dir.esm.ts"]
+        }
+    }
+}
