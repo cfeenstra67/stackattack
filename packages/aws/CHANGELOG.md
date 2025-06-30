@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.3.0-dev.2
+
+### Patch Changes
+
+- Fix log analytics env var for twingate
+
 ## 0.3.0-dev.1
 
 ### Patch Changes

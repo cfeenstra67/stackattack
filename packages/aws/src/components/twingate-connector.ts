@@ -68,7 +68,7 @@ export interface TwingateConnectorArgs {
   /** Optional custom DNS server IP address for the connector to use */
   customDnsServer?: pulumi.Input<string>;
   /** Enable detailed connection logging and analytics (default: false) */
-  connectionLogs?: pulumi.Input<boolean>;
+  connectionLogs?: boolean;
   /** Skip adding 'twingate' prefix to resource names (default: false) */
   noPrefix?: boolean;
 }
@@ -85,24 +85,25 @@ export interface TwingateConnectorArgs {
  */
 export function twingateConnector(ctx: Context, args: TwingateConnectorArgs) {
   if (!args.noPrefix) {
-    ctx = ctx.prefix("twingate");
+    ctx = ctx.prefix("twingate-connector");
   }
 
   return service(ctx, {
     cluster: args.cluster,
     network: args.network,
-    name: "twingate",
+    name: "twingate-connector",
     image: "twingate/connector:1",
     memory: 2048,
     cpu: 1024,
+    replicas: 1,
     env: {
       TWINGATE_NETWORK: args.twingateNetwork,
       TWINGATE_ACCESS_TOKEN: args.twingateAccessToken,
       TWINGATE_REFRESH_TOKEN: args.twingateRefreshToken,
       TWINGATE_LAST_DEPLOYED_BY: "ecs",
-      TWINGATE_LOG_ANALYTICS: pulumi
-        .output(args.connectionLogs)
-        .apply((enabled) => (enabled ? "v2" : "")),
+      ...(args.connectionLogs && {
+        TWINGATE_LOG_ANALYTICS: "v2",
+      }),
     },
   });
 }
