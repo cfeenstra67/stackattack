@@ -2,11 +2,11 @@
 
 Production-ready AWS infrastructure components for Pulumi. Deploy complex applications with minimal code using secure, opinionated defaults.
 
-**[Get Started](https://stackattack.camfeenstra.com)** | **[Components](https://stackattack.camfeenstra.com/components/)** | **[Examples](https://stackattack.camfeenstra.com/getting-started/quick-start/)**
+**[Get Started](https://stackattack.camfeenstra.com)** | **[Components](https://stackattack.camfeenstra.com/components/)** | **[Examples](https://github.com/cfeenstra67/stackattack/tree/main/examples)**
 
 ## What is StackAttack?
 
-StackAttack eliminates infrastructure boilerplate by providing battle-tested AWS components built on Pulumi. Instead of writing hundreds of lines of infrastructure code, deploy production-ready applications with a fraction of the effort it takes to wire it all up yourself. The following config deploys service to ECS with a database in ~30 lines:
+StackAttack eliminates infrastructure boilerplate by providing battle-tested AWS components with good defaults built on Pulumi. Instead of writing hundreds of lines of infrastructure code, deploy production-ready applications with a fraction of the effort it takes to wire it all up yourself. The following config deploys service to ECS with a database in ~30 lines:
 
 ```typescript
 import * as saws from "@stackattack/aws";
@@ -14,8 +14,7 @@ import * as saws from "@stackattack/aws";
 const ctx = saws.context();
 const domain = "api.mydomain.com";
 
-// Create complete infrastructure in ~20 lines
-const vpc = saws.vpc(ctx, { cidr: "10.0.0.0/16" });
+const vpc = saws.vpc(ctx);
 
 const db = saws.database(ctx, { network: vpc.network("private") });
 
