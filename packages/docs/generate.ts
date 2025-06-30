@@ -16,7 +16,7 @@ async function generateDocs() {
       "../aws/src/stack-ref.ts",
     ],
     entryPointStrategy: "expand",
-    tsconfig: "../aws/tsconfig.json",
+    tsconfig: "../aws/tsconfig.esm.json",
     excludeExternals: true,
     excludePrivate: false,
     excludeProtected: false,
