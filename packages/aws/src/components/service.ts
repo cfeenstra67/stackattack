@@ -134,28 +134,49 @@ export function getServiceAttributes(
  * Configuration arguments for creating an ECS task definition.
  */
 export interface TaskDefinitionArgs {
+  /** The name of the container and ECS task family. */
   name: pulumi.Input<string>;
+  /** The Docker image to run (e.g., "nginx:latest", "my-registry/my-app:v1.0"). */
   image: pulumi.Input<string>;
+  /** Optional command to override the container's default command. */
   command?: pulumi.Input<string[]>;
+  /** Health check configuration for the container. */
   healthcheck?: {
+    /** Custom shell command for health checks (e.g., "curl -f http://localhost/health"). */
     command?: pulumi.Input<string>;
+    /** HTTP path for health checks (e.g., "/health", "/api/status"). */
     path?: pulumi.Input<string>;
+    /** Interval between health checks in seconds. */
     interval?: pulumi.Input<number>;
+    /** Grace period before first health check in seconds. */
     startPeriod?: pulumi.Input<number>;
+    /** Number of consecutive failures before marking unhealthy. */
     retries?: pulumi.Input<number>;
   };
+  /** Port the container exposes (required for load balancer integration). */
   port?: pulumi.Input<number>;
+  /** IAM role ARN for the task to assume (for AWS API access). */
   role?: pulumi.Input<string>;
+  /** Memory limit in MB (defaults to 512). */
   memory?: pulumi.Input<number>;
+  /** CPU limit in CPU units, where 1024 = 1 vCPU (defaults to 512). */
   cpu?: pulumi.Input<number>;
+  /** Environment variables to pass to the container. */
   env?: Record<string, pulumi.Input<string>>;
+  /** Configuration for an init container that runs before the main container. */
   init?: {
+    /** Command to run in the init container. */
     command: pulumi.Input<string[]>;
+    /** Docker image for init container (uses main image if not specified). */
     image?: pulumi.Input<string>;
+    /** Environment variables for the init container. */
     env?: Record<string, pulumi.Input<string>>;
+    /** Timeout in seconds for the init container to complete. */
     stopTimeout?: pulumi.Input<number>;
   };
+  /** CloudWatch log retention period in days (defaults to 30). */
   logRetention?: pulumi.Input<number>;
+  /** Whether to skip adding a prefix to resource names. */
   noPrefix?: boolean;
 }
 
