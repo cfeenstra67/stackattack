@@ -92,7 +92,7 @@ async function generateDocs() {
     );
     if (!children || children.length === 0) return "";
 
-    let result = "\n### Properties\n\n";
+    let result = "\n#### Properties\n\n";
     for (const prop of children) {
       const name = prop.name;
       const typeStr = prop.type?.toString() || "unknown";

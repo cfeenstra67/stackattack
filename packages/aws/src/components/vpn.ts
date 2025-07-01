@@ -8,7 +8,7 @@
  *
  * const ctx = saws.context();
  * const vpc = saws.vpc(ctx);
- * const vpnEndpoint = saws.vpn(ctx, { vpc });
+ * const vpnEndpoint = saws.vpn(ctx, vpc);
  *
  * export const vpnClientConfig = vpnEndpoint.clientConfig;
  * ```
@@ -20,33 +20,28 @@
  * ```bash
  * # Export the client config from Pulumi outputs
  * pulumi stack output vpnClientConfig --show-secrets > client.ovpn
- *
- * # Connect using OpenVPN client
- * sudo openvpn --config client.ovpn
- *
- * # Or use AWS CLI to manage the VPN endpoint
- * aws ec2 describe-client-vpn-endpoints
- * aws ec2 describe-client-vpn-connections --client-vpn-endpoint-id cvpn-endpoint-123
  * ```
  *
- * The generated `.ovpn` configuration file includes embedded certificates and can be used with any OpenVPN-compatible client (OpenVPN Connect, Tunnelblick, etc.).
+ * You can use the `client.ovpn` file to connect to your VPN using any openvpn-compatible client, such as [OpenVPN Connect](https://openvpn.net/client/) for a desktop app, or on the command line directly:
+ * ```
+ * # Connect using OpenVPN client
+ * sudo openvpn --config client.ovpn
+ * ```
  *
  * ## Costs
  *
  * **Warning**: Using this component is quite expensive relative to other options. It's a simple way to connect to private resources in AWS, but be careful using this approach if you are cost-sensitive.
  *
  * Client VPN pricing includes both endpoint charges and connection hours:
- * - **Endpoint charge**: $0.10/hour (~$73/month) whether connections are active or not
- * - **Connection charge**: $0.05/hour per concurrent connection (~$36/month per user)
- * - **Data transfer**: Standard AWS data transfer rates apply
+ * - **Endpoint charge**: $0.10/hour (~$73/month) _per subnet association_ whether connections are active or not. A subnet association will be created for each subnet passed in `privateSubnetIds`, so be aware of this and only pass the subnet IDs that you'd like to create subnet associations with.
+ * - **Connection charge**: $0.05/hour per concurrent connection (~$36/month per user connected 24 hours a day, prorated based on actual connection time)
+ * - **Data transfer**: Standard AWS data transfer rates apply. If you do not use split-tunneling, you will pay for traffic flowing through your NAT gateway.
  *
  * Cost optimization strategies:
- * - Use split tunneling (enabled by default) to avoid routing all traffic through AWS
- * - Consider AWS Site-to-Site VPN for persistent office connections instead of multiple Client VPN connections
- * - Monitor concurrent connections and implement automatic disconnection policies
- * - Use security groups and authorization rules to limit access scope
+ * - Use split tunneling (enabled by default) to avoid routing all traffic through AWS.
+ * - AWS [recommends](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateClientVpnTargetNetwork.html) associating your client VPN endpoint with at least two subnets for availability, but you can associate a single subnet if you'd prefer. You are charged per subnet association per hour, so the number of subnets the VPN is associated with highly correlated with the cost.
  *
- * See the [AWS VPC Pricing](https://aws.amazon.com/vpn/pricing/) for current rates.
+ * See the [AWS VPN Pricing](https://aws.amazon.com/vpn/pricing/) for current rates.
  *
  */
 

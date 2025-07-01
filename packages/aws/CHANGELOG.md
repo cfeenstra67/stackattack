@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.3.2
+
+### Patch Changes
+
+- Improve docs for VPN component
+
 ## 0.3.1
 
 ### Patch Changes
