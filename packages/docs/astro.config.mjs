@@ -8,7 +8,7 @@ const googleAnalyticsId = 'G-2C44VGJN2K';
 export default defineConfig({
   site: 'https://stackattack.camfeenstra.com',
   integrations: [starlight({
-    title: 'StackAttack AWS',
+    title: 'Stackattack',
     description: 'Production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal code',
     favicon: '/favicon.ico',
     logo: {
