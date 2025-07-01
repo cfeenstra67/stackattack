@@ -69,7 +69,6 @@ function api() {
   const app = saws.service(ctx, {
     cluster,
     name: 'ecs-api-example',
-    replicas: 1,
     command: ['api'],
     image: image.imageUri,
     network: vpc.network('private'),
@@ -86,6 +85,15 @@ function api() {
     },
     init: {
       command: ['init']
+    },
+    autoScaling: {
+      minReplicas: 1,
+      maxReplicas: 3,
+      policies: saws.targetTrackingPolicies({
+        targetValue: 50,
+        metric: 'CPUUtilization',
+        namespace: 'AWS/ECS'
+      })
     }
   });
 

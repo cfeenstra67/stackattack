@@ -67,6 +67,7 @@
 import * as aws from "@pulumi/aws";
 import * as awsNative from "@pulumi/aws-native";
 import * as pulumi from "@pulumi/pulumi";
+import { ecsClusterArn, ecsServiceArn } from "../arns.js";
 import { Context } from "../context.js";
 import { getZoneFromDomain } from "./certificate.js";
 import {
@@ -81,7 +82,53 @@ import {
   getListenerId,
   getLoadBalancerAttributes,
 } from "./load-balancer.js";
+import {
+  ServiceAutoScalingArgs,
+  serviceAutoScaling,
+} from "./service-autoscaling.js";
 import { NetworkInput, getVpcDefaultSecurityGroup, getVpcId } from "./vpc.js";
+
+export type ServiceInput = string | aws.ecs.Service | ServiceOutput;
+
+export function getServiceId(
+  service: pulumi.Input<ServiceInput>,
+): pulumi.Output<string> {
+  return pulumi.output(service).apply((value) => {
+    if (typeof value === "string") {
+      return pulumi.output(value);
+    }
+    if ("service" in value) {
+      value = value.service;
+    }
+    return ecsServiceArn({
+      serviceName: value.name,
+      clusterName: value.cluster,
+    });
+  });
+}
+
+export function getServiceAttributes(
+  service: pulumi.Input<ServiceInput>,
+): pulumi.Output<aws.ecs.Service | aws.ecs.GetServiceResult> {
+  const result = pulumi.output(service).apply(async (value) => {
+    if (typeof value === "string") {
+      const arn = await aws.getArn({ arn: value });
+      const [, cluster, service] = arn.resource.split("/");
+      const clusterArn = ecsClusterArn({ clusterName: cluster });
+
+      return aws.ecs.getServiceOutput({
+        clusterArn,
+        serviceName: service,
+      });
+    }
+    if ("service" in value) {
+      value = value.service;
+    }
+    return value;
+  });
+
+  return pulumi.output(result);
+}
 
 /**
  * Configuration arguments for creating an ECS task definition.
@@ -253,22 +300,38 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
 /**
  * Configuration arguments for creating an ECS service, extending TaskDefinitionArgs.
  */
-export type ServiceArgs = TaskDefinitionArgs & {
+export interface ServiceArgs extends TaskDefinitionArgs {
+  /** The VPC network configuration for the service. */
   network: NetworkInput;
+  /** Number of tasks to run (cannot be used with autoScaling). */
   replicas?: pulumi.Input<number>;
+  /** The ECS cluster to run the service in. */
   cluster: pulumi.Input<ClusterResourcesInput>;
+  /** Custom domain name for external access (requires loadBalancer). */
   domain?: pulumi.Input<string>;
+  /** Route53 hosted zone ID for the domain (auto-detected if not specified). */
   zone?: pulumi.Input<string>;
+  /** Load balancer configuration for external traffic routing. This must be passed if `domain` is specified. */
   loadBalancer?: LoadBalancerWithListener;
+  /** Custom security groups for the service (uses VPC default if not specified). */
   securityGroups?: pulumi.Input<pulumi.Input<string>[]>;
-};
+  /** Service level strategy rules that are taken into consideration during task placement. List from top to bottom in order of precedence. Default behavior is to use the `binpack` strategy on `cpu`. */
+  orderedPlacementStrategies?: pulumi.Input<
+    pulumi.Input<aws.types.input.ecs.ServiceOrderedPlacementStrategy>[]
+  >;
+  /** Specify an auto-scaling configuration for your service. Cannot be used with `replicas`. See the [serviceAutoScaling](/components/service-autoscaling) component for argument documentation. */
+  autoScaling?: Omit<ServiceAutoScalingArgs, "service">;
+}
 
 /**
  * Output from creating an ECS service, containing the service resource and URLs.
  */
 export interface ServiceOutput {
+  /** The ECS service resource. */
   service: aws.ecs.Service;
+  /** External URL for the service (only available if `domain` is configured). */
   url?: pulumi.Output<string>;
+  /** Internal service discovery URL for VPC communication (only available if `port` is configured) */
   internalUrl?: pulumi.Output<string>;
 }
 
@@ -320,6 +383,13 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   if (!noPrefix) {
     ctx = ctx.prefix("service");
   }
+
+  if (args.replicas !== undefined && args.autoScaling) {
+    throw new Error(
+      "`replicas` should not be provided when autoScaling is provided--the number of replicas will be set dynamically based on the scaling policies",
+    );
+  }
+
   const port = portArg ? portArg : args.domain ? 80 : undefined;
 
   const definition = taskDefinition(ctx, { ...taskArgs, port });
@@ -480,7 +550,7 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
             containerName: args.name,
           }
         : undefined,
-      orderedPlacementStrategies: [
+      orderedPlacementStrategies: args.orderedPlacementStrategies ?? [
         {
           type: "binpack",
           field: "cpu",
@@ -501,6 +571,13 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   );
 
   checkEcsDeployment(service, definition);
+
+  if (args.autoScaling) {
+    serviceAutoScaling(ctx, {
+      service,
+      ...args.autoScaling,
+    });
+  }
 
   const finalUrl =
     url === undefined

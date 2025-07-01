@@ -437,10 +437,11 @@ export function bucketFiles(
 /**
  * Configuration arguments for creating an S3 bucket with optional features.
  */
-export type BucketArgs = Pick<
-  aws.s3.BucketV2Args,
-  "bucket" | "bucketPrefix"
-> & {
+export interface BucketArgs {
+  /** Specify a prefix to use for the bucket name. If neither this nor `bucket` are specified, a prefix will be auto-generated based on the resource name */
+  bucketPrefix?: pulumi.Input<string>;
+  /** Specify the name of your bucket. In general when using Pulumi, it's preferred to specify name _prefixes_ (`bucketPrefix`, or allow pulumi to generate the prefix for you) so that resources can be recreated before deleting them in the case where they need to replaced. */
+  bucket?: pulumi.Input<string>;
   /** Whether to enable versioning on the bucket */
   versioned?: boolean;
   /** Whether to enable server-side encryption (defaults to true) */
@@ -451,17 +452,19 @@ export type BucketArgs = Pick<
   allowCors?: boolean;
   /** Whether the bucket should allow public access */
   public?: boolean;
-  /** Whether to disable deletion protection */
-  noProtect?: boolean;
   /** The object ownership setting for the bucket */
   objectOwnership?: pulumi.Input<string>;
   /** Lifecycle rules to automatically manage object expiration */
   lifecycleRules?: BucketLifecycleRule[];
   /** Policy configuration for granting access to services and accounts */
   policy?: Omit<BucketPolicyArgs, "bucket" | "noPrefix">;
+  /** When deleting the bucket, delete all objects in the bucket first. This is dangerous and can cause unintentional data loss (particularly if used in conjunction with `noProtect`), but may be desirable for ephemeral buckets */
+  forceDestroy?: pulumi.Input<boolean>;
+  /** Whether to disable deletion protection. Since buckets are stateful and deleting them can cause data loss, they are protected by default. */
+  noProtect?: boolean;
   /** Whether to skip adding a prefix to the resource name */
   noPrefix?: boolean;
-};
+}
 
 /**
  * Creates an S3 bucket with security best practices enabled by default, including encryption, public access blocking, and optional versioning.
@@ -479,10 +482,12 @@ export function bucket(ctx: Context, args?: BucketArgs): aws.s3.BucketV2 {
     {
       bucket: args?.bucket,
       bucketPrefix: args?.bucketPrefix,
+      forceDestroy: args?.forceDestroy,
       tags: ctx.tags(),
     },
     {
       protect: !args?.noProtect,
+      deleteBeforeReplace: args?.bucket !== undefined,
     },
   );
 

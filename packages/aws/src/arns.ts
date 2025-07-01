@@ -121,3 +121,56 @@ export function glueTableArn({
   }
   return pulumi.interpolate`arn:aws:glue:${region}:${accountId}:table/${databaseName}/${tableName}`;
 }
+
+export interface ECSServiceArnArgs {
+  /** AWS region (defaults to current region if not specified) */
+  region?: pulumi.Input<string>;
+  /** AWS account ID (defaults to current account if not specified) */
+  accountId?: pulumi.Input<string>;
+  /** Name of the ECS service */
+  serviceName: pulumi.Input<string>;
+  /** Name of the ECS cluster that the service is deployed in */
+  clusterName: pulumi.Input<string>;
+}
+
+export function ecsServiceArn({
+  region,
+  accountId,
+  serviceName,
+  clusterName,
+}: ECSServiceArnArgs): pulumi.Output<string> {
+  if (region === undefined) {
+    const regionOutput = aws.getRegionOutput();
+    region = regionOutput.name;
+  }
+  if (accountId === undefined) {
+    const identity = aws.getCallerIdentityOutput();
+    accountId = identity.accountId;
+  }
+  return pulumi.interpolate`arn:aws:ecs:${region}:${accountId}:service/${clusterName}/${serviceName}`;
+}
+
+export interface ECSClusterArnArgs {
+  /** AWS region (defaults to current region if not specified) */
+  region?: pulumi.Input<string>;
+  /** AWS account ID (defaults to current account if not specified) */
+  accountId?: pulumi.Input<string>;
+  /** Name of the ECS cluster that the service is deployed in */
+  clusterName: pulumi.Input<string>;
+}
+
+export function ecsClusterArn({
+  region,
+  accountId,
+  clusterName,
+}: ECSClusterArnArgs): pulumi.Output<string> {
+  if (region === undefined) {
+    const regionOutput = aws.getRegionOutput();
+    region = regionOutput.name;
+  }
+  if (accountId === undefined) {
+    const identity = aws.getCallerIdentityOutput();
+    accountId = identity.accountId;
+  }
+  return pulumi.interpolate`arn:aws:ecs:${region}:${accountId}:cluster/${clusterName}`;
+}
