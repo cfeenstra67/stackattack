@@ -1,7 +1,9 @@
 /**
  * @packageDocumentation
  *
- * ECS clusters in AWS provide compute capacity for running containerized applications. StackAttack creates ECS clusters with auto-scaling EC2 instances, service discovery, and secure SSH access through Instance Connect.
+ * ECS clusters in AWS provide compute capacity for running containerized applications. Stackattack creates ECS clusters with:
+ * - EC2 instances used for compute. By default, the configuration will use spot instances. Pass `noSpot: true` to disable spot instances, or `onDemandPercentage` with a percentage value to split your EC2 instances between on demand and spot. The number of instances will always match the requirements of your cluster (within the constraints you set via `minSize` (default 0) and `maxSize` (default 1)). Currently Fargate is not supported.
+ * - A private DNS namespace is created so that your services can communicate internally via ECS service discovery. ECS service connect is currently not supported.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -15,21 +17,16 @@
  *
  * ## Usage
  *
- * After deploying a cluster, you can manage it using:
- *
- * **AWS CLI:**
- * ```bash
- * # View cluster details and running tasks
- * aws ecs describe-clusters --clusters your-cluster-name
- * ```
+ * After deploying a cluster, you can deploy [services](/components/service) into it to run code in docker containers.
  *
  * **SSH Access to EC2 Instances:**
- * ```bash
- * # Find instance IDs in the cluster
- * aws ec2 describe-instances --filters "Name=tag:aws:autoscaling:groupName,Values=your-asg-name" --query 'Reservations[].Instances[].InstanceId' --output text
+ * _NOTE_: if your instances are within a private subnet (as is likely the case), you need a way to access your instances. If you created your vpc with the [vpc](/components/vpc) component, an EC2 instance connect endpoint is set up automatically.
  *
+ * ```bash
  * # Connect to an instance using Instance Connect (no key pairs needed)
  * aws ec2-instance-connect ssh --instance-id i-1234567890abcdef0 --region us-east-1
+ * # If you do not have an EC2 instance connect endpoint but have direct access to your instance (e.g. via a VPN), pass --connection-type direct
+ * aws ec2-instance-connect ssh --instance-id i-1234567890abcdef0 --region us-east-1 --connection-type direct
  * ```
  *
  * ## Related Components
@@ -43,17 +40,13 @@
  *
  * ECS cluster costs depend on the underlying EC2 instances and are **usage-based**:
  *
- * - **EC2 instances** - The default `t3.micro` instances cost ~$8.47/month each when running 24/7. Auto-scaling can reduce costs by scaling to zero during low usage periods.
+ * - **EC2 instances** - This will depend on your configuration. Your auto-scaling cluster will scale up and down based on the desired capacity of the services you have deployed, meaning instances will be terminated if they are unused and created as you deploy and scale your services. By default Stackattack will use spot instances with an ARM architecture, 1-2 CPUs, 2-4 GB of memory, and a 2:1 memory:cpu ratio (this uses a [mixed instances policy](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-mixed-instances-groups.html) so the specific instance type(s) that will be launched is not known. This allows for greater availability of spot instances, as it does not rely as much on the capacity of any one specific instance type ). This can be configured with the `instances` parameter. See the [Spot Instance Pricing](https://aws.amazon.com/ec2/spot/pricing/) documentation for specific figures.
  *
- * - **Auto Scaling** - The cluster automatically scales based on CPU and memory reservations. Empty clusters can scale down to zero instances, costing nothing for compute.
- *
- * - **EBS storage** - Each instance gets 8GB GP3 storage (~$0.96/month per instance). Storage persists even when instances terminate.
+ * - **EBS storage** - Each instance gets 25GB of storage by default (~$2/month per instance). Block devices are deleted when instances are terminated.
  *
  * - **Data transfer** - Service-to-service communication within the VPC is free. External data transfer follows standard AWS rates (~$0.09/GB out).
  *
- * - **Service Discovery** - The private DNS namespace is free. Route 53 health checks (if used) cost ~$0.50/month each.
- *
- * - **Instance Connect** - SSH access through Instance Connect endpoints costs ~$3.60/month per endpoint + $0.10/hour when in use.
+ * - **Service Discovery** - The private DNS namespace is free.
  *
  * Cost optimization strategies:
  * - Use spot instances for non-critical workloads (up to 90% savings)
@@ -61,7 +54,7 @@
  * - Monitor instance utilization and rightsize instance types
  * - Use [service](/components/service) placement strategies to maximize instance utilization
  *
- * See [ECS Pricing](https://aws.amazon.com/ecs/pricing/) for current rates.
+ * See [EC2 Pricing](https://aws.amazon.com/ec2/pricing/) for current rates.
  */
 
 import * as aws from "@pulumi/aws";
@@ -551,7 +544,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
 
   const instances = args.instances ?? {
     architecture: "arm64",
-    memoryMib: { min: 1024, max: 2048 },
+    memoryMib: { min: 2048, max: 4096 },
     vcpuCount: { min: 1, max: 2 },
     memoryGibPerVcpu: { min: 2, max: 2 },
   };
@@ -642,7 +635,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
           ebs: {
             deleteOnTermination: "true",
             encrypted: "true",
-            volumeSize: args.diskSize ?? 50,
+            volumeSize: args.diskSize ?? 25,
           },
         },
       ],
