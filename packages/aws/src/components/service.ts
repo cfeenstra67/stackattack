@@ -174,8 +174,8 @@ export interface TaskDefinitionArgs {
     /** Timeout in seconds for the init container to complete. */
     stopTimeout?: pulumi.Input<number>;
   };
-  /** CloudWatch log retention period in days (defaults to 30). */
-  logRetention?: pulumi.Input<number>;
+  /** The name of a log group to write logs to. If not specified, a new log group will be created with a 30 day retention period. */
+  logGroup?: pulumi.Input<string>;
   /** Whether to skip adding a prefix to resource names. */
   noPrefix?: boolean;
 }
@@ -192,9 +192,15 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
   }
   const region = aws.getRegionOutput();
 
-  const logGroup = new aws.cloudwatch.LogGroup(ctx.id("log-group"), {
-    retentionInDays: args.logRetention ?? 30,
-  });
+  let logGroupName: pulumi.Input<string>;
+  if (args.logGroup !== undefined) {
+    logGroupName = args.logGroup;
+  } else {
+    const logGroup = new aws.cloudwatch.LogGroup(ctx.id("log-group"), {
+      retentionInDays: 30,
+    });
+    logGroupName = logGroup.name;
+  }
 
   let healthCheck:
     | awsNative.types.input.ecs.TaskDefinitionHealthCheckArgs
@@ -233,7 +239,7 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
       logConfiguration: {
         logDriver: "awslogs",
         options: {
-          "awslogs-group": logGroup.name,
+          "awslogs-group": logGroupName,
           "awslogs-region": region.name,
           "awslogs-stream-prefix": args.name,
         },
@@ -273,7 +279,7 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
         logConfiguration: {
           logDriver: "awslogs",
           options: {
-            "awslogs-group": logGroup.name,
+            "awslogs-group": logGroupName,
             "awslogs-region": region.name,
             "awslogs-stream-prefix": pulumi.interpolate`${args.name}-init`,
           },
