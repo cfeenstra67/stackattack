@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.5.0-dev.1
+
+### Patch Changes
+
+- 2b0b431: Fix cidr allocation order for subnets
+
 ## 0.5.0-dev.0
 
 ### Minor Changes
