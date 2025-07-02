@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "dev",
+  "initialVersions": {
+    "@stackattack/ecs-api-example": "1.0.1",
+    "@stackattack/aws": "0.3.2",
+    "@stackattack/docs": "0.1.0"
+  },
+  "changesets": []
+}
