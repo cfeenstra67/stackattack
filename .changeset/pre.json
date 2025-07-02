@@ -7,7 +7,6 @@
     "@stackattack/docs": "0.1.0"
   },
   "changesets": [
-    "evil-dots-agree",
     "modern-pianos-win"
   ]
 }
