@@ -1,5 +1,15 @@
 # @stackattack/aws
 
+## 0.5.0-dev.0
+
+### Minor Changes
+
+- 595b0dd: Added nat: "multi" option to VPC component for per-subnet NAT gateways
+
+### Patch Changes
+
+- Fix cidr allocation order for subnets
+
 ## 0.4.0
 
 ### Minor Changes

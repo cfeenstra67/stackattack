@@ -290,9 +290,12 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
 
   let idx = 0;
   for (const zoneId of availabilityZones(args.availabilityZones ?? 2)) {
+    const privateCidr = args.cidrAllocator.allocate(subnetMask);
+    const publicCidr = args.cidrAllocator.allocate(subnetMask);
+
     const publicSubnet = new aws.ec2.Subnet(ctx.id(`public-${idx}`), {
       vpcId,
-      cidrBlock: args.cidrAllocator.allocate(24),
+      cidrBlock: publicCidr,
       availabilityZone: zoneId,
       tags: { ...ctx.tags(), Name: ctx.id(`public-${idx}`) },
     });
@@ -308,7 +311,7 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
 
     const privateSubnet = new aws.ec2.Subnet(ctx.id(`private-${idx}`), {
       vpcId,
-      cidrBlock: args.cidrAllocator.allocate(subnetMask),
+      cidrBlock: privateCidr,
       availabilityZone: zoneId,
       tags: { ...ctx.tags(), Name: ctx.id(`private-${idx}`) },
     });

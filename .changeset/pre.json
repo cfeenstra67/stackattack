@@ -6,5 +6,8 @@
     "@stackattack/aws": "0.3.2",
     "@stackattack/docs": "0.1.0"
   },
-  "changesets": []
+  "changesets": [
+    "evil-dots-agree",
+    "modern-pianos-win"
+  ]
 }
