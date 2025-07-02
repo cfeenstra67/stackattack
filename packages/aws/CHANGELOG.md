@@ -1,5 +1,15 @@
 # @stackattack/aws
 
+## 0.4.0
+
+### Minor Changes
+
+- 8307647: Added service auto scaling component
+
+### Patch Changes
+
+- 58369fa: Allow passing logGroup into task definition instead of logRetentionDays
+
 ## 0.3.2
 
 ### Patch Changes
