@@ -1,7 +1,7 @@
-name: stackattack-ecs-api
+name: stackattack-astro
 main: infra.ts
 runtime:
   name: nodejs
   options:
     nodeargs: "--loader ts-node/esm --no-warnings"
-description: ECS API Example
+description: Astro static site example

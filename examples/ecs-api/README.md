@@ -12,7 +12,7 @@ pulumi stack init api
 pulumi stack init env
 ```
 
-2. Modify the domain names to be subdomains of your custom API:
+2. Modify the domain names to be subdomains of your custom domain:
 ```bash
 pulumi -s env config set domain ecs-api.yourdomain.com
 pulumi -s api config set domain api.ecs-api.yourdomain.com
