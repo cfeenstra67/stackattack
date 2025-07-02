@@ -45,20 +45,19 @@
  *
  * - **VPC, subnets, route tables, security groups** - No charge for the basic networking infrastructure.
  *
- * - **NAT Gateway** - StackAttack creates a single NAT Gateway for all private subnets (~$45/month + $0.045/GB processed). This enables private subnet instances to access the internet while remaining inaccessible from the internet.
+ * - **NAT Gateway** - StackAttack creates NAT Gateway(s) for private subnets (~$45/month + $0.045/GB processed apiece). This enables private subnet instances to access the internet while remaining inaccessible from the internet. If you pass `nat: "multi"` one NAT gateway per private subnet will be created, whereas if you pass `nat: "single"` only one will be created for all private subnets. Passing `nat: "none"` will not create a NAT gateway, but resources in your private subnets will not have access to the public internet.
+ *
+ * - **Public IP addresses** - Each public IP address costs ~$3.60/month. One public IP address is allocated per NAT gateway.
  *
  * - **Internet Gateway** - Free for the gateway itself, but data transfer charges apply (~$0.09/GB out to internet).
- *
- * - **VPC Endpoints** - StackAttack creates S3 gateway endpoints (free) to avoid data transfer charges when accessing S3 from private subnets. Interface endpoints cost ~$7.20/month per endpoint if you add them.
  *
  * - **Instance Connect Endpoints** - StackAttack creates these for secure SSH access (~$3.60/month per endpoint + $0.10/hour when in use).
  *
  * - **VPC Flow Logs** - If enabled, logs cost ~$0.50/GB stored in CloudWatch Logs. Can generate significant data if traffic is high.
  *
  * Cost optimization strategies:
+ * - NAT gateways are typically the largest driver of cost (though usage-based charges can eclipse them based on usag of course). For this reason, the default is to create only a single NAT gateway for all of your private subnets. Be aware that using `nat: "multi"` may lead to significantly higher costs (for the benefit of higher availability).
  * - Use the default `flowLogs: false` unless you need traffic analysis
- * - VPC endpoints save money on data transfer if you frequently access AWS services
- * - Consider multiple smaller VPCs vs one large VPC based on isolation requirements
  *
  * See [VPC Pricing](https://aws.amazon.com/vpc/pricing/) for current rates.
  */
@@ -223,11 +222,13 @@ export interface SubnetsArgs {
   vpc: pulumi.Input<VpcInput>;
   /** CIDR allocator for getting new cidrs */
   cidrAllocator: CidrAllocator;
-  /** Whether to create a NAT gateway or not; `single` (the default) creates a single NAT gateway in the first subnet in your VPC */
-  nat?: "single" | "none";
-  /** Specify availability zones--if a number is passed this will be the first two availability zones in the current region */
-  availabilityZones: number | pulumi.Input<string>[];
-  /** Specify the netmask to use for allocating CIDRs to subnets. This determines how many IP addresses are available in the subnet. */
+  /** Whether to create a NAT gateway or not; `single` (the default) creates a single NAT gateway in the first subnet in your VPC. `multi` creates a NAT gateway per subnet for high availability. `none` does not create any NAT gateways. */
+  nat?: "single" | "none" | "multi";
+  /** By default, s3 gateway endpoint(s) will be created for internal access to S3. Passing true disables this behavior. Otherwise, one S3 endpoint will be created per private route table--so one if you're using `nat: "single"` or `nat: "none"` (default), or one per AZ if you're using `nat: "multi"` */
+  noS3Endpoints?: boolean;
+  /** Availability zone input; see [availabilityZones](#availabilityZones) for details on behavior */
+  availabilityZones?: number | pulumi.Input<string>[];
+  /** Indicate the netmask to use for subnets, which defines how many IP addresses are available. Defaults to 20 (4096 IP addresses available per subnet) */
   subnetMask?: number;
   /** Do not add a prefix to the context */
   noPrefix?: boolean;
@@ -264,43 +265,31 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
     gatewayId: gateway.id,
   });
 
-  const privateRouteTable = new aws.ec2.RouteTable(
-    ctx.id("private-route-table"),
-    {
-      vpcId,
-      tags: { ...ctx.tags(), Name: ctx.id("private-route-table") },
-    },
-  );
+  const nat = args.nat ?? "single";
+  let privateRouteTableId: pulumi.Output<string> | null = null;
+  if (nat !== "multi") {
+    const privateRouteTable = new aws.ec2.RouteTable(
+      ctx.id("private-route-table"),
+      {
+        vpcId,
+        tags: { ...ctx.tags(), Name: ctx.id("private-route-table") },
+      },
+    );
 
-  // const region = aws.getRegionOutput();
-  // new aws.ec2.VpcEndpoint(ctx.id("s3-endpoint"), {
-  //   serviceName: pulumi.interpolate`com.amazonaws.${region.name}.s3`,
-  //   vpcId,
-  //   autoAccept: true,
-  //   routeTableIds: [privateRouteTable.id],
-  //   tags: { ...ctx.tags(), Name: ctx.id("s3-endpoint") },
-  // });
+    if (!args.noS3Endpoints) {
+      s3GatewayEndpoint(ctx, {
+        vpc: vpcId,
+        privateRouteTableId: privateRouteTable.id,
+      });
+    }
+
+    privateRouteTableId = privateRouteTable.id;
+  }
 
   const subnetMask = args.subnetMask ?? 20;
 
   let idx = 0;
-  for (const zoneId of availabilityZones(args.availabilityZones)) {
-    const privateSubnet = new aws.ec2.Subnet(ctx.id(`private-${idx}`), {
-      vpcId,
-      cidrBlock: args.cidrAllocator.allocate(subnetMask),
-      availabilityZone: zoneId,
-      tags: { ...ctx.tags(), Name: ctx.id(`private-${idx}`) },
-    });
-    privateSubnetIds.push(privateSubnet.id);
-
-    new aws.ec2.RouteTableAssociation(
-      ctx.id(`private-route-table-association-${idx}`),
-      {
-        routeTableId: privateRouteTable.id,
-        subnetId: privateSubnet.id,
-      },
-    );
-
+  for (const zoneId of availabilityZones(args.availabilityZones ?? 2)) {
     const publicSubnet = new aws.ec2.Subnet(ctx.id(`public-${idx}`), {
       vpcId,
       cidrBlock: args.cidrAllocator.allocate(24),
@@ -317,20 +306,62 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
       },
     );
 
+    const privateSubnet = new aws.ec2.Subnet(ctx.id(`private-${idx}`), {
+      vpcId,
+      cidrBlock: args.cidrAllocator.allocate(subnetMask),
+      availabilityZone: zoneId,
+      tags: { ...ctx.tags(), Name: ctx.id(`private-${idx}`) },
+    });
+    privateSubnetIds.push(privateSubnet.id);
+
+    let zonePrivateRouteTableId = privateRouteTableId;
+    if (zonePrivateRouteTableId === null) {
+      const elasticIp = new aws.ec2.Eip(ctx.id(`nat-ip-${idx}`), {
+        tags: { ...ctx.tags(), Name: ctx.id(`nat-ip-${idx}`) },
+      });
+
+      const natGateway = new aws.ec2.NatGateway(ctx.id(`nat-gateway-${idx}`), {
+        allocationId: elasticIp.id,
+        subnetId: publicSubnet.id,
+        tags: { ...ctx.tags(), Name: ctx.id(`nat-gateway-${idx}`) },
+      });
+
+      const privateRouteTable = new aws.ec2.RouteTable(
+        ctx.id(`private-route-table-${idx}`),
+        {
+          vpcId,
+          tags: { ...ctx.tags(), Name: ctx.id(`private-route-table-${idx}`) },
+        },
+      );
+
+      if (!args?.noS3Endpoints) {
+        s3GatewayEndpoint(ctx.prefix(`gateway-endpoint-${idx}`), {
+          vpc: vpcId,
+          privateRouteTableId: privateRouteTable.id,
+          noPrefix: true,
+        });
+      }
+
+      new aws.ec2.Route(ctx.id(`nat-route-${idx}`), {
+        routeTableId: privateRouteTable.id,
+        destinationCidrBlock: "0.0.0.0/0",
+        natGatewayId: natGateway.id,
+      });
+
+      zonePrivateRouteTableId = privateRouteTable.id;
+    }
+
+    new aws.ec2.RouteTableAssociation(
+      ctx.id(`private-route-table-association-${idx}`),
+      {
+        routeTableId: zonePrivateRouteTableId,
+        subnetId: privateSubnet.id,
+      },
+    );
+
     idx++;
   }
 
-  // if (privateSubnetIds.length > 0) {
-  //   new aws.ec2transitgateway.InstanceConnectEndpoint(
-  //     ctx.id(`instance-connect-endpoint-${idx}`),
-  //     {
-  //       subnetId: privateSubnet.id,
-  //       tags: { ...ctx.tags(), Name: ctx.id(`instance-connect-endpoint-${idx}`) },
-  //     },
-  //   );
-  // }
-
-  const nat = args.nat ?? "single";
   if (nat === "single") {
     const elasticIp = new aws.ec2.Eip(ctx.id("nat-ip"), {
       tags: { ...ctx.tags(), Name: ctx.id("nat-ip") },
@@ -343,7 +374,7 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
     });
 
     new aws.ec2.Route(ctx.id("nat-route"), {
-      routeTableId: privateRouteTable.id,
+      routeTableId: privateRouteTableId!,
       destinationCidrBlock: "0.0.0.0/0",
       natGatewayId: natGateway.id,
     });
@@ -352,8 +383,6 @@ export function subnets(ctx: Context, args: SubnetsArgs) {
   return {
     publicSubnetIds,
     privateSubnetIds,
-    privateRouteTable,
-    publicRouteTable,
   };
 }
 
@@ -578,17 +607,15 @@ export function vpcFlowLogs(ctx: Context, args: VPCFlowLogsArgs) {
 }
 
 /** Input properties for the vpc component */
-export interface VpcArgs {
+export interface VpcArgs
+  extends Pick<
+    SubnetsArgs,
+    "nat" | "noS3Endpoints" | "subnetMask" | "availabilityZones"
+  > {
   /** Provide a CIDR block that defines the range of addresses for your VPC. Defaults to 10.0.0.0/16 if not provided. See https://docs.aws.amazon.com/vpc/latest/userguide/vpc-cidr-blocks.html for details */
   cidrBlock?: pulumi.Input<string>;
-  /** Availability zone input; see [availabilityZones](#availabilityZones) for details on behavior */
-  availabilityZones?: number | string[];
   /** Indicate whether VPC Flow Logs should be enabled */
   flowLogs?: boolean;
-  /** Indicate the netmask to use for subnets, which defines how many IP addresses are available. Defaults to 20 (4096 IP addresses available per subnet) */
-  subnetMask?: number;
-  /** By default, an s3 gateway endpoint will be created for internal access to S3. Passing true disables this behavior. */
-  noS3Endpoint?: boolean;
   /** By default, an EC2 Instance Connect endpoint will be created for SSH access to EC2 instances without a public IP address. Passing true disables this behavior. */
   noInstanceConnectEndpoint?: boolean;
   /** By default, VPCs are created with protect: true, which prevent accidental deletion. To disable this behavior, pass `true`. */
@@ -683,7 +710,6 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
 
   let publicSubnetIds: pulumi.Output<string>[] = [];
   let privateSubnetIds: pulumi.Output<string>[] = [];
-  let privateRouteTableId: pulumi.Input<string> | undefined = undefined;
   const zones = availabilityZones(args?.availabilityZones ?? 2);
   if (zones.length > 0) {
     const results = subnets(ctx, {
@@ -691,18 +717,15 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
       cidrAllocator: allocator,
       availabilityZones: zones,
       subnetMask: args?.subnetMask,
+      nat: args?.nat,
+      noS3Endpoints: args?.noS3Endpoints,
     });
     publicSubnetIds = results.publicSubnetIds;
     privateSubnetIds = results.privateSubnetIds;
-    privateRouteTableId = results.privateRouteTable.id;
   }
 
   if (args?.flowLogs) {
     vpcFlowLogs(ctx, { vpc });
-  }
-
-  if (!args?.noS3Endpoint && privateRouteTableId !== undefined) {
-    s3GatewayEndpoint(ctx, { vpc, privateRouteTableId });
   }
 
   if (!args?.noInstanceConnectEndpoint && privateSubnetIds.length > 0) {
