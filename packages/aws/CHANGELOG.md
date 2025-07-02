@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.5.0-dev.2
+
+### Patch Changes
+
+- Decouple security group rules from default SG
+
 ## 0.5.0-dev.1
 
 ### Patch Changes

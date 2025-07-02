@@ -688,25 +688,30 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
     },
   );
 
-  new aws.ec2.DefaultSecurityGroup(ctx.id("default-sg"), {
-    vpcId: vpc.id,
-    ingress: [
-      {
-        protocol: "-1",
-        self: true,
-        fromPort: 0,
-        toPort: 0,
-      },
-    ],
-    egress: [
-      {
-        fromPort: 0,
-        toPort: 0,
-        protocol: "-1",
-        cidrBlocks: ["0.0.0.0/0"],
-      },
-    ],
-    tags: ctx.tags(),
+  const defaultSecurityGroup = new aws.ec2.DefaultSecurityGroup(
+    ctx.id("default-sg"),
+    {
+      vpcId: vpc.id,
+      tags: ctx.tags(),
+    },
+  );
+
+  new aws.ec2.SecurityGroupRule(ctx.id("default-sg-ingress"), {
+    securityGroupId: defaultSecurityGroup.id,
+    type: "ingress",
+    protocol: "-1",
+    self: true,
+    fromPort: 0,
+    toPort: 0,
+  });
+
+  new aws.ec2.SecurityGroupRule(ctx.id("default-sg-egress"), {
+    securityGroupId: defaultSecurityGroup.id,
+    type: "egress",
+    fromPort: 0,
+    toPort: 0,
+    protocol: "-1",
+    cidrBlocks: ["0.0.0.0/0"],
   });
 
   const allocator = cidrAllocator(cidrBlock);
