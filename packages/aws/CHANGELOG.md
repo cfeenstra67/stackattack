@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.5.0-dev.3
+
+### Patch Changes
+
+- Remove default security group management
+
 ## 0.5.0-dev.2
 
 ### Patch Changes
