@@ -200,15 +200,15 @@ export interface SPAAdapterArgs
 }
 
 /** Static site adapter for a single-page application. This directs all requests to a single HTML page */
-export function spaAdapter(args?: SPAAdapterArgs): StaticSiteAdapter {
+export function SPAAdapter(args?: SPAAdapterArgs): StaticSiteAdapter {
   const htmlPath = args?.index ?? "index.html";
   const maxAge = args?.cacheControlMaxAge ?? 30 * 24 * 3600;
   return {
     index: htmlPath,
-    getKey: () => htmlPath,
-    getRedirectPath: () => htmlPath,
+    getKey: (uri) => (uri.includes(".") ? uri : `/${htmlPath}`),
+    getRedirectPath: (uri) => (uri === `/${htmlPath}` ? "" : uri),
     defaultHeaders: args?.defaultHeaders,
-    errorPages: [{ code: 404, key: htmlPath }],
+    errorPages: [{ code: 404, key: `/${htmlPath}` }],
     headers: [
       {
         patterns: args?.staticPaths ?? DefaultStaticPaths,

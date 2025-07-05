@@ -7,6 +7,8 @@ The actual code is just the default starter Astro project; it was created with:
 npm create astro@latest -- --template basics
 ```
 
+This example is live at: <https://astro-static-site.stackattack.camfeenstra.com>
+
 To deploy:
 
 **Note: in order to actually deploy this you must have a Route53 zone with a custom domain in AWS**

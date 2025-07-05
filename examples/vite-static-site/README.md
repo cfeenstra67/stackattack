@@ -2,6 +2,8 @@
 
 This is the default vite starter app with React + Typescript selected. This example deploys this app to cloudfront; the final result is a static site at a custom domain served over HTTPS, with appropriate caching headers set for static resources.
 
+This example is live at: <https://vite-static-site.stackattack.camfeenstra.com>
+
 To deploy:
 
 **Note: in order to actually deploy this you must have a Route53 zone with a custom domain in AWS**
