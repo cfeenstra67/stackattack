@@ -106,6 +106,7 @@ import { certificate, getZoneFromDomain } from "./certificate.js";
  * Configuration interface for static site framework adapters.
  */
 export interface StaticSiteAdapter {
+  /** The default root page of your app, for example "index.html". This will be served at the "/" path */
   index?: string;
   /** Function to transform URI paths to S3 object keys */
   getKey?: (uri: string) => string;
@@ -123,12 +124,29 @@ export interface StaticSiteAdapter {
   errorPages?: { code: number; key: string }[];
 }
 
+const DefaultStaticPaths = [
+  "*.jpg",
+  "*.png",
+  "*.apng",
+  "*.avif",
+  "*.gif",
+  "*.webp",
+  "*.js",
+  "*.css",
+  "*.svg",
+];
+
 /**
  * Configuration arguments for the Astro static site adapter.
  */
-export interface AstroAdapterArgs {
-  /** Custom file patterns that should receive long-term caching headers */
+export interface AstroAdapterArgs
+  extends Pick<StaticSiteAdapter, "defaultHeaders" | "headers"> {
+  /** Custom file patterns that should receive long-term caching headers. By default, this includes "*.jpg", "*.png", "*.apng", "*.avif", "*.gif", "*.webp", "*.js", "*.css", and "*.svg" */
   staticPaths?: string[];
+  /** Max age for patterns that match `staticPaths` */
+  cacheControlMaxAge?: number;
+  /** Default headers to include in every response from your CDN */
+  defaultHeaders?: Record<string, string>;
 }
 
 /**
@@ -137,6 +155,7 @@ export interface AstroAdapterArgs {
  * @returns Static site adapter with Astro-specific routing and caching rules
  */
 export function astroAdapter(args?: AstroAdapterArgs): StaticSiteAdapter {
+  const maxAge = args?.cacheControlMaxAge ?? 30 * 24 * 3600;
   return {
     index: "index.html",
     getKey: (uri) => {
@@ -154,18 +173,49 @@ export function astroAdapter(args?: AstroAdapterArgs): StaticSiteAdapter {
       return uri === "/index.html" ? "" : uri;
     },
     errorPages: [{ code: 404, key: "/404.html" }],
+    defaultHeaders: args?.defaultHeaders,
     headers: [
       {
-        patterns: args?.staticPaths ?? [
-          "*.jpg",
-          "*.png",
-          "*.js",
-          "*.css",
-          "*.svg",
-        ],
+        patterns: args?.staticPaths ?? DefaultStaticPaths,
         headers: {
-          "Cache-Control": `max-age=${30 * 24 * 3600}`,
+          "Cache-Control": `max-age=${maxAge}`,
         },
+        ...args?.headers,
+      },
+    ],
+  };
+}
+
+/**
+ * Configuration arguments for the single page application static site adapter.
+ */
+export interface SPAAdapterArgs
+  extends Pick<StaticSiteAdapter, "defaultHeaders" | "headers"> {
+  /** The path to the HTML file for your single page application. Defaults to "index.html" */
+  index?: string;
+  /** Custom file patterns that should receive long-term caching headers. By default, this includes "*.jpg", "*.png", "*.apng", "*.avif", "*.gif", "*.webp", "*.js", "*.css", and "*.svg" */
+  staticPaths?: string[];
+  /** Max age for patterns that match `staticPaths` */
+  cacheControlMaxAge?: number;
+}
+
+/** Static site adapter for a single-page application. This directs all requests to a single HTML page */
+export function spaAdapter(args?: SPAAdapterArgs): StaticSiteAdapter {
+  const htmlPath = args?.index ?? "index.html";
+  const maxAge = args?.cacheControlMaxAge ?? 30 * 24 * 3600;
+  return {
+    index: htmlPath,
+    getKey: () => htmlPath,
+    getRedirectPath: () => htmlPath,
+    defaultHeaders: args?.defaultHeaders,
+    errorPages: [{ code: 404, key: htmlPath }],
+    headers: [
+      {
+        patterns: args?.staticPaths ?? DefaultStaticPaths,
+        headers: {
+          "Cache-Control": `max-age=${maxAge}`,
+        },
+        ...args?.headers,
       },
     ],
   };

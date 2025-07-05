@@ -1,11 +1,6 @@
-# Astro Static Site Example
+# Vite Static Site
 
-This example deploys an astro static site to cloudfront. The final result is a static site served at a custom domain over HTTPS, with appropriate caching headers set for static resources.
-
-The actual code is just the default starter Astro project; it was created with:
-```sh
-npm create astro@latest -- --template basics
-```
+This is the default vite starter app with React + Typescript selected. This example deploys this app to cloudfront; the final result is a static site at a custom domain served over HTTPS, with appropriate caching headers set for static resources.
 
 To deploy:
 

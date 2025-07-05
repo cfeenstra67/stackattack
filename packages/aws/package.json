@@ -38,8 +38,20 @@
   ],
   "author": "Cam Feenstra <me@camfeenstra.com>",
   "license": "MIT",
+  "peerDependencies": {
+    "@pulumi/aws": "^6.0.0",
+    "@pulumi/aws-native": "^1.0.0",
+    "@pulumi/command": "^1.0.0",
+    "@pulumi/pulumi": "^3.0.0",
+    "@pulumi/random": "^4.0.0"
+  },
   "devDependencies": {
     "@biomejs/biome": "^1.5.0",
+    "@pulumi/aws": "^6.83.0",
+    "@pulumi/aws-native": "^1.30.0",
+    "@pulumi/command": "^1.1.0",
+    "@pulumi/pulumi": "^3.181.0",
+    "@pulumi/random": "^4.18.2",
     "@swc/core": "^1.4.2",
     "@types/mime-types": "^2.1.4",
     "@types/node": "^20.10.7",
@@ -48,11 +60,6 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "@pulumi/aws": "^6.0.0",
-    "@pulumi/aws-native": "^1.0.0",
-    "@pulumi/command": "^1.0.0",
-    "@pulumi/pulumi": "^3.0.0",
-    "@pulumi/random": "^4.0.0",
     "mime-types": "^2.0.0"
   }
 }

@@ -17,7 +17,7 @@ export default () => {
   const { url } = saws.staticSite(ctx, {
     bucket,
     domain,
-    adapter: saws.singlePageApplicationAdapter(),
+    adapter: saws.spaAdapter(),
   });
 
   return { url };

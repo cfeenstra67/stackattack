@@ -23,15 +23,15 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^16.5.0",
+    "drizzle-kit": "^0.31.0",
     "drizzle-orm": "^0.43.1",
     "express": "^5.1.0",
-    "pg": "^8.15.6",
-    "drizzle-kit": "^0.31.0"
+    "pg": "^8.15.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.5.0",
     "@pulumi/aws": "^6.83.0",
-    "@pulumi/pulumi": "^3.178.0",
+    "@pulumi/pulumi": "^3.181.0",
     "@stackattack/aws": "workspace:*",
     "@types/node": "^20.10.7",
     "@types/pg": "^8.11.14",
