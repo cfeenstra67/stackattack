@@ -1,5 +1,18 @@
 # @stackattack/aws
 
+## 0.5.0
+
+### Minor Changes
+
+- 47db8c2: Added SPA adapter for static site component
+- 595b0dd: Added nat: "multi" option to VPC component for per-subnet NAT gateways
+
+### Patch Changes
+
+- 2b0b431: Fix cidr allocation order for subnets
+- a758e19: Remove default security group management
+- 9ca0cf0: Decouple security group rules from default SG
+
 ## 0.5.0-dev.3
 
 ### Patch Changes
