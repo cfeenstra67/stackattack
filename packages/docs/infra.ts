@@ -2,7 +2,15 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import * as saws from "@stackattack/aws";
 
-function githubRolePolicy(bucketArn: pulumi.Input<string>) {
+interface GithubRolePolicyArgs {
+  bucketArn: pulumi.Input<string>;
+  distributionArn: pulumi.Input<string>;
+}
+
+function githubRolePolicy({
+  bucketArn,
+  distributionArn,
+}: GithubRolePolicyArgs) {
   return aws.iam.getPolicyDocumentOutput({
     statements: [
       {
@@ -24,6 +32,10 @@ function githubRolePolicy(bucketArn: pulumi.Input<string>) {
         actions: ["s3:PutObject*", "s3:DeleteObject"],
         resources: [bucketArn, pulumi.interpolate`${bucketArn}/*`],
       },
+      {
+        actions: ["cloudfront:UpdateDistribution"],
+        resources: [distributionArn],
+      },
     ],
   });
 }
@@ -38,7 +50,7 @@ export default () => {
     paths: ["./dist"],
   });
 
-  saws.staticSite(ctx, {
+  const { url, distribution } = saws.staticSite(ctx, {
     bucket,
     domain: domainName,
     adapter: saws.astroAdapter(),
@@ -46,9 +58,12 @@ export default () => {
 
   const githubRole = saws.githubRole(ctx, {
     repo: "cfeenstra67/stackattack",
-    policy: githubRolePolicy(bucket.arn).json,
+    policy: githubRolePolicy({
+      bucketArn: bucket.arn,
+      distributionArn: distribution.arn,
+    }).json,
     openIdProvider: null,
   });
 
-  return { url: `https://${domainName}`, githubRoleArn: githubRole.arn };
+  return { url, githubRoleArn: githubRole.arn };
 };
