@@ -15,7 +15,7 @@
  *
  * ## Usage
  *
- * After deployment, use the AWS CLI to download the client configuration:
+ * After deployment, you can retrieve your client configuration from your stack output and write it to a file, like so:
  *
  * ```bash
  * # Export the client config from Pulumi outputs
@@ -30,7 +30,7 @@
  *
  * ## Costs
  *
- * **Warning**: Using this component is quite expensive relative to other options. It's a simple way to connect to private resources in AWS, but be careful using this approach if you are cost-sensitive.
+ * **Warning**: Using this component is quite expensive relative to other options. It's a simple, reliable way to connect to private resources in AWS without any third-party services, but be careful using this approach if you are cost-sensitive.
  *
  * Client VPN pricing includes both endpoint charges and connection hours:
  * - **Endpoint charge**: $0.10/hour (~$73/month) _per subnet association_ whether connections are active or not. A subnet association will be created for each subnet passed in `privateSubnetIds`, so be aware of this and only pass the subnet IDs that you'd like to create subnet associations with.

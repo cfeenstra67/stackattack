@@ -42,8 +42,7 @@
  * - [cluster](/components/cluster) - Provides compute capacity for running services
  * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
  * - [load-balancer](/components/load-balancer) - Routes external traffic to services
- * - [database](/components/database) - Provides persistent data storage for services
- *
+ * 
  * ## Costs
  *
  * ECS service costs depend on the underlying compute resources and are **usage-based**:

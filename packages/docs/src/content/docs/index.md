@@ -1,6 +1,6 @@
 ---
 title: Stackattack - Production-Ready Infrastructure Components for Pulumi
-description: Deploy secure, scalable AWS infrastructure with minimal code. TypeScript components for VPC, ECS, RDS, S3, and more. Infrastructure as code made simple.
+description: Production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal code
 template: splash
 hero:
   title: Stackattack

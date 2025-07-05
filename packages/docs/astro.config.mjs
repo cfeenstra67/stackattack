@@ -92,9 +92,30 @@ export default defineConfig({
       {
         tag: 'meta',
         attrs: {
+          property: 'og:image',
+          content: '/social-image.png'
+        }
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          property: 'twitter:image',
+          content: '/social-image.png'
+        }
+      },
+      {
+        tag: 'meta',
+        attrs: {
           name: 'twitter:card',
           content: 'summary_large_image',
         },
+      },
+      {
+        tag: 'meta',
+        attrs: {
+          name: 'twitter:creator',
+          content: '@camfeen67'
+        }
       },
       // Google Analytics
       {

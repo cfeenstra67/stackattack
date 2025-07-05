@@ -43,6 +43,11 @@
  * # View CloudWatch alarms
  * aws cloudwatch describe-alarms --alarm-names your-alarm-name
  * ```
+ * 
+ * ## Related Components
+ *
+ * Autoscaling work together with other Stackattack components:
+ * - [service](/components/service) - The autoscaling component is used to scale services based on Cloudwatch metrics.
  *
  * ## Costs
  *

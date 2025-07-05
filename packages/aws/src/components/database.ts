@@ -62,7 +62,6 @@
  *
  * Databases work together with other Stackattack components:
  * - [vpc](/components/vpc) - Provides secure private networking for database access
- * - [service](/components/service) - Connects to databases for persistent data storage
  *
  * ## Costs
  *

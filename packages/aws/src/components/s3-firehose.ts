@@ -50,6 +50,10 @@
  * aws athena start-query-execution --query-string \
  *   "SELECT * FROM events WHERE year='2024' LIMIT 10"
  * ```
+ * ## Related Components
+ *
+ * S3 firehoses work together with other Stackattack components:
+ * - [bucket](/components/bucket) - Buckets are used to store the data that's written to the firehose.
  *
  * ## Costs
  *

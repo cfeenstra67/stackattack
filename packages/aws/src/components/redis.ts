@@ -17,27 +17,12 @@
  *
  * ## Usage
  *
- * After deploying a Redis cluster, you can connect and manage it using:
- *
- * **AWS CLI:**
- * ```bash
- * # View cluster details
- * aws elasticache describe-cache-clusters --cache-cluster-id your-redis-cluster
- *
- * # View cluster status and endpoints
- * aws elasticache describe-cache-clusters --cache-cluster-id your-redis-cluster --show-cache-node-info
- *
- * # View parameter group settings
- * aws elasticache describe-cache-parameter-groups --cache-parameter-group-name your-param-group
- *
- * # Create manual snapshot
- * aws elasticache create-snapshot --cache-cluster-id your-redis-cluster --snapshot-name manual-snapshot-$(date +%Y%m%d)
- * ```
+ * After deploying a Redis cluster, you can connect to it using:
  *
  * **Direct Connection:**
  * ```bash
  * # Connect using redis-cli from an EC2 instance in the same VPC
- * redis-cli -h your-redis-endpoint.cache.amazonaws.com -p 6379
+ * redis-cli -u redis://your-redis-endpoint.cache.amazonaws.com:6379/0
  *
  * # Test basic operations
  * SET mykey "Hello Redis"
@@ -63,7 +48,6 @@
  *
  * Redis clusters work together with other Stackattack components:
  * - [vpc](/components/vpc) - Provides secure private networking for Redis access
- * - [service](/components/service) - Connects to Redis for caching and session storage
  *
  * ## Costs
  *
@@ -86,11 +70,10 @@
  * - Database query caching: Can range from MBs to GBs depending on query complexity
  *
  * Cost optimization strategies:
- * - Use `cache.t4g.micro` for development and small applications
+ * - Start small; use `cache.t4g.micro` for development and small applications. Unless you're using redis as a primary data store or a cache for a large amount of data, there's a good chance you won't need anything bigger than that for some time.
  * - Monitor memory utilization and scale instance type as needed
  * - Set appropriate TTL values to prevent memory leaks
  * - Use Redis eviction policies like `allkeys-lru` for automatic cleanup
- * - Consider reserved instances for predictable workloads (up to 56% savings)
  *
  * See [ElastiCache Pricing](https://aws.amazon.com/elasticache/pricing/) for current rates.
  */
