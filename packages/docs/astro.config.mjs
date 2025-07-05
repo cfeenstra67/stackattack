@@ -13,6 +13,7 @@ export default defineConfig({
     favicon: '/favicon.ico',
     logo: {
       src: './src/assets/logo.svg',
+      alt: 'A cute hedgehog picking up a building block',
       replacesTitle: true,
     },
     customCss: [
@@ -144,7 +145,8 @@ export default defineConfig({
             "@context" : "https://schema.org",
             "@type" : "WebSite",
             "name" : "Stackattack",
-            "url" : "https://stackattack.camfeenstra.com"
+            "alternateNames": ["stackattack.camfeenstra.com"],
+            "url" : "https://stackattack.camfeenstra.com/"
           }
         `
       }
