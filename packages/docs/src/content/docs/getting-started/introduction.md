@@ -5,13 +5,13 @@ description: Production-ready AWS infrastructure components for Pulumi
 
 <div class="intro-hero">
 
-# Welcome to StackAttack
+# Welcome to Stackattack
 
-StackAttack provides a curated collection of high-level infrastructure components built on top of Pulumi. It allows you to deploy your applications on robust, secure infrastructure without giving up any control or spending days putting it together.
+Stackattack provides a curated collection of high-level infrastructure components built on top of Pulumi. It allows you to deploy your applications on robust, secure infrastructure without giving up any control or spending days putting it together.
 
 </div>
 
-## Philsophy
+## Philosophy
 
 Stackattack was created for one simple reason: **there's too much code needed to get up and running with infra-as-code**. Most of the time, putting up infrastructure with IaC tools requires a slow, iterative process of cross referencing Pulumi/Terraform docs, cross-referencing them with AWS docs, and trial-and-error to get things working.
 
@@ -42,10 +42,10 @@ saws.staticSite(ctx, {
 Ready to get started? Here's your path forward:
 
 **[Installation](/getting-started/installation/)**  
-Set up StackAttack in your project
+Set up Stackattack in your project
 
 **[Quick Start](/getting-started/quick-start/)**  
-Build your first infrastructure with StackAttack
+Build your first infrastructure with Stackattack
 
 **[Components](/components/)**  
 Explore the available infrastructure components

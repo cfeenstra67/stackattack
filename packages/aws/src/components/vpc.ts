@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * VPCs in AWS are isolated virtual networks that provide the networking foundation for your applications. StackAttack creates VPCs with public and private subnets across multiple availability zones, internet gateways, NAT gateways, and VPC endpoints.
+ * VPCs in AWS are isolated virtual networks that provide the networking foundation for your applications. Stackattack creates VPCs with public and private subnets across multiple availability zones, internet gateways, NAT gateways, and VPC endpoints.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -32,7 +32,7 @@
  *
  * ## Related Components
  *
- * VPCs provide the networking foundation for other StackAttack components:
+ * VPCs provide the networking foundation for other Stackattack components:
  * - [cluster](/components/cluster) - Requires VPC networking for ECS instances
  * - [service](/components/service) - Runs in VPC private subnets
  * - [database](/components/database) - Deployed in VPC private subnets for security
@@ -45,13 +45,13 @@
  *
  * - **VPC, subnets, route tables, security groups** - No charge for the basic networking infrastructure.
  *
- * - **NAT Gateway** - StackAttack creates NAT Gateway(s) for private subnets (~$45/month + $0.045/GB processed apiece). This enables private subnet instances to access the internet while remaining inaccessible from the internet. If you pass `nat: "multi"` one NAT gateway per private subnet will be created, whereas if you pass `nat: "single"` only one will be created for all private subnets. Passing `nat: "none"` will not create a NAT gateway, but resources in your private subnets will not have access to the public internet.
+ * - **NAT Gateway** - Stackattack creates NAT Gateway(s) for private subnets (~$45/month + $0.045/GB processed apiece). This enables private subnet instances to access the internet while remaining inaccessible from the internet. If you pass `nat: "multi"` one NAT gateway per private subnet will be created, whereas if you pass `nat: "single"` only one will be created for all private subnets. Passing `nat: "none"` will not create a NAT gateway, but resources in your private subnets will not have access to the public internet.
  *
  * - **Public IP addresses** - Each public IP address costs ~$3.60/month. One public IP address is allocated per NAT gateway.
  *
  * - **Internet Gateway** - Free for the gateway itself, but data transfer charges apply (~$0.09/GB out to internet).
  *
- * - **Instance Connect Endpoints** - StackAttack creates these for secure SSH access (~$3.60/month per endpoint + $0.10/hour when in use).
+ * - **Instance Connect Endpoints** - Stackattack creates these for secure SSH access (~$3.60/month per endpoint + $0.10/hour when in use).
  *
  * - **VPC Flow Logs** - If enabled, logs cost ~$0.50/GB stored in CloudWatch Logs. Can generate significant data if traffic is high.
  *

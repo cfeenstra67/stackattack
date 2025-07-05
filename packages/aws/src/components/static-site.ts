@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * Static sites in AWS combine S3 storage with CloudFront CDN for fast global content delivery. StackAttack creates static websites with custom domains, SSL certificates, and framework-specific routing (like Astro).
+ * Static sites in AWS combine S3 storage with CloudFront CDN for fast global content delivery. Stackattack creates static websites with custom domains, SSL certificates, and framework-specific routing (like Astro).
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -60,7 +60,7 @@
  *
  * ## Related Components
  *
- * Static sites work together with other StackAttack components:
+ * Static sites work together with other Stackattack components:
  * - [bucket](/components/bucket) - Stores website files in S3
  * - [certificate](/components/certificate) - Provides SSL certificates for HTTPS domains
  *

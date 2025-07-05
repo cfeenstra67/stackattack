@@ -1,8 +1,8 @@
 ---
 title: Quick Start
-description: Build your first infrastructure with StackAttack AWS
+description: Build your first infrastructure stack with Stackattack
 ---
-This guide will help you create your first infrastructure using StackAttack AWS components.
+This guide will help you create your first infrastructure using Stackattack AWS components.
 
 ## (If needed) Create a New Pulumi Project
 

@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * ElastiCache Redis in AWS provides managed Redis instances for caching and session storage. StackAttack creates Redis clusters with secure networking, parameter groups, and proper security group configuration.
+ * ElastiCache Redis in AWS provides managed Redis instances for caching and session storage. Stackattack creates Redis clusters with secure networking, parameter groups, and proper security group configuration.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -61,7 +61,7 @@
  *
  * ## Related Components
  *
- * Redis clusters work together with other StackAttack components:
+ * Redis clusters work together with other Stackattack components:
  * - [vpc](/components/vpc) - Provides secure private networking for Redis access
  * - [service](/components/service) - Connects to Redis for caching and session storage
  *

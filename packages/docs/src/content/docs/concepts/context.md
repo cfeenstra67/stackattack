@@ -3,7 +3,7 @@ title: Context
 description: Understanding the Context system for consistent resource management
 ---
 
-The `Context` is the foundation of StackAttack AWS. It provides a consistent way to name, tag, and organize your infrastructure resources.
+The `Context` is a foundational piece of Stackattack. It provides a consistent way to name, tag, and organize your infrastructure resources.
 
 ## What is Context?
 
@@ -33,7 +33,7 @@ const ctx = context({
 
 ## Using Context with Components
 
-Every StackAttack component takes a Context as its first parameter:
+Every Stackattack component takes a Context as its first parameter:
 
 ```typescript
 const storage = saws.bucket(ctx, {

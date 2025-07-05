@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * S3 buckets in AWS are the standard way to store files within "buckets". StackAttack creates S3 buckets with secure defaults including encryption and public access blocking.
+ * S3 buckets in AWS are the standard way to store files within "buckets". Stackattack creates S3 buckets with secure defaults including encryption and public access blocking.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";

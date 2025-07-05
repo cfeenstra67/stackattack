@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * RDS databases in AWS provide managed relational database instances. StackAttack creates PostgreSQL databases with secure networking, automatic backups, encryption at rest, and SSL connections enabled by default.
+ * RDS databases in AWS provide managed relational database instances. Stackattack creates PostgreSQL databases with secure networking, automatic backups, encryption at rest, and SSL connections enabled by default.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -60,7 +60,7 @@
  *
  * ## Related Components
  *
- * Databases work together with other StackAttack components:
+ * Databases work together with other Stackattack components:
  * - [vpc](/components/vpc) - Provides secure private networking for database access
  * - [service](/components/service) - Connects to databases for persistent data storage
  *
@@ -72,7 +72,7 @@
  *
  * - **Storage costs** - General Purpose SSD storage is ~$0.115/GB/month. The default 30GB allocation costs ~$3.45/month. Storage automatically scales as your database grows.
  *
- * - **Backup storage** - StackAttack enables 7-day backup retention. Backups within your allocated storage are free; additional backup storage is ~$0.095/GB/month.
+ * - **Backup storage** - Stackattack enables 7-day backup retention. Backups within your allocated storage are free; additional backup storage is ~$0.095/GB/month.
  *
  * - **Data transfer** - Minimal costs for database connections within the same VPC (typically free). Cross-region replication incurs standard AWS data transfer rates.
  *

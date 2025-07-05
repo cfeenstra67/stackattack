@@ -11,7 +11,7 @@
   
   <!-- Text -->
   <text x="12" y="26" font-family="'IBM Plex Mono', monospace" font-size="16" font-weight="500" fill="url(#gradient)">
-    $ StackAttack
+    $ Stackattack
   </text>
   
   <!-- Terminal cursor -->

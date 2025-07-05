@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: How to install and set up StackAttack AWS
+description: How to install and set up Stackattack
 ---
 
 ## Prerequisites
@@ -29,4 +29,4 @@ pnpm add @stackattack/aws
 
 ## Next Steps
 
-- [Quick Start](/getting-started/quick-start/) - Start using StackAttack's components to deploy your application.
+- [Quick Start](/getting-started/quick-start/) - Start using Stackattack's components to deploy your application.

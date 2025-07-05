@@ -48,13 +48,6 @@
  *       - run: aws s3 ls  # Now authenticated with AWS
  * ```
  *
- * Use AWS CLI to verify role configuration:
- *
- * ```bash
- * aws iam get-role --role-name my-github-role
- * aws iam list-attached-role-policies --role-name my-github-role
- * ```
- *
  * ## Costs
  *
  * GitHub Actions OIDC integration has no additional AWS costs beyond standard IAM usage:

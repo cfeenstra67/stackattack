@@ -72,7 +72,7 @@ export default defineConfig({
         tag: 'meta',
         attrs: {
           name: 'author',
-          content: 'StackAttack',
+          content: 'Stackattack',
         },
       },
       {
@@ -86,7 +86,7 @@ export default defineConfig({
         tag: 'meta',
         attrs: {
           property: 'og:site_name',
-          content: 'StackAttack AWS',
+          content: 'Stackattack',
         },
       },
       {

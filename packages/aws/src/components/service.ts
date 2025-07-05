@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * ECS services in AWS provide a managed way to run containerized applications. StackAttack creates ECS services with task definitions, load balancer integration, health checks, and service discovery.
+ * ECS services in AWS provide a managed way to run containerized applications. Stackattack creates ECS services with task definitions, load balancer integration, health checks, and service discovery.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -38,7 +38,7 @@
  *
  * ## Related Components
  *
- * Services work together with other StackAttack components:
+ * Services work together with other Stackattack components:
  * - [cluster](/components/cluster) - Provides compute capacity for running services
  * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
  * - [load-balancer](/components/load-balancer) - Routes external traffic to services

@@ -31,7 +31,7 @@
  *
  * ## Related Components
  *
- * Clusters work together with other StackAttack components:
+ * Clusters work together with other Stackattack components:
  * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
  * - [service](/components/service) - Runs containerized applications on the cluster
  * - [load-balancer](/components/load-balancer) - Routes external traffic to services on the cluster

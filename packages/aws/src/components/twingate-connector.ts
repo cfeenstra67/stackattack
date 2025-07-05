@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * Twingate connectors provide secure zero-trust network access to private resources in AWS. StackAttack deploys Twingate connectors as ECS services to create encrypted tunnels between your Twingate network and AWS VPC.
+ * Twingate connectors provide secure zero-trust network access to private resources in AWS. Stackattack deploys Twingate connectors as ECS services to create encrypted tunnels between your Twingate network and AWS VPC.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -26,7 +26,7 @@
  *
  * ## Related Components
  *
- * Twingate connectors work with other StackAttack components:
+ * Twingate connectors work with other Stackattack components:
  * - [vpc](/components/vpc) - Provides the private network where the connector runs
  * - [cluster](/components/cluster) - Provides compute capacity for the connector service
  * - [service](/components/service) - Base service component that runs the Twingate container
@@ -75,7 +75,7 @@ export interface TwingateConnectorArgs {
  * The connector runs as an ECS service and creates an encrypted tunnel between your
  * Twingate network and AWS VPC, allowing secure access to private resources.
  *
- * @param ctx - The StackAttack context for resource configuration
+ * @param ctx - The Stackattack context for resource configuration
  * @param args - Configuration options for the Twingate connector
  * @returns The ECS service running the Twingate connector
  */

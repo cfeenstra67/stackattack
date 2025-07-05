@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * Application Load Balancers (ALBs) in AWS distribute incoming HTTP/HTTPS traffic across multiple targets. StackAttack creates ALBs with SSL termination, health checks, and integration with ECS services for high availability web applications.
+ * Application Load Balancers (ALBs) in AWS distribute incoming HTTP/HTTPS traffic across multiple targets. Stackattack creates ALBs with SSL termination, health checks, and integration with ECS services for high availability web applications.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -56,7 +56,7 @@
  *
  * ## Related Components
  *
- * Load balancers work together with other StackAttack components:
+ * Load balancers work together with other Stackattack components:
  * - [vpc](/components/vpc) - Provides public networking for internet-facing load balancers
  * - [service](/components/service) - Receives traffic routed through load balancers
  * - [certificate](/components/certificate) - Enables HTTPS termination at the load balancer

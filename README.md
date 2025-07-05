@@ -4,9 +4,9 @@ Production-ready AWS infrastructure components for Pulumi, written in Typescript
 
 **[Get Started](https://stackattack.camfeenstra.com/getting-started/quick-start)** | **[Components](https://stackattack.camfeenstra.com/components)** | **[Examples](https://github.com/cfeenstra67/stackattack/tree/main/examples)**
 
-## What is StackAttack?
+## What is Stackattack?
 
-StackAttack eliminates infrastructure boilerplate by providing battle-tested AWS components with good defaults built on Pulumi. Instead of writing hundreds of lines of infrastructure code, deploy production-ready applications with a fraction of the effort it takes to wire it all up yourself. The following config deploys service to ECS with a database in ~30 lines:
+Stackattack eliminates infrastructure boilerplate by providing battle-tested AWS components with good defaults built on Pulumi. Instead of writing hundreds of lines of infrastructure code, deploy production-ready applications with a fraction of the effort it takes to wire it all up yourself. The following config deploys service to ECS with a database in ~30 lines:
 
 ```typescript
 import * as saws from "@stackattack/aws";

@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * ACM certificates in AWS provide SSL/TLS certificates for secure HTTPS connections. StackAttack creates certificates with automatic DNS validation through Route53, supporting wildcards and multiple domains.
+ * ACM certificates in AWS provide SSL/TLS certificates for secure HTTPS connections. Stackattack creates certificates with automatic DNS validation through Route53, supporting wildcards and multiple domains.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
@@ -27,7 +27,7 @@
  *
  * ## Related Components
  *
- * Certificates work together with other StackAttack components:
+ * Certificates work together with other Stackattack components:
  * - [load-balancer](/components/load-balancer) - Uses certificates for HTTPS termination
  * - [static-site](/components/static-site) - Uses certificates for secure CloudFront distributions
  *

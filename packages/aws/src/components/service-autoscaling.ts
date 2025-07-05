@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * Application Auto Scaling in AWS provides automatic scaling for ECS services based on CloudWatch metrics. StackAttack creates auto scaling policies with CloudWatch alarms that can scale services up or down based on custom metrics.
+ * Application Auto Scaling in AWS provides automatic scaling for ECS services based on CloudWatch metrics. Stackattack creates auto scaling policies with CloudWatch alarms that can scale services up or down based on custom metrics.
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
