@@ -22,7 +22,7 @@ const certificate = saws.certificate(ctx, { domain });
 
 const loadBalancer = saws.loadBalancer(ctx, {
   network: vpc.network("public"),
-  cerificate
+  certificate
 });
 
 const cluster = saws.cluster(ctx, { network: vpc.network("private") });
