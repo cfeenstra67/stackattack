@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.5.1
+
+### Patch Changes
+
+- c043016: README improvement
+
 ## 0.5.0
 
 ### Minor Changes
