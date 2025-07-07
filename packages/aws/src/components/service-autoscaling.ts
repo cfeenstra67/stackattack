@@ -43,7 +43,7 @@
  * # View CloudWatch alarms
  * aws cloudwatch describe-alarms --alarm-names your-alarm-name
  * ```
- * 
+ *
  * ## Related Components
  *
  * Autoscaling work together with other Stackattack components:

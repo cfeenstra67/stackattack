@@ -58,7 +58,7 @@
  * pulumi up
  * ```
  *
- * This pattern enables you to deploy shared infrastructure separately from applications, allowing for faster deployments and better isolation. See the [Structuring Stacks](/working-with-pulumi/structuring-stacks) guide for comprehensive patterns and best practices.
+ * This pattern enables you to deploy shared infrastructure separately from applications, allowing for faster deployments and better isolation. See the [Structuring Stacks](/working-with-pulumi/structuring-stacks) guide for recommendations on separating your resources into stacks.
  */
 
 import * as pulumi from "@pulumi/pulumi";

@@ -59,6 +59,15 @@ export default defineConfig({
         label: 'Utilities',
         autogenerate: { directory: 'utilities' },
       },
+      {
+        label: 'Examples',
+        link: 'https://github.com/cfeenstra67/stackattack/tree/main/examples',
+        attrs: { target: '_blank' }
+      },
+      {
+        label: 'Support',
+        link: '/support'
+      }
     ],
     head: [
       // SEO meta tags

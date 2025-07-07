@@ -451,8 +451,6 @@ title: Components
 description: AWS infrastructure components for Pulumi
 ---
 
-# Components
-
 Stackattack provides opinionated, secure-by-default AWS infrastructure components built on top of Pulumi.
 
 ## Available Components

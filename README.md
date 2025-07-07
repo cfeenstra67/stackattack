@@ -1,6 +1,6 @@
 # Stackattack
 
-Production-ready AWS infrastructure components for Pulumi, written in Typescript. Deploy complex applications with minimal code using secure, opinionated defaults.
+Stackattack provides a curated collection of high-level infrastructure components built on top of Pulumi. It allows you to deploy your applications on robust, secure infrastructure without giving up any control or spending days putting it together. Components are just functions, making them copy-paste friendly, so you can choose to use Stackattack as a library or just a set of working examples that you can take and modify for your own purposes.
 
 **[Get Started](https://stackattack.camfeenstra.com/getting-started/quick-start)** | **[Components](https://stackattack.camfeenstra.com/components)** | **[Examples](https://github.com/cfeenstra67/stackattack/tree/main/examples)**
 
@@ -11,49 +11,51 @@ Stackattack eliminates infrastructure boilerplate by providing battle-tested AWS
 ```typescript
 import * as saws from "@stackattack/aws";
 
-const ctx = saws.context();
-const domain = "api.mydomain.com";
+export default () => {
+  const ctx = saws.context();
+  const domain = "api.mydomain.com";
 
-const vpc = saws.vpc(ctx);
+  const vpc = saws.vpc(ctx);
 
-const db = saws.database(ctx, { network: vpc.network("private") });
+  const db = saws.database(ctx, { network: vpc.network("private") });
 
-const certificate = saws.certificate(ctx, { domain });
+  const certificate = saws.certificate(ctx, { domain });
 
-const loadBalancer = saws.loadBalancer(ctx, {
-  network: vpc.network("public"),
-  certificate
-});
+  const loadBalancer = saws.loadBalancer(ctx, {
+    network: vpc.network("public"),
+    certificate
+  });
 
-const cluster = saws.cluster(ctx, { network: vpc.network("private") });
+  const cluster = saws.cluster(ctx, { network: vpc.network("private") });
 
-const app = saws.service(ctx, {
-  cluster,
-  domain,
-  image: "my-app:latest",
-  loadBalancer,
-  port: 3000,
-  env: { DATABASE_URL: db.url }
-});
+  const app = saws.service(ctx, {
+    cluster,
+    domain,
+    image: "my-app:latest",
+    loadBalancer,
+    port: 3000,
+    env: { DATABASE_URL: db.url }
+  });
 
-export const appUrl = app.url;
+  return { appUrl: app.url };
+};
 ```
+
+_NOTE_: While this example is meant to demonstrate how much you can do with Stackattack with a small amount of code, it is not recommended to structure your infrastructure code this way with everying in a single stack. See the [Structuring Stacks](https://stackattack.camfeenstra.com/working-with-pulumi/structuring-stacks/) section for recommendations on how separating your resources into stacks.
 
 ## Key Features
 
-- **Secure by Default** - Encryption, private subnets, least-privilege IAM
+- **Secure by Default** - All components are designed with secure defaults in mind, allowing you to get started quickly without worrying about security debt
 - **Copy/Paste Friendly** - Components are just functions, no heavy abstractions--you can copy/paste and modify them to fit your use-case. It's always easiest to start with something that works!
+- **Composable** - Stackattack components are designed to work well with each other and your existing infrastructure resources seamlessly
+- **Well Documented** - Comprehensive guides and examples. Each component contains usage examples and cost implications
 - **Deploy in Minutes** - From zero to production infrastructure
 - **TypeScript First** - Full type safety and excellent IDE support
-- **Composable** - Mix and match components for any architecture
-- **Well Documented** - Comprehensive guides and examples. Each component contains usage examples and cost implications.
 
 ## Documentation
 
 - [Full Documentation](https://stackattack.camfeenstra.com)
 - [Getting Started Guide](https://stackattack.camfeenstra.com/getting-started/introduction/)
-- [Component Reference](https://stackattack.camfeenstra.com/components/)
-- [Working with Pulumi](https://stackattack.camfeenstra.com/working-with-pulumi/)
 - [View all components](https://stackattack.camfeenstra.com/components/)
 
 ## Support and Feature Requests
