@@ -6,9 +6,9 @@ description: This section offers recommendations on how to structure the stacks 
 When deploying infrastructure with Pulumi, you often do not want to deploy all of your resources as a single stack. There are a few reasons for this:
 - Isolation - In Pulumi, when you run `pulumi preview`/`pulumi up` it diffs/deploys the entire stack at once; there's no mechanism to target a subset of resources when planning/applying or anything like that. Separating stacks gives you guarantees that resources in one stack won't be altered by another stack's deployment. For example, deploying my API services won't drop our production database.
 - Reuse - You can use `pulumi config` to templatize your configs and deploy copies of stacks that may or may not share the same infrastructure.
-- Performance - as the number of resources in a stack grows, it takes longer and longer to do `pulumi up`, `pulumi refresh`, etc. If you add all of your resources to a single pulumi stack, deploying individual services or components will get slower and slower.  Restructuring/splitting up existing stacks can be a lot of work.
+- Performance - as the number of resources in a stack grows, it takes longer and longer to do `pulumi up`, `pulumi refresh`, etc. If you add all of your resources to a single pulumi stack, deploying individual services or components will get slower and slower.  Restructuring/splitting up existing stacks can be a lot of work, so it's a good idea to put at least a bit of thought into how you set up your stacks the first time.
 
-You can use outputs and stack reference to pass data between stacks, and Stackattack provides the [stackRef](/utilities/stack-ref) function which adds type safety. A simple example, using a shared wildcard certificate with a static Astro site deployed via Cloudfront:
+You can use outputs and stack references to pass data between stacks, and Stackattack provides the [stackRef](/utilities/stack-ref) function which adds type safety. A simple example, using a shared wildcard certificate with a static Astro site deployed via Cloudfront:
 
 First, add the `stack-type` key to your pulumi config:
 ```bash
