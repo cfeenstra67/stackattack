@@ -5,6 +5,7 @@ import {
   DeclarationReflection,
   ParameterReflection,
   ReflectionKind,
+  SignatureReflection,
 } from "typedoc";
 
 // Helper function to format TypeDoc comments
@@ -51,6 +52,32 @@ function formatParameters(
   return result;
 }
 
+function formatReturnType(
+  signature: SignatureReflection | undefined,
+  typeMap: Map<string, { componentName: string; anchor: string }>,
+  isUtility = false,
+  hasMainFunction = true,
+): string {
+  if (!signature?.type) return "";
+
+  const headingLevel = isUtility || !hasMainFunction ? "###" : "####";
+
+  let result = `\n${headingLevel} Returns\n\n`;
+  const typeStr = signature.type.toString();
+
+  const linkedType = formatTypeWithLinks(typeStr, typeMap);
+  const description = formatComment(signature.comment);
+
+  const formattedType = formatTypeAsCode(linkedType);
+  const cleanedType = formattedType
+    .replace(/`\s+\[/g, "`[")
+    .replace(/\]\s+`/g, "]`");
+
+  result += `- (${cleanedType}) - ${description}\n`;
+
+  return result;
+}
+
 // Helper function to convert types to links where possible
 function formatTypeWithLinks(
   typeStr: string,
@@ -66,9 +93,6 @@ function formatTypeWithLinks(
       `[${typeName}](${typeInfo.componentName}${typeInfo.anchor})`,
     );
   }
-
-  // Handle Context type (from context.ts, not in components)
-  result = result.replace(/\bContext\b/g, "`[Context](/concepts/context/)`");
 
   return result;
 }
@@ -258,6 +282,7 @@ sourceUrl: https://github.com/cfeenstra67/stackattack/blob/main/packages/aws/src
       isUtility,
       true,
     )}\n`;
+    markdown += formatReturnType(mainFunction.signatures?.[0], typeMap);
   }
 
   // Group remaining declarations by type
@@ -444,14 +469,40 @@ async function generateDocs() {
           });
         }
 
+        const children = child.children?.sort((a, b) => {
+          let aType = false;
+          if (
+            a.kind === ReflectionKind.Interface ||
+            a.kind === ReflectionKind.TypeAlias
+          ) {
+            aType = true;
+          }
+          let bType = false;
+          if (
+            b.kind === ReflectionKind.Interface ||
+            b.kind === ReflectionKind.TypeAlias
+          ) {
+            bType = true;
+          }
+          if (aType === bType) {
+            return 0;
+          }
+          return aType ? 1 : -1;
+        });
+
         // If this is a module, get its children (the actual exports)
-        if (child.kind === ReflectionKind.Module && child.children) {
+        if (child.kind === ReflectionKind.Module && children) {
           // Store the module itself for potential @packageDocumentation comment
           const moduleDecl = child as DeclarationReflection;
           targetMap.get(targetName)!.declarations.push(moduleDecl);
 
-          for (const decl of child.children) {
+          const anchorCounts: Record<string, number> = {};
+          for (const decl of children) {
             targetMap.get(targetName)!.declarations.push(decl);
+
+            const anchor = decl.name.toLowerCase();
+            anchorCounts[anchor] ??= -1;
+            anchorCounts[anchor]++;
 
             // Add to type map for cross-linking
             if (
@@ -464,9 +515,13 @@ async function generateDocs() {
                   : type === "concept"
                     ? `/concepts/${targetName}/`
                     : `/components/${targetName}/`;
+
+              const ct = anchorCounts[anchor];
+              const fullAnchor = ct === 0 ? anchor : `${anchor}-${ct}`;
+
               typeMap.set(decl.name, {
                 componentName: linkPath,
-                anchor: `#${decl.name.toLowerCase()}`,
+                anchor: `#${fullAnchor}`,
               });
             }
           }

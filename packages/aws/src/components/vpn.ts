@@ -8,9 +8,15 @@
  *
  * const ctx = saws.context();
  * const vpc = saws.vpc(ctx);
- * const vpnEndpoint = saws.vpn(ctx, vpc);
+ * const vpn = saws.vpn(ctx, vpc);
  *
- * export const vpnClientConfig = vpnEndpoint.clientConfig;
+ * // If you'd only like to associate the VPN with a single subnet (cheapest option)
+ * // const vpn = saws.vpn(ctx, {
+ * //   ...vpc,
+ * //   privateSubnetIds: vpc.privateSubnetIds.slice(0, 1)
+ * // })
+ *
+ * export const vpnClientConfig = vpn.clientConfig;
  * ```
  *
  * ## Usage
@@ -39,7 +45,7 @@
  *
  * Cost optimization strategies:
  * - Use split tunneling (enabled by default) to avoid routing all traffic through AWS.
- * - AWS [recommends](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateClientVpnTargetNetwork.html) associating your client VPN endpoint with at least two subnets for availability, but you can associate a single subnet if you'd prefer. You are charged per subnet association per hour, so the number of subnets the VPN is associated with highly correlated with the cost.
+ * - AWS [recommends](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AssociateClientVpnTargetNetwork.html) associating your client VPN endpoint with at least two subnets for availability, but you can associate a single subnet if you'd prefer (see example above). You are charged per subnet association per hour, so the number of subnets the VPN is associated with highly correlated with the cost.
  *
  * See the [AWS VPN Pricing](https://aws.amazon.com/vpn/pricing/) for current rates.
  *
@@ -139,7 +145,7 @@ export function vpnCertificate(
 /**
  * Configuration for generating OpenVPN client configuration file.
  */
-interface GenerateClientConfigArgs {
+export interface ClientConfigFileArgs {
   /** Name used for the client configuration */
   name: pulumi.Input<string>;
   /** VPN server hostname (may contain wildcards) */
@@ -165,7 +171,7 @@ export function clientConfigFile({
   certificateChain,
   clientCertificate,
   clientPrivateKey,
-}: GenerateClientConfigArgs): pulumi.Output<string> {
+}: ClientConfigFileArgs): pulumi.Output<string> {
   const remote = pulumi
     .all([hostname, name])
     .apply(([h, name]) => h.replace("*", name));
@@ -200,13 +206,11 @@ verify-x509-name server name`;
 /**
  * Configuration options for creating an AWS Client VPN endpoint.
  */
-interface VpnArgs {
+export interface VpnArgs {
   /** VPC where the VPN endpoint will be created */
   vpc: pulumi.Input<VpcInput>;
   /** Private subnet IDs for VPN network associations */
   privateSubnetIds: pulumi.Input<string>[];
-  /** Public subnet IDs (currently unused but part of interface) */
-  publicSubnetIds: pulumi.Input<string>[];
   /** Pre-generated VPN certificates, will auto-generate if not provided */
   certificate?: pulumi.Input<VPNCertificateOutput>;
   /** Security group IDs to attach to the VPN endpoint */

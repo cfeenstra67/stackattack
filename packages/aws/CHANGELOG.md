@@ -1,5 +1,16 @@
 # @stackattack/aws
 
+## 0.6.0
+
+### Minor Changes
+
+- Add azs argument to vpc.network
+
+### Patch Changes
+
+- Remove unused publicSubnetIds arg from vpn, export vpn interfaces
+- Add default tags to context
+
 ## 0.5.1
 
 ### Patch Changes
