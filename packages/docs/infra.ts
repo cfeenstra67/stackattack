@@ -29,7 +29,15 @@ function githubRolePolicy({
         resources: ["*"],
       },
       {
-        actions: ["s3:PutObject*", "s3:DeleteObject", "s3:PutBucketTagging"],
+        actions: [
+          "lambda:TagResource",
+          "s3:PutBucketTagging",
+          "acm:AddTagsToCertificate",
+        ],
+        resources: ["*"],
+      },
+      {
+        actions: ["s3:PutObject*", "s3:DeleteObject"],
         resources: [bucketArn, pulumi.interpolate`${bucketArn}/*`],
       },
       {
