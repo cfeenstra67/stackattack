@@ -60,4 +60,4 @@ _NOTE_: While this example is meant to demonstrate how much you can do with Stac
 
 ## Support and Feature Requests
 
-Please [open an issue](https://github.com/cfeenstra67/stackattack/issues/new) if you have any trouble using stackattack or want to request additional components.
+Please [open an issue](https://github.com/cfeenstra67/stackattack/issues/new) if you have any trouble using Stackattack or want to request additional components.
