@@ -316,6 +316,7 @@ sourceUrl: https://github.com/cfeenstra67/stackattack/blob/main/packages/aws/src
         isUtility,
         !!mainFunction,
       )}\n`;
+      markdown += formatReturnType(func.signatures?.[0], typeMap);
     }
   }
 
