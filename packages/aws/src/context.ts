@@ -9,7 +9,7 @@
  * - **Tags** - Common tags applied to all resources
  * - **Hierarchical organization** - Ability to create nested contexts for different parts of your infrastructure
  *
- * The reasoning for having a context is quite simple: it allows you to abstract groups of components into functions without name collisions. For example, without a context, if you write a function like the following:
+ * The reasoning for having a context is quite simple: it allows you to abstract groups of resources into functions without name collisions. For example, without a context, if you write a function like the following:
  * ```typescript
  * import * as aws from '@pulumi/aws';
  * import * as pulumi from '@pulumi/pulumi';
