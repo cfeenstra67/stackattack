@@ -47,7 +47,7 @@
  * ## Related Components
  *
  * Redis clusters work together with other Stackattack components:
- * - [vpc](/components/vpc) - Provides secure private networking for Redis access
+ * - [vpc](/components/vpc/) - Provides secure private networking for Redis access
  *
  * ## Costs
  *

@@ -27,9 +27,9 @@
  * ## Related Components
  *
  * Twingate connectors work with other Stackattack components:
- * - [vpc](/components/vpc) - Provides the private network where the connector runs
- * - [cluster](/components/cluster) - Provides compute capacity for the connector service
- * - [service](/components/service) - Base service component that runs the Twingate container
+ * - [vpc](/components/vpc/) - Provides the private network where the connector runs
+ * - [cluster](/components/cluster/) - Provides compute capacity for the connector service
+ * - [service](/components/service/) - Base service component that runs the Twingate container
  *
  * ## Costs
  *

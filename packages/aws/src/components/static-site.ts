@@ -61,8 +61,8 @@
  * ## Related Components
  *
  * Static sites work together with other Stackattack components:
- * - [bucket](/components/bucket) - Stores website files in S3
- * - [certificate](/components/certificate) - Provides SSL certificates for HTTPS domains
+ * - [bucket](/components/bucket/) - Stores website files in S3
+ * - [certificate](/components/certificate/) - Provides SSL certificates for HTTPS domains
  *
  * ## Costs
  *

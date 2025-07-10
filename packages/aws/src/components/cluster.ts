@@ -17,10 +17,10 @@
  *
  * ## Usage
  *
- * After deploying a cluster, you can deploy [services](/components/service) into it to run code in docker containers.
+ * After deploying a cluster, you can deploy [services](/components/service/) into it to run code in docker containers.
  *
  * **SSH Access to EC2 Instances:**
- * _NOTE_: if your instances are within a private subnet (as is likely the case), you need a way to access your instances. If you created your vpc with the [vpc](/components/vpc) component, an EC2 instance connect endpoint is set up automatically.
+ * _NOTE_: if your instances are within a private subnet (as is likely the case), you need a way to access your instances. If you created your vpc with the [vpc](/components/vpc/) component, an EC2 instance connect endpoint is set up automatically.
  *
  * ```bash
  * # Connect to an instance using Instance Connect (no key pairs needed)
@@ -32,9 +32,9 @@
  * ## Related Components
  *
  * Clusters work together with other Stackattack components:
- * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
- * - [service](/components/service) - Runs containerized applications on the cluster
- * - [load-balancer](/components/load-balancer) - Routes external traffic to services on the cluster
+ * - [vpc](/components/vpc/) - Provides networking foundation with private/public subnets
+ * - [service](/components/service/) - Runs containerized applications on the cluster
+ * - [load-balancer](/components/load-balancer/) - Routes external traffic to services on the cluster
  *
  * ## Costs
  *
@@ -52,7 +52,7 @@
  * - Use spot instances for non-critical workloads (up to 90% savings)
  * - Enable cluster auto-scaling to scale to zero during low usage
  * - Monitor instance utilization and rightsize instance types
- * - Use [service](/components/service) placement strategies to maximize instance utilization
+ * - Use [service](/components/service/) placement strategies to maximize instance utilization
  *
  * See [EC2 Pricing](https://aws.amazon.com/ec2/pricing/) for current rates.
  */

@@ -53,7 +53,7 @@
  * ## Related Components
  *
  * S3 firehoses work together with other Stackattack components:
- * - [bucket](/components/bucket) - Buckets are used to store the data that's written to the firehose.
+ * - [bucket](/components/bucket/) - Buckets are used to store the data that's written to the firehose.
  *
  * ## Costs
  *

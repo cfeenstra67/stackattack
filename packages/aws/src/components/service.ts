@@ -39,15 +39,15 @@
  * ## Related Components
  *
  * Services work together with other Stackattack components:
- * - [cluster](/components/cluster) - Provides compute capacity for running services
- * - [vpc](/components/vpc) - Provides networking foundation with private/public subnets
- * - [load-balancer](/components/load-balancer) - Routes external traffic to services
+ * - [cluster](/components/cluster/) - Provides compute capacity for running services
+ * - [vpc](/components/vpc/) - Provides networking foundation with private/public subnets
+ * - [load-balancer](/components/load-balancer/) - Routes external traffic to services
  *
  * ## Costs
  *
  * ECS service costs depend on the underlying compute resources and are **usage-based**:
  *
- * - **EC2 instances** - If using EC2 capacity providers, you pay for the underlying EC2 instances (~$0.0116/hour for t3.micro). The [cluster](/components/cluster) component manages auto-scaling groups that can scale to zero when no tasks are running.
+ * - **EC2 instances** - If using EC2 capacity providers, you pay for the underlying EC2 instances (~$0.0116/hour for t3.micro). The [cluster](/components/cluster/) component manages auto-scaling groups that can scale to zero when no tasks are running.
  *
  * - **Fargate** - If using Fargate capacity providers, you pay per vCPU-hour (~$0.04048/vCPU/hour) and per GB-hour (~$0.004445/GB/hour). A 0.5 vCPU, 1GB task running 24/7 costs ~$15/month.
  *
@@ -56,7 +56,7 @@
  * - **CloudWatch Logs** - Log storage is ~$0.50/GB/month. Use the `logRetention` parameter to automatically delete old logs and control costs.
  *
  * Cost optimization strategies:
- * - Use the [cluster](/components/cluster) component's auto-scaling features to scale EC2 instances to zero during low usage
+ * - Use the [cluster](/components/cluster/) component's auto-scaling features to scale EC2 instances to zero during low usage
  * - Set appropriate `logRetention` periods (default: 30 days)
  * - Consider spot instances for non-critical workloads through capacity provider configuration
  *
@@ -345,7 +345,7 @@ export interface ServiceArgs extends TaskDefinitionArgs {
   orderedPlacementStrategies?: pulumi.Input<
     pulumi.Input<aws.types.input.ecs.ServiceOrderedPlacementStrategy>[]
   >;
-  /** Specify an auto-scaling configuration for your service. Cannot be used with `replicas`. See the [serviceAutoScaling](/components/service-autoscaling) component for argument documentation. */
+  /** Specify an auto-scaling configuration for your service. Cannot be used with `replicas`. See the [serviceAutoScaling](/components/service-autoscaling/) component for argument documentation. */
   autoScaling?: Omit<ServiceAutoScalingArgs, "service">;
 }
 

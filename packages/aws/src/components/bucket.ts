@@ -41,16 +41,16 @@
  * ## Related Components
  *
  * Buckets are a foundational component in AWS and integrate with several other components:
- * - [static-site](/components/static-site) - Serves files stored in S3 publicly using Cloudfront as a CDN with support for framework-specific routing.
- * - [s3-firehose](/components/s3-firehose) - Sets up a Kinesis Firehose that can be used to buffer data and write it to S3 in chunks. This can be used to query it efficiently with tools that can read data directly from S3 such as Athena or Apache Spark.
+ * - [static-site](/components/static-site/) - Serves files stored in S3 publicly using Cloudfront as a CDN with support for framework-specific routing.
+ * - [s3-firehose](/components/s3-firehose/) - Sets up a Kinesis Firehose that can be used to buffer data and write it to S3 in chunks. This can be used to query it efficiently with tools that can read data directly from S3 such as Athena or Apache Spark.
  *
  * ## Costs
  *
  * S3 costs are all **usage-based** so you will not be charged if you create a bucket and never use it. S3 costs are broken down by:
  *
  * - **Data Transfer** - This is the component that often makes costs really blow up unless handled carefully. Sending data **to** S3 is always free. However, transferring data **out of** S3 to the internet incurs charges of ~$0.09/GB. If data is transferred from S3 to many clients, this can add up quickly. Consider these cost reduction strategies:
- *   - Use S3 endpoints - The [vpc](/components/vpc) component sets up VPC endpoints by default, so requests to S3 from your VPC will be made internally in AWS's network and will not incur data transfer charges.
- *   - Consider CloudFront - Use the [staticSite](/components/static-site) component or create your own CloudFront distribution to serve files publicly. The first 1TB of data transfer out to the internet from CloudFront is free each month; [see CloudFront pricing for details](https://aws.amazon.com/cloudfront/pricing/).
+ *   - Use S3 endpoints - The [vpc](/components/vpc/) component sets up VPC endpoints by default, so requests to S3 from your VPC will be made internally in AWS's network and will not incur data transfer charges.
+ *   - Consider CloudFront - Use the [staticSite](/components/static-site/) component or create your own CloudFront distribution to serve files publicly. The first 1TB of data transfer out to the internet from CloudFront is free each month; [see CloudFront pricing for details](https://aws.amazon.com/cloudfront/pricing/).
  *
  * - **Data stored** - The storage itself is relatively cheap, ~$0.023/GB/month. If you store 100GB of data in S3 and leave it there, you'll be billed ~$2.30 each month. If you delete the data (including all versions, if versioning is enabled) from S3, you will not be charged for its storage anymore.
  *

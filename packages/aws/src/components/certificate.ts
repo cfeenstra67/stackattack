@@ -28,8 +28,8 @@
  * ## Related Components
  *
  * Certificates work together with other Stackattack components:
- * - [load-balancer](/components/load-balancer) - Uses certificates for HTTPS termination
- * - [static-site](/components/static-site) - Uses certificates for secure CloudFront distributions
+ * - [load-balancer](/components/load-balancer/) - Uses certificates for HTTPS termination
+ * - [static-site](/components/static-site/) - Uses certificates for secure CloudFront distributions
  *
  * ## Costs
  *

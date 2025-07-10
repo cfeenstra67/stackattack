@@ -57,9 +57,9 @@
  * ## Related Components
  *
  * Load balancers work together with other Stackattack components:
- * - [vpc](/components/vpc) - Provides public networking for internet-facing load balancers
- * - [service](/components/service) - Receives traffic routed through load balancers
- * - [certificate](/components/certificate) - Enables HTTPS termination at the load balancer
+ * - [vpc](/components/vpc/) - Provides public networking for internet-facing load balancers
+ * - [service](/components/service/) - Receives traffic routed through load balancers
+ * - [certificate](/components/certificate/) - Enables HTTPS termination at the load balancer
  *
  * ## Costs
  *

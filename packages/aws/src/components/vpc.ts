@@ -27,17 +27,17 @@
  * One important thing you'll need to determine is how you access private resources within your VPC from your local machine--**by default the only connectivity provided to private resources is SSH access to EC2 instances via [EC2 Instance Connect](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/connect-linux-inst-eic.html)**.
  *
  * Stackattack provides a few options:
- * - [twingate-connector](/components/twingate-connector) - Deploys a Twingate Connector for Zero Trust access access to your resources via the Twingate client app. This is a good option: it's very easy to set up and relatively cheap.
- * - [vpc](/components/vpn) - This sets up an AWS Client VPN endpoint that you can connect to via any OpenVPN client. This provides a way to provision a VPN for access to private resources without any third-party services. However, **this option is quite expensive**. See the [costs](/components/vpn#costs) for the VPN component for details.
+ * - [twingate-connector](/components/twingate-connector/) - Deploys a Twingate Connector for Zero Trust access access to your resources via the Twingate client app. This is a good option: it's very easy to set up and relatively cheap.
+ * - [vpc](/components/vpn/) - This sets up an AWS Client VPN endpoint that you can connect to via any OpenVPN client. This provides a way to provision a VPN for access to private resources without any third-party services. However, **this option is quite expensive**. See the [costs](/components/vpn#costs) for the VPN component for details.
  *
  * ## Related Components
  *
  * VPCs provide the networking foundation for other Stackattack components:
- * - [cluster](/components/cluster) - Requires VPC networking for ECS instances
- * - [service](/components/service) - Runs in VPC private subnets
- * - [database](/components/database) - Deployed in VPC private subnets for security
- * - [load-balancer](/components/load-balancer) - Uses VPC public subnets for internet access
- * - [redis](/components/redis) - Deployed in VPC private subnets
+ * - [cluster](/components/cluster/) - Requires VPC networking for ECS instances
+ * - [service](/components/service/) - Runs in VPC private subnets
+ * - [database](/components/database/) - Deployed in VPC private subnets for security
+ * - [load-balancer](/components/load-balancer/) - Uses VPC public subnets for internet access
+ * - [redis](/components/redis/) - Deployed in VPC private subnets
  *
  * ## Costs
  *
