@@ -1,7 +1,7 @@
 /**
  * @packageDocumentation
  *
- * The `Context` is a foundational piece of Stackattack. It provides a consistent way to name, tag, and organize your infrastructure resources.
+ * The `Context` is a foundational piece of Stackattack. It provides a consistent way to name, tag, and organize your infrastructure resources while avoiding name collisions between resources.
  *
  * ## What is a context?
  * A Context is an object that encapsulates:
@@ -40,6 +40,33 @@
  * const record2 = dnsRecord({ name: "server2.mydomain", zoneId, ip: ip2 });
  * ```
  * This code will fail when you run `pulumi up`, because you end up with two `aws.route53.Record` resources with the name "record". You can mitigate this by, for example, passing a prefix to `dnsRecord`, but stackattack's `context` provides a simple, clean way to do this in a consistent manner.
+ *
+ * Using a context, the function might look like:
+ * ```ts
+ * function dnsRecord(ctx: saws.Context, { name, zoneId, ip }: DnsRecordArgs) {
+ *   return new aws.route53.Record(ctx.id(), {
+ *     name,
+ *     zoneId,
+ *     type: "A",
+ *     ttl: 300,
+ *     records: [ip]
+ *   });
+ * }
+ * ```
+ * And your stack could look like:
+ * ```ts
+ * import * as saws from '@stackattack/aws';
+ *
+ * const ctx = saws.context();
+ *
+ * const zoneId = aws.route53.getZoneOutput({ name: "mydomain.com" }).id;
+ * const ip1 = "71.112.12.111";
+ * const ip2 = "32.112.43.22";
+ *
+ * const record1 = dnsRecord(ctx.prefix("record-1"), { name: "server1.mydomain.com", zoneId, ip: ip1 });
+ * const record2 = dnsRecord(ctx.prefix("record-2"), { name: "server2.mydomain", zoneId, ip: ip2 });
+ * ```
+ * This illustrates a key point--contexts are not a Stackattack-specific abstraction! The concept is still useful even if you're writing Pulumi code that doesn't use Stackattack components at all.
  *
  * ## Creating a Context
  *
@@ -88,6 +115,10 @@
  * ```
  *
  * _NOTE_: all Stackattack components add default prefixes to the context you pass in by default, so it's never _necessary_ to use `.prefix` unless you're creating multiple instances of a single component with the same context. All components also take `noPrefix: true` to disable to default prefixing behavior.
+ *
+ * ```typescript
+ *
+ * ```
  *
  * ## Adding Tags
  *
