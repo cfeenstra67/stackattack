@@ -2,7 +2,7 @@
   "name": "@stackattack/aws",
   "type": "module",
   "version": "0.5.1",
-  "description": "Production-ready AWS components for Pulumi",
+  "description": "High-level, production-ready AWS components for Pulumi",
   "homepage": "https://stackattack.camfeenstra.com",
   "repository": "github:cfeenstra67/stackattack",
   "main": "./dist/cjs/index.js",

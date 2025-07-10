@@ -600,7 +600,7 @@ export function vpcFlowLogs(ctx: Context, args: VPCFlowLogsArgs) {
 
   const role = vpcFlowLogsRole(ctx, { logGroup });
 
-  new aws.ec2.FlowLog(ctx.id(), {
+  return new aws.ec2.FlowLog(ctx.id(), {
     iamRoleArn: role.arn,
     logDestination: logGroup.arn,
     trafficType: "ALL",
@@ -652,11 +652,16 @@ export interface NetworkInput {
  */
 export type NetworkType = "public" | "private";
 
-interface VpcOutput {
+export interface VpcOutput {
+  /** The created VPC object */
   vpc: aws.ec2.Vpc;
+  /** The public subnet IDs created in the VPC */
   publicSubnetIds: pulumi.Output<string>[];
+  /** The private subnet IDs created in the VPC */
   privateSubnetIds: pulumi.Output<string>[];
-  network: (type: NetworkType) => Network;
+  /** Method to get a `Network`, which is a VPC and a set of subnets. `type` should be "public" to choose public subnet IDs, and "private" to choose private ones. You can optionally pass a number of `azs` to limit the number of availability zones that you want to include subnets from */
+  network: (type: NetworkType, azs?: number) => Network;
+  /** The `cidrAllocator` provides a way to allocate new CIDR blocks within the vpc for subnets or other purposes, given a netmask. */
   cidrAllocator: CidrAllocator;
 }
 
@@ -719,10 +724,12 @@ export function vpc(ctx: Context, args?: VpcArgs): VpcOutput {
     publicSubnetIds,
     privateSubnetIds,
     cidrAllocator: allocator,
-    network: (type) => {
+    network: (type, azs) => {
+      const subnetIds = type === "private" ? privateSubnetIds : publicSubnetIds;
+
       return {
         vpc,
-        subnetIds: type === "private" ? privateSubnetIds : publicSubnetIds,
+        subnetIds: azs === undefined ? subnetIds : subnetIds.slice(0, azs),
       };
     },
   };
@@ -773,11 +780,16 @@ export function vpcFromIds(vpcInput: pulumi.Input<VpcIds>, increment?: number) {
       attrs.cidrBlock,
       vpc.counter.apply((c) => c + (increment ?? 0)),
     ),
-    network: (type: NetworkType) => {
+    network: (type: NetworkType, azs?: number) => {
+      const subnetIds =
+        type === "private" ? vpc.privateSubnetIds : vpc.publicSubnetIds;
+
       return {
         vpc: attrs,
         subnetIds:
-          type === "private" ? vpc.privateSubnetIds : vpc.publicSubnetIds,
+          azs === undefined
+            ? subnetIds
+            : subnetIds.apply((ids) => ids.slice(0, azs)),
       };
     },
   };

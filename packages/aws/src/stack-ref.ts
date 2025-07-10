@@ -55,7 +55,7 @@
  * pulumi up
  * ```
  *
- * The function parameter serves as a type template - it defines the shape of the referenced stack's outputs without being executed. This enables full TypeScript IntelliSense and type checking for cross-stack references. See the [Structuring Stacks](/working-with-pulumi/structuring-stacks) guide for comprehensive multi-stack patterns.
+ * The function parameter serves as a type template - it defines the shape of the referenced stack's outputs without being executed. This enables full TypeScript IntelliSense and type checking for cross-stack references. See the [Structuring Stacks](/working-with-pulumi/structuring-stacks/) guide for comprehensive multi-stack patterns.
  */
 
 import * as pulumi from "@pulumi/pulumi";

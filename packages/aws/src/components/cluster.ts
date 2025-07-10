@@ -1,7 +1,9 @@
 /**
  * @packageDocumentation
  *
- * ECS clusters in AWS provide compute capacity for running containerized applications. Stackattack creates ECS clusters with:
+ * ECS clusters in AWS provide compute capacity for running containerized applications. Stackattack's `cluster` component provides an easy way to set up working ECS clusters for running applications on EC2 instances with auto-scaling and private inter-service communication.
+ *
+ * Stackattack creates ECS clusters with:
  * - EC2 instances used for compute. By default, the configuration will use spot instances. Pass `noSpot: true` to disable spot instances, or `onDemandPercentage` with a percentage value to split your EC2 instances between on demand and spot. The number of instances will always match the requirements of your cluster (within the constraints you set via `minSize` (default 0) and `maxSize` (default 1)). Currently Fargate is not supported.
  * - A private DNS namespace is created so that your services can communicate internally via ECS service discovery. ECS service connect is currently not supported.
  *

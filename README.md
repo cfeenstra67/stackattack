@@ -2,7 +2,7 @@
 
 Stackattack provides a curated collection of high-level infrastructure components built on top of Pulumi. It allows you to deploy your applications on robust, secure infrastructure without giving up any control or spending days putting it together. Components are just functions, making them copy-paste friendly, so you can choose to use Stackattack as a library or just a set of working examples that you can take and modify for your own purposes.
 
-**[Get Started](https://stackattack.camfeenstra.com/getting-started/quick-start)** | **[Components](https://stackattack.camfeenstra.com/components)** | **[Examples](https://github.com/cfeenstra67/stackattack/tree/main/examples)**
+**[Get Started](https://stackattack.camfeenstra.com/getting-started/quick-start/)** | **[Components](https://stackattack.camfeenstra.com/components)** | **[Examples](https://github.com/cfeenstra67/stackattack/tree/main/examples)**
 
 ## What is Stackattack?
 
@@ -43,7 +43,7 @@ export default () => {
 
 _NOTE_: While this example is meant to demonstrate how much you can do with Stackattack with a small amount of code, it is not recommended to structure your infrastructure code this way with everying in a single stack. See the [Structuring Stacks](https://stackattack.camfeenstra.com/working-with-pulumi/structuring-stacks/) section for recommendations on how separating your resources into stacks.
 
-## Key Features
+## Features
 
 - **Secure by Default** - All components are designed with secure defaults in mind, allowing you to get started quickly without worrying about security debt
 - **Copy/Paste Friendly** - Components are just functions, no heavy abstractions--you can copy/paste and modify them to fit your use-case. It's always easiest to start with something that works!

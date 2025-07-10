@@ -1,10 +1,10 @@
 ---
 title: Stackattack - Production-Ready Infrastructure Components for Pulumi
-description: Production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal code
+description: High-level, production-ready AWS components for Pulumi - Deploy secure, scalable applications with minimal code
 template: splash
 hero:
   title: Stackattack
-  tagline: Production-ready AWS infrastructure components for Pulumi
+  tagline: High-level, production-ready AWS components for Pulumi
   image:
     file: ../../assets/hero.png
   actions:
@@ -19,28 +19,56 @@ hero:
 
 ## Features
 
-- **Type-safe**: Built with TypeScript for excellent IDE support and type safety
-- **Production-ready**: Battle-tested components used in production environments  
-- **Consistent**: Standardized naming, tagging, and configuration patterns
-- **Composable**: Mix and match components to build complex infrastructure
-- **Well-documented**: Comprehensive documentation with examples
+- **Secure by Default** - All components are designed with secure defaults in mind, allowing you to get started quickly without worrying about security debt
+- **Copy/Paste Friendly** - Components are just functions, no heavy abstractions--you can copy/paste and modify them to fit your use-case. It's always easiest to start with something that works!
+- **Composable** - Stackattack components are designed to work well with each other and your existing infrastructure resources seamlessly
+- **Well Documented** - Comprehensive guides and examples. Each component contains usage examples and cost implications
+- **Deploy in Minutes** - From zero to production infrastructure
+- **TypeScript First** - Full type safety and excellent IDE support
 
 ## Quick Example
 
-This configuration deploys an Astro site served on a custom domain with HTTPS:
+The following config deploys service to ECS with a database in ~30 lines, utilizing a handful of Stackattack components:
 
-```ts
-import * as saws from '@stackattack/aws';
+```typescript
+import * as saws from "@stackattack/aws";
 
-const ctx = saws.context();
+export default () => {
+  const ctx = saws.context();
+  const domain = "api.mydomain.com";
 
-const bucket = saws.bucket(ctx, { paths: ["./dist"] });
+  const vpc = saws.vpc(ctx);
 
-saws.staticSite(ctx, {
-  bucket,
-  domain: "www.mysite.com",
-  adapter: saws.astroAdapter(),
-});
+  const db = saws.database(ctx, { network: vpc.network("private") });
+
+  const certificate = saws.certificate(ctx, { domain });
+
+  const loadBalancer = saws.loadBalancer(ctx, {
+    network: vpc.network("public"),
+    certificate
+  });
+
+  const cluster = saws.cluster(ctx, { network: vpc.network("private") });
+
+  const app = saws.service(ctx, {
+    cluster,
+    domain,
+    image: "my-app:latest",
+    loadBalancer,
+    port: 3000,
+    env: { DATABASE_URL: db.url }
+  });
+
+  return { appUrl: app.url };
+};
 ```
 
-Check out the [quick start](/getting-started/quick-start) for an example of deploying a containerized services, or the [components](/components) for a listing of all of the components that Stackattack provides.
+Check out the [quick start](/getting-started/quick-start/) for setting up a multi-stack environment from scratch, or browse the [components](/components/) for a listing of all of the components that Stackattack provides.
+
+The example above uses the following components:
+- [vpc](/components/vpc/) - Creates a working VPC and associated resources such as subnets, NAT gateway, route tables, and more.
+- [database](/components/database/) - Creates a PostgreSQL instance running on RDS.
+- [certificate](/components/certificate/) - Creates a certificate using AWS ACM.
+- [loadBalancer](/components/load-balancer/) - Creates a load balancer and listener, optionally associated with a default certificate.
+- [cluster](/components/cluster/) - Creates an ECS cluster, auto-scaling group, and capacity provider for running services.
+- [service](/components/service/) - Creates an ECS service to run docker containers on, with optional auto-scaling.

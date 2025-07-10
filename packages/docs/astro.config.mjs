@@ -9,7 +9,7 @@ export default defineConfig({
   site: 'https://stackattack.camfeenstra.com',
   integrations: [starlight({
     title: 'Stackattack',
-    description: 'Production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal code',
+    description: 'High-level, production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal code',
     favicon: '/favicon.ico',
     logo: {
       src: './src/assets/logo.svg',
@@ -47,9 +47,7 @@ export default defineConfig({
       },
       {
         label: 'Concepts',
-        items: [
-          { label: 'Context', link: '/concepts/context/' },
-        ],
+        autogenerate: { directory: 'concepts' }
       },
       {
         label: 'Components',
