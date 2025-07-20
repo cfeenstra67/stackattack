@@ -12,7 +12,8 @@ export default defineConfig({
     description: 'High-level, production-ready AWS infrastructure components for Pulumi - Deploy secure, scalable applications with minimal code',
     favicon: '/favicon.ico',
     logo: {
-      src: './src/assets/logo.svg',
+      light: './src/assets/logo-light.svg',
+      dark: './src/assets/logo-dark.svg',
       alt: 'A cute hedgehog picking up a building block',
       replacesTitle: true,
     },
