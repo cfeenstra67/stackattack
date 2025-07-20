@@ -12,9 +12,12 @@ hero:
       link: /getting-started/introduction/
       icon: right-arrow
       variant: primary
-    - text: View Components
-      link: /components/
+    - text: View on GitHub
+      link: https://github.com/cfeenstra67/stackattack
       icon: external
+      variant: minimal
+      attrs:
+        rel: me
 ---
 
 ## Features
