@@ -5,18 +5,14 @@
  *
  * ```typescript
  * import * as saws from "@stackattack/aws";
+ * import * as aws from "@pulumi/aws";
  *
  * const ctx = saws.context();
  * const deploymentRole = saws.githubRole(ctx, {
  *   repo: "myorg/myapp",
- *   policy: JSON.stringify({
- *     Version: "2012-10-17",
- *     Statement: [{
- *       Effect: "Allow",
- *       Action: "s3:*",
- *       Resource: "*"
- *     }]
- *   })
+ *   policy: aws.iam.getPolicyDocumentOutput({
+ *     statements: [{ actions: ["s3:*"], resources: ["*"] }]
+ *   }).json
  * });
  *
  * export const roleArn = deploymentRole.arn;

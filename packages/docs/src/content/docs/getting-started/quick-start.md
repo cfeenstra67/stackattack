@@ -141,5 +141,6 @@ In just a few lines of code, you created:
 
 ## Next Steps
 
-- Learn about [contexts](/concepts/context/)
 - Explore individual [components](/components/)
+- See recommendations about [structuring pulumi stacks](/working-with-pulumi/structuring-stacks/)
+- Learn about [contexts](/concepts/context/)

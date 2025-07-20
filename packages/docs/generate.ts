@@ -200,46 +200,42 @@ function generateMarkdown(
   declarations: DeclarationReflection[],
   typeMap: Map<string, { componentName: string; anchor: string }>,
   isUtility = false,
-): string {
+): { description: string; markdown: string } {
   const docType = isUtility ? "utility" : "component";
-  let markdown = "";
 
   const camelCaseName = kebabCaseToCamelCase(name);
+
+  let description = "";
+  let moduleDescription = "";
 
   // Look for module-level documentation
   const moduleDecl = declarations.find((d) => d.kind === ReflectionKind.Module);
   if (moduleDecl?.comment) {
-    const moduleDescription = formatComment(moduleDecl.comment);
+    moduleDescription = formatComment(moduleDecl.comment);
     if (moduleDescription) {
       let firstPart = moduleDescription.trim().indexOf("\n");
       if (firstPart === -1) {
         firstPart = moduleDescription.length;
       }
-      const description = moduleDescription.slice(0, firstPart).trim();
+      description = moduleDescription.slice(0, firstPart).trim();
+    }
+  }
 
-      markdown += `
+  if (!description) {
+    description = `${name} ${docType} documentation`;
+  }
+
+  let markdown = `
 ---
 title: ${camelCaseName}
 description: ${JSON.stringify(description)}
 sourceUrl: https://github.com/cfeenstra67/stackattack/blob/main/packages/aws/src/${fileName}
 ---
 
-${moduleDescription}
-
-
 `.trimStart();
-    }
-  }
 
-  if (!markdown) {
-    markdown += `
----
-title: ${name}
-description: ${name} ${docType} documentation
-sourceUrl: https://github.com/cfeenstra67/stackattack/blob/main/packages/aws/src/${fileName}
----
-
-`.trimStart();
+  if (moduleDescription) {
+    markdown += `${moduleDescription}\n\n\n`;
   }
 
   // Filter out module declaration for other processing
@@ -348,7 +344,7 @@ sourceUrl: https://github.com/cfeenstra67/stackattack/blob/main/packages/aws/src
     }
   }
 
-  return markdown;
+  return { description, markdown };
 }
 
 async function generateDocs() {
@@ -536,21 +532,23 @@ async function generateDocs() {
   }
 
   // Generate component documentation
+  const componentDescriptions: Record<string, string> = {};
   for (const [componentName, { fileName, declarations }] of componentFiles) {
-    const markdown = generateMarkdown(
+    const { markdown, description } = generateMarkdown(
       componentName,
       fileName,
       declarations,
       typeMap,
       false,
     );
+    componentDescriptions[componentName] = description;
     const outputPath = path.join(componentsOutputDir, `${componentName}.md`);
     fs.writeFileSync(outputPath, markdown);
     console.log(`Generated documentation for ${componentName}`);
   }
 
   for (const [conceptName, { fileName, declarations }] of conceptFiles) {
-    const markdown = generateMarkdown(
+    const { markdown } = generateMarkdown(
       conceptName,
       fileName,
       declarations,
@@ -564,7 +562,7 @@ async function generateDocs() {
 
   // Generate utility documentation
   for (const [utilityName, { fileName, declarations }] of utilityFiles) {
-    const markdown = generateMarkdown(
+    const { markdown } = generateMarkdown(
       utilityName,
       fileName,
       declarations,
@@ -578,18 +576,18 @@ async function generateDocs() {
 
   // Generate components index file
   const componentNames = Array.from(componentFiles.keys()).sort();
+  const componentItems = componentNames.map((name) => {
+    const description = componentDescriptions[name];
+    const camelName = kebabCaseToCamelCase(name);
+    return `- [${camelName}](/components/${name}/) - ${description}`;
+  });
+
   const indexMarkdown = `---
 title: Components
 description: High-level, production-ready AWS components for Pulumi
 ---
 
 Stackattack provides opinionated, secure-by-default AWS infrastructure components built on top of Pulumi.
-
-## Available Components
-
-${componentNames
-  .map((name) => `- [${kebabCaseToCamelCase(name)}](/components/${name}/)`)
-  .join("\n")}
 
 ## Getting Started
 
@@ -599,10 +597,14 @@ All components follow the same basic pattern:
 import * as saws from "@stackattack/aws";
 
 const ctx = saws.context();
-const component = saws.componentName(ctx, args);
+const component = saws.componentName(ctx, { ... });
 \`\`\`
 
-Each component is designed with secure defaults and can be customized through configuration arguments.
+See each component's documentation for information about arguments and usage.
+
+## Available Components
+
+${componentItems.join("\n")}
 `;
 
   const indexPath = "./src/content/docs/components.md";

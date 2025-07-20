@@ -9,7 +9,8 @@
  * const ctx = saws.context();
  * const emailSetup = saws.emailDomain(ctx, {
  *   domain: "mail.example.com",
- *   dmarcInbox: "dmarc-reports@example.com"
+ *   dmarcInbox: "dmarc-reports@mail.example.com",
+ *   webhookUrl: "https://my-api.example.com/email/webhook" // Optional
  * });
  *
  * export const configurationSet = emailSetup.configurationSet.name;
@@ -17,7 +18,7 @@
  *
  * ## Usage
  *
- * After deployment, send emails using the AWS SDK or SMTP:
+ * After deployment, send emails using the AWS SDK:
  *
  * ```javascript
  * // Using AWS SDK
@@ -26,7 +27,7 @@
  * const client = new SESv2Client({ region: "us-east-1" });
  * await client.send(new SendEmailCommand({
  *   FromEmailAddress: "noreply@mail.example.com",
- *   Destination: { ToAddresses: ["user@example.com"] },
+ *   Destination: { ToAddresses: ["user@mail.example.com"] },
  *   Content: {
  *     Simple: {
  *       Subject: { Data: "Welcome!" },
@@ -37,16 +38,50 @@
  * }));
  * ```
  *
- * Monitor email events and deliverability:
+ * See the [AWS SDK Documentation](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/ses/command/SendEmailCommand/) for more details.
  *
- * ```bash
- * # Check domain verification status
- * aws sesv2 get-email-identity --email-identity mail.example.com
+ * You will have to [request production access for SES](https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html) to be able to send to email addresses other than your [verified identifies](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html). The setup above will allow you to send emails to email addresses with the domain `mail.example.com`, e.g. `user1@mail.example.com`. It also requires that you have `example.com` as a hosted zone in Route53.
  *
- * # View sending statistics
- * aws sesv2 get-account-sending-enabled
- * aws sesv2 get-configuration-set --configuration-set-name my-config-set
+ * ### Confirming webhook subscriptions
+ *
+ * If you provide the `webhookUrl` parameter, you should also configure your API endpoint such that it confirms the webhook subscription. For example:
+ *
+ * ```javascript
+ * import { SNSClient, ConfirmSubscriptionCommand } from "@aws-sdk/client-sns";
+ *
+ * // Express.js webhook handler
+ * app.post('/email/webhook', express.raw({ type: 'text/plain' }), async (req, res) => {
+ *   const message = JSON.parse(req.body);
+ *   const messageType = req.headers['x-amz-sns-message-type'] || message.Type;
+ *
+ *   // Handle subscription confirmation programmatically
+ *   if (messageType === 'SubscriptionConfirmation') {
+ *     const sns = new SNSClient({ region: "us-east-1" });
+ *     await sns.send(new ConfirmSubscriptionCommand({
+ *       Token: message.Token,
+ *       AuthenticateOnUnsubscribe: 'true',
+ *       TopicArn: message.TopicArn
+ *     }));
+ *     return res.status(200).send('Subscription confirmed');
+ *   }
+ *
+ *   // Handle actual notifications
+ *   if (messageType === 'Notification') {
+ *     console.log('SNS Message:', message.Message);
+ *     // Process your webhook logic here
+ *     return res.status(200).send('OK');
+ *   }
+ *
+ *   res.status(400).send('Unknown message type');
+ * });
  * ```
+ *
+ * The API above should be (publicly) available at `https://my-api.example.com` to confirm the subscription. Also ensure that your application is authenticated with AWS and has the `sns:ConfirmSubscription` permission.
+ *
+ * ## Related Components
+ *
+ * The email domain component depends on:
+ * - [topicWebhook](/components/topic-webhook/) - Used to set up a webhook subscription if `webhookUrl` is passes as a parameter.
  *
  * ## Important Setup Notes
  *
@@ -214,6 +249,24 @@ export interface EmailDomainArgs {
 }
 
 /**
+ * Outputs of the email domain component
+ */
+export interface EmailDomainOutput {
+  /**
+   * Configuration set; if you send emails using this as a parameter (see example above), reputation metrics will be enabled meaning AWS cloudwatch metrics will be emitted that you can use to [track bounce and complaint rates](https://docs.aws.amazon.com/ses/latest/dg/reputation-dashboard-dg.html)
+   */
+  configurationSet: aws.ses.ConfigurationSet;
+  /**
+   * SNS topic that events related to emails send through SES with this domain will be sent to. See the SES [notification examples](https://docs.aws.amazon.com/ses/latest/dg/notification-examples.html) for more information.
+   */
+  logTopic: aws.sns.Topic;
+  /**
+   * If you pass `webhookUrl` as an input parameter, this will contain the subscription object representing the connection between `logTopic` and your endpoint.
+   */
+  webhookSubscription: aws.sns.TopicSubscription | null;
+}
+
+/**
  * Sets up a complete email domain configuration with Amazon SES.
  * This function creates domain identity, DKIM verification, SPF/DMARC records,
  * configuration set, event logging, and optional S3 logging and webhooks.
@@ -221,7 +274,10 @@ export interface EmailDomainArgs {
  * @param args - Configuration arguments for the email domain setup
  * @returns An object containing the SES configuration set and SNS log topic
  */
-export function emailDomain(ctx: Context, args: EmailDomainArgs) {
+export function emailDomain(
+  ctx: Context,
+  args: EmailDomainArgs,
+): EmailDomainOutput {
   if (!args.noPrefix) {
     ctx = ctx.prefix("email-domain");
   }
@@ -347,12 +403,13 @@ export function emailDomain(ctx: Context, args: EmailDomainArgs) {
     });
   }
 
+  let webhookSubscription: aws.sns.TopicSubscription | null = null;
   if (args.webhookUrl !== undefined) {
-    topicWebhook(ctx, {
+    webhookSubscription = topicWebhook(ctx, {
       topic: topic.arn,
       url: args.webhookUrl,
     });
   }
 
-  return { configurationSet, logTopic: topic };
+  return { configurationSet, logTopic: topic, webhookSubscription };
 }

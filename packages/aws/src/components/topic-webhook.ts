@@ -62,6 +62,10 @@
  * aws sns publish --topic-arn arn:aws:sns:... --message "Test message"
  * ```
  *
+ * ## Related Components
+ *
+ * - [emailDomain](/components/email-domain/) - Used to set up a webhook listening for SES message events.
+ *
  * ## Costs
  *
  * SNS webhook delivery costs are based on message volume and delivery attempts:

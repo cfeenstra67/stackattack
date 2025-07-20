@@ -3,13 +3,7 @@ title: Introduction
 description: Production-ready AWS infrastructure components for Pulumi
 ---
 
-<div class="intro-hero">
-
-# Welcome to Stackattack
-
 Stackattack provides a curated collection of high-level infrastructure components built on top of Pulumi. It allows you to deploy your applications on robust, secure infrastructure without giving up any control or spending days putting it together. Components are just functions, making them copy-paste friendly, so you can choose to use Stackattack as a library or just a set of working examples that you can take and modify for your own purposes.
-
-</div>
 
 ## Philosophy
 
