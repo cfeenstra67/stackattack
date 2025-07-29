@@ -239,7 +239,7 @@ export interface StaticSiteArgs {
   certificate?: pulumi.Input<string>;
   /** Route53 hosted zone ID (auto-detected from domain if not provided) */
   zoneId?: pulumi.Input<string>;
-  /** S3 bucket for CloudFront access logs (creates new one if undefined, disables if null) */
+  /** S3 bucket for CloudFront access logs (creates new one if undefined, disables if null). Note that if you provide a bucket as an input, it must an `objectOwnership` value of "BucketOwnerPreferred" */
   logsBucket?: null | pulumi.Input<BucketInput>;
   /** Prefix for CloudFront access log files */
   logsPrefix?: pulumi.Input<string>;

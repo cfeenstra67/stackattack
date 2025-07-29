@@ -16,20 +16,26 @@ importers:
     dependencies:
       astro:
         specifier: ^5.10.2
-        version: 5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
+        version: 5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.5.0
         version: 1.5.0
       '@pulumi/pulumi':
         specifier: ^3.181.0
-        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3))(typescript@5.8.3)
+        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3))(typescript@5.8.3)
       '@stackattack/aws':
         specifier: workspace:*
         version: link:../../packages/aws
+      '@stackattack/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
+      '@types/node':
+        specifier: ^20.19.9
+        version: 20.19.9
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3)
+        version: 10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3)
 
   examples/ecs-api:
     dependencies:
@@ -54,22 +60,22 @@ importers:
         version: 1.5.0
       '@pulumi/aws':
         specifier: ^6.83.0
-        version: 6.83.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 6.83.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/pulumi':
         specifier: ^3.181.0
-        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       '@stackattack/aws':
         specifier: workspace:*
         version: link:../../packages/aws
       '@types/node':
-        specifier: ^20.10.7
-        version: 20.10.7
+        specifier: ^20.19.9
+        version: 20.19.9
       '@types/pg':
         specifier: ^8.11.14
         version: 8.11.14
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2)
+        version: 10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2)
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
@@ -91,7 +97,7 @@ importers:
         version: 1.5.0
       '@pulumi/pulumi':
         specifier: ^3.181.0
-        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3))(typescript@5.8.3)
+        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3))(typescript@5.8.3)
       '@stackattack/aws':
         specifier: workspace:*
         version: link:../../packages/aws
@@ -103,19 +109,19 @@ importers:
         version: 19.1.6(@types/react@19.1.8)
       '@vitejs/plugin-react':
         specifier: ^4.5.2
-        version: 4.6.0(vite@7.0.2(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0))
+        version: 4.6.0(vite@7.0.2(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0))
       globals:
         specifier: ^16.2.0
         version: 16.3.0
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3)
+        version: 10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3)
       typescript:
         specifier: ~5.8.3
         version: 5.8.3
       vite:
         specifier: ^7.0.0
-        version: 7.0.2(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0)
+        version: 7.0.2(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0)
 
   packages/aws:
     dependencies:
@@ -128,19 +134,19 @@ importers:
         version: 1.5.0
       '@pulumi/aws':
         specifier: ^6.83.0
-        version: 6.83.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 6.83.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/aws-native':
         specifier: ^1.30.0
-        version: 1.30.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 1.30.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/command':
         specifier: ^1.1.0
-        version: 1.1.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 1.1.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/pulumi':
         specifier: ^3.181.0
-        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       '@pulumi/random':
         specifier: ^4.18.2
-        version: 4.18.2(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+        version: 4.18.2(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       '@swc/core':
         specifier: ^1.4.2
         version: 1.4.2(@swc/helpers@0.5.17)
@@ -148,11 +154,11 @@ importers:
         specifier: ^2.1.4
         version: 2.1.4
       '@types/node':
-        specifier: ^20.10.7
-        version: 20.10.7
+        specifier: ^20.19.9
+        version: 20.19.9
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2)
+        version: 10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2)
       tsc-alias:
         specifier: ^1.8.16
         version: 1.8.16
@@ -164,20 +170,20 @@ importers:
     dependencies:
       '@astrojs/starlight':
         specifier: ^0.34.4
-        version: 0.34.4(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
+        version: 0.34.4(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
       astro:
         specifier: ^5.10.2
-        version: 5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
+        version: 5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.5.0
         version: 1.5.0
       '@pulumi/aws':
         specifier: ^6.73.0
-        version: 6.73.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3))(typescript@5.8.3)
+        version: 6.73.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3))(typescript@5.8.3)
       '@pulumi/pulumi':
         specifier: ^3.181.0
-        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3))(typescript@5.8.3)
+        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3))(typescript@5.8.3)
       '@stackattack/aws':
         specifier: workspace:*
         version: link:../aws
@@ -186,16 +192,41 @@ importers:
         version: 0.34.2
       starlight-llms-txt:
         specifier: ^0.5.1
-        version: 0.5.1(@astrojs/starlight@0.34.4(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)))(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
+        version: 0.5.1(@astrojs/starlight@0.34.4(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)))(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3)
+        version: 10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3)
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
       typedoc:
         specifier: ^0.27.6
         version: 0.27.9(typescript@5.8.3)
+
+  packages/testing:
+    dependencies:
+      '@pulumi/pulumi':
+        specifier: ^3.181.0
+        version: 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3))(typescript@5.8.3)
+      yargs:
+        specifier: ^18.0.0
+        version: 18.0.0
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^1.5.0
+        version: 1.5.0
+      '@types/node':
+        specifier: ^20.19.9
+        version: 20.19.9
+      '@types/yargs':
+        specifier: ^17.0.33
+        version: 17.0.33
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
 
 packages:
 
@@ -1654,8 +1685,8 @@ packages:
   '@types/node@17.0.45':
     resolution: {integrity: sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==}
 
-  '@types/node@20.10.7':
-    resolution: {integrity: sha512-fRbIKb8C/Y2lXxB5eVMj4IU7xpdox0Lh8bUPEdtLysaylsml1hOOx1+STloRs/B9nf7C6kPRmmg/V7aQW7usNg==}
+  '@types/node@20.19.9':
+    resolution: {integrity: sha512-cuVNgarYWZqxRJDQHEB58GEONhOK79QVR/qYx4S7kcUObQvUwvFnYxJuuHUKm2aieN9X3yZB4LZsuYNU1Qphsw==}
 
   '@types/pg@8.11.14':
     resolution: {integrity: sha512-qyD11E5R3u0eJmd1lB0WnWKXJGA7s015nyARWljfz5DcX83TKAIlY+QrmvzQTsbIe+hkiFtkyL2gHC6qwF6Fbg==}
@@ -1688,6 +1719,12 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/yargs-parser@21.0.3':
+    resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
+
+  '@types/yargs@17.0.33':
+    resolution: {integrity: sha512-WpxBCKWPLr4xSsHgz511rFJAM+wS28w2zEO1QDNY5zM/S8ok70NNfztH0xwhqKyaK0OHCbN98LDAZuy1ctxDkA==}
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
@@ -1965,6 +2002,10 @@ packages:
   cliui@8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
+
+  cliui@9.0.1:
+    resolution: {integrity: sha512-k7ndgKhwoQveBL+/1tqGJYNz097I7WOvwbmmU2AR5+magtbjPWQTS1C5vzGkBC8Ym8UWRzfKUzUUqFLypY4Q+w==}
+    engines: {node: '>=20'}
 
   clone-response@1.0.3:
     resolution: {integrity: sha512-ROoL94jJH2dUVML2Y/5PEDNaSHgeOdSDicUyS7izcF63G6sTc/FTjLub4b8Il9S8S0beOfYt0TaA5qvFK+w0wA==}
@@ -4255,8 +4296,8 @@ packages:
   uncrypto@0.1.3:
     resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
 
-  undici-types@5.26.5:
-    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
   unicode-properties@1.4.1:
     resolution: {integrity: sha512-CLjCCLQ6UuMxWnbIylkisbRj31qxHPAurvena/0iwSVbQ2G1VY5/HjV0IRabOEbDHlzZlRdCrD4NhB0JtU40Pg==}
@@ -4577,9 +4618,17 @@ packages:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
 
+  yargs-parser@22.0.0:
+    resolution: {integrity: sha512-rwu/ClNdSMpkSrUb+d6BRsSkLUq1fmfsY6TOpYzTwvwkg1/NRG85KBy3kq++A8LKQwX6lsu+aWad+2khvuXrqw==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >=23}
+
   yargs@17.7.2:
     resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
     engines: {node: '>=12'}
+
+  yargs@18.0.0:
+    resolution: {integrity: sha512-4UEqdc2RYGHZc7Doyqkrqiln3p9X2DZVxaGbwhn2pi7MrRagKaOcIKe8L3OxYcbhXLgLFUS3zAYuQjKBQgmuNg==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >=23}
 
   yn@3.1.1:
     resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
@@ -4676,12 +4725,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@4.0.8(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))':
+  '@astrojs/mdx@4.0.8(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))':
     dependencies:
       '@astrojs/markdown-remark': 6.1.0
       '@mdx-js/mdx': 3.1.0(acorn@8.14.0)
       acorn: 8.14.0
-      astro: 5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
+      astro: 5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
       es-module-lexer: 1.6.0
       estree-util-visit: 2.0.0
       hast-util-to-html: 9.0.4
@@ -4695,12 +4744,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@astrojs/mdx@4.3.0(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))':
+  '@astrojs/mdx@4.3.0(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))':
     dependencies:
       '@astrojs/markdown-remark': 6.3.2
       '@mdx-js/mdx': 3.1.0(acorn@8.15.0)
       acorn: 8.15.0
-      astro: 5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
+      astro: 5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
       es-module-lexer: 1.7.0
       estree-util-visit: 2.0.0
       hast-util-to-html: 9.0.5
@@ -4728,17 +4777,17 @@ snapshots:
       stream-replace-string: 2.0.0
       zod: 3.25.67
 
-  '@astrojs/starlight@0.34.4(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))':
+  '@astrojs/starlight@0.34.4(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))':
     dependencies:
       '@astrojs/markdown-remark': 6.3.2
-      '@astrojs/mdx': 4.3.0(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
+      '@astrojs/mdx': 4.3.0(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
       '@astrojs/sitemap': 3.4.1
       '@pagefind/default-ui': 1.3.0
       '@types/hast': 3.0.4
       '@types/js-yaml': 4.0.9
       '@types/mdast': 4.0.4
-      astro: 5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
-      astro-expressive-code: 0.41.2(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
+      astro: 5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
+      astro-expressive-code: 0.41.2(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
       bcp-47: 2.1.0
       hast-util-from-html: 2.0.3
       hast-util-select: 6.0.4
@@ -5831,18 +5880,18 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@pulumi/aws-native@1.30.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
+  '@pulumi/aws-native@1.30.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
-      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
     transitivePeerDependencies:
       - bluebird
       - supports-color
       - ts-node
       - typescript
 
-  '@pulumi/aws@6.73.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3))(typescript@5.8.3)':
+  '@pulumi/aws@6.73.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3))(typescript@5.8.3)':
     dependencies:
-      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3))(typescript@5.8.3)
+      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3))(typescript@5.8.3)
       mime: 2.6.0
     transitivePeerDependencies:
       - bluebird
@@ -5850,9 +5899,9 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/aws@6.83.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
+  '@pulumi/aws@6.83.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
-      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       mime: 2.6.0
     transitivePeerDependencies:
       - bluebird
@@ -5860,9 +5909,9 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/aws@6.83.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
+  '@pulumi/aws@6.83.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
-      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
       mime: 2.6.0
     transitivePeerDependencies:
       - bluebird
@@ -5870,16 +5919,16 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pulumi/command@1.1.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
+  '@pulumi/command@1.1.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
-      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
     transitivePeerDependencies:
       - bluebird
       - supports-color
       - ts-node
       - typescript
 
-  '@pulumi/pulumi@3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
+  '@pulumi/pulumi@3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
       '@grpc/grpc-js': 1.13.1
       '@logdna/tail-file': 2.2.0
@@ -5910,13 +5959,13 @@ snapshots:
       tmp: 0.2.3
       upath: 1.2.0
     optionalDependencies:
-      ts-node: 10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2)
+      ts-node: 10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2)
       typescript: 5.8.2
     transitivePeerDependencies:
       - bluebird
       - supports-color
 
-  '@pulumi/pulumi@3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
+  '@pulumi/pulumi@3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
       '@grpc/grpc-js': 1.13.1
       '@logdna/tail-file': 2.2.0
@@ -5947,13 +5996,13 @@ snapshots:
       tmp: 0.2.3
       upath: 1.2.0
     optionalDependencies:
-      ts-node: 10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2)
+      ts-node: 10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.2)
       typescript: 5.8.2
     transitivePeerDependencies:
       - bluebird
       - supports-color
 
-  '@pulumi/pulumi@3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3))(typescript@5.8.3)':
+  '@pulumi/pulumi@3.181.0(ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3))(typescript@5.8.3)':
     dependencies:
       '@grpc/grpc-js': 1.13.1
       '@logdna/tail-file': 2.2.0
@@ -5984,15 +6033,15 @@ snapshots:
       tmp: 0.2.3
       upath: 1.2.0
     optionalDependencies:
-      ts-node: 10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3)
+      ts-node: 10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3)
       typescript: 5.8.3
     transitivePeerDependencies:
       - bluebird
       - supports-color
 
-  '@pulumi/random@4.18.2(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)':
+  '@pulumi/random@4.18.2(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)':
     dependencies:
-      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2))(typescript@5.8.2)
+      '@pulumi/pulumi': 3.181.0(ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2))(typescript@5.8.2)
     transitivePeerDependencies:
       - bluebird
       - supports-color
@@ -6276,7 +6325,7 @@ snapshots:
     dependencies:
       '@types/http-cache-semantics': 4.0.4
       '@types/keyv': 3.1.4
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
       '@types/responselike': 1.0.3
 
   '@types/debug@4.1.12':
@@ -6293,7 +6342,7 @@ snapshots:
 
   '@types/fontkit@2.0.8':
     dependencies:
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
 
   '@types/google-protobuf@3.15.12': {}
 
@@ -6307,7 +6356,7 @@ snapshots:
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
 
   '@types/mdast@4.0.4':
     dependencies:
@@ -6331,13 +6380,13 @@ snapshots:
 
   '@types/node@17.0.45': {}
 
-  '@types/node@20.10.7':
+  '@types/node@20.19.9':
     dependencies:
-      undici-types: 5.26.5
+      undici-types: 6.21.0
 
   '@types/pg@8.11.14':
     dependencies:
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
       pg-protocol: 1.9.5
       pg-types: 4.0.2
 
@@ -6351,7 +6400,7 @@ snapshots:
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
 
   '@types/sax@1.2.7':
     dependencies:
@@ -6367,9 +6416,15 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
+  '@types/yargs-parser@21.0.3': {}
+
+  '@types/yargs@17.0.33':
+    dependencies:
+      '@types/yargs-parser': 21.0.3
+
   '@ungap/structured-clone@1.3.0': {}
 
-  '@vitejs/plugin-react@4.6.0(vite@7.0.2(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0))':
+  '@vitejs/plugin-react@4.6.0(vite@7.0.2(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0))':
     dependencies:
       '@babel/core': 7.28.0
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.0)
@@ -6377,7 +6432,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.19
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: 7.0.2(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0)
+      vite: 7.0.2(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -6456,12 +6511,12 @@ snapshots:
 
   astring@1.9.0: {}
 
-  astro-expressive-code@0.41.2(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)):
+  astro-expressive-code@0.41.2(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)):
     dependencies:
-      astro: 5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
+      astro: 5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
       rehype-expressive-code: 0.41.2
 
-  astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0):
+  astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0):
     dependencies:
       '@astrojs/compiler': 2.12.2
       '@astrojs/internal-helpers': 0.6.1
@@ -6516,8 +6571,8 @@ snapshots:
       unist-util-visit: 5.0.0
       unstorage: 1.16.0
       vfile: 6.0.3
-      vite: 6.3.5(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0)
-      vitefu: 1.0.7(vite@6.3.5(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0))
+      vite: 6.3.5(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0)
+      vitefu: 1.0.7(vite@6.3.5(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0))
       xxhash-wasm: 1.1.0
       yargs-parser: 21.1.1
       yocto-spinner: 0.2.3
@@ -6732,6 +6787,12 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
+
+  cliui@9.0.1:
+    dependencies:
+      string-width: 7.2.0
+      strip-ansi: 7.1.0
+      wrap-ansi: 9.0.0
 
   clone-response@1.0.3:
     dependencies:
@@ -8862,7 +8923,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
       long: 5.3.1
 
   proxy-addr@2.0.7:
@@ -9469,13 +9530,13 @@ snapshots:
     dependencies:
       minipass: 7.1.2
 
-  starlight-llms-txt@0.5.1(@astrojs/starlight@0.34.4(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)))(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)):
+  starlight-llms-txt@0.5.1(@astrojs/starlight@0.34.4(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)))(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)):
     dependencies:
-      '@astrojs/mdx': 4.0.8(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
-      '@astrojs/starlight': 0.34.4(astro@5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
+      '@astrojs/mdx': 4.0.8(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
+      '@astrojs/starlight': 0.34.4(astro@5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0))
       '@types/hast': 3.0.4
       '@types/micromatch': 4.0.9
-      astro: 5.10.2(@types/node@20.10.7)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
+      astro: 5.10.2(@types/node@20.19.9)(encoding@0.1.13)(rollup@4.44.1)(tsx@4.19.3)(typescript@5.8.3)(yaml@2.8.0)
       github-slugger: 2.0.0
       hast-util-select: 6.0.3
       micromatch: 4.0.8
@@ -9575,14 +9636,14 @@ snapshots:
 
   trough@2.2.0: {}
 
-  ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.10.7)(typescript@5.8.2):
+  ts-node@10.9.2(@swc/core@1.4.2(@swc/helpers@0.5.17))(@types/node@20.19.9)(typescript@5.8.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.9
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
       acorn: 8.11.3
       acorn-walk: 8.3.1
       arg: 4.1.3
@@ -9595,14 +9656,14 @@ snapshots:
     optionalDependencies:
       '@swc/core': 1.4.2(@swc/helpers@0.5.17)
 
-  ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.2):
+  ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.9
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
       acorn: 8.11.3
       acorn-walk: 8.3.1
       arg: 4.1.3
@@ -9616,14 +9677,14 @@ snapshots:
       '@swc/core': 1.4.2(@swc/helpers@0.5.17)
     optional: true
 
-  ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.10.7)(typescript@5.8.3):
+  ts-node@10.9.2(@swc/core@1.4.2)(@types/node@20.19.9)(typescript@5.8.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.9
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
       acorn: 8.11.3
       acorn-walk: 8.3.1
       arg: 4.1.3
@@ -9698,7 +9759,7 @@ snapshots:
 
   uncrypto@0.1.3: {}
 
-  undici-types@5.26.5: {}
+  undici-types@6.21.0: {}
 
   unicode-properties@1.4.1:
     dependencies:
@@ -9837,7 +9898,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.2
 
-  vite@6.3.5(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0):
+  vite@6.3.5(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0):
     dependencies:
       esbuild: 0.25.3
       fdir: 6.4.6(picomatch@4.0.2)
@@ -9846,12 +9907,12 @@ snapshots:
       rollup: 4.44.1
       tinyglobby: 0.2.14
     optionalDependencies:
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
       fsevents: 2.3.3
       tsx: 4.19.3
       yaml: 2.8.0
 
-  vite@7.0.2(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0):
+  vite@7.0.2(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0):
     dependencies:
       esbuild: 0.25.3
       fdir: 6.4.6(picomatch@4.0.2)
@@ -9860,14 +9921,14 @@ snapshots:
       rollup: 4.44.1
       tinyglobby: 0.2.14
     optionalDependencies:
-      '@types/node': 20.10.7
+      '@types/node': 20.19.9
       fsevents: 2.3.3
       tsx: 4.19.3
       yaml: 2.8.0
 
-  vitefu@1.0.7(vite@6.3.5(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0)):
+  vitefu@1.0.7(vite@6.3.5(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0)):
     optionalDependencies:
-      vite: 6.3.5(@types/node@20.10.7)(tsx@4.19.3)(yaml@2.8.0)
+      vite: 6.3.5(@types/node@20.19.9)(tsx@4.19.3)(yaml@2.8.0)
 
   walk-up-path@3.0.1: {}
 
@@ -9933,6 +9994,8 @@ snapshots:
 
   yargs-parser@21.1.1: {}
 
+  yargs-parser@22.0.0: {}
+
   yargs@17.7.2:
     dependencies:
       cliui: 8.0.1
@@ -9942,6 +10005,15 @@ snapshots:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.1.1
+
+  yargs@18.0.0:
+    dependencies:
+      cliui: 9.0.1
+      escalade: 3.2.0
+      get-caller-file: 2.0.5
+      string-width: 7.2.0
+      y18n: 5.0.8
+      yargs-parser: 22.0.0
 
   yn@3.1.1: {}
 

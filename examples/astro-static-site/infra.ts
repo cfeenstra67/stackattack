@@ -14,9 +14,17 @@ export default () => {
     forceDestroy: true,
   });
 
+  // Not normally required, but use in this example so that `forceDestroy` can be specified for integration testing
+  const logsBucket = saws.bucket(ctx.prefix("logs"), {
+    objectOwnership: "BucketOwnerPreferred",
+    noProtect: true,
+    forceDestroy: true,
+  });
+
   const { url } = saws.staticSite(ctx, {
     bucket,
     domain,
+    logsBucket,
     adapter: saws.astroAdapter(),
   });
 

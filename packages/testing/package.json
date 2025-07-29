@@ -1,0 +1,35 @@
+{
+  "name": "@stackattack/testing",
+  "type": "module",
+  "private": true,
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "saws-testing": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "check": "biome check --apply src"
+  },
+  "keywords": [],
+  "author": "Cam Feenstra <me@camfeenstra.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@pulumi/pulumi": "^3.181.0",
+    "yargs": "^18.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.5.0",
+    "@types/node": "^20.19.9",
+    "@types/yargs": "^17.0.33",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
