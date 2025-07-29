@@ -101,6 +101,9 @@ importers:
       '@stackattack/aws':
         specifier: workspace:*
         version: link:../../packages/aws
+      '@stackattack/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
       '@types/react':
         specifier: ^19.1.8
         version: 19.1.8

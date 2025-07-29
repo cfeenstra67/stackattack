@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "check": "biome check --apply src *.ts"
+    "check": "biome check --apply src *.ts",
+    "test": "pnpm node:test *.spec.ts",
+    "node:test": "node --loader ts-node/esm --no-warnings --test"
   },
   "dependencies": {
     "react": "^19.1.0",
@@ -17,6 +19,7 @@
     "@biomejs/biome": "^1.5.0",
     "@pulumi/pulumi": "^3.181.0",
     "@stackattack/aws": "workspace:*",
+    "@stackattack/testing": "workspace:*",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.2",
