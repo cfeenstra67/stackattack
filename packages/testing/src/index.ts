@@ -51,7 +51,11 @@ export async function runIntegrationTest({
 
       await stack.preview({ expectNoChanges: true });
 
-      await validate?.(stack);
+      if (validate) {
+        console.log("Validating", stackName);
+        await validate(stack);
+        console.log("Validation succeeded for", stackName);
+      }
     }
   } finally {
     if (!skipDelete) {
