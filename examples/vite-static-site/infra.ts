@@ -9,14 +9,19 @@ export default () => {
 
   const bucket = saws.bucket(ctx, {
     paths: ["./dist"],
-    // For example purposes, on real stacks you will typically not want these set unless it's an ephemeral stack of some kind
-    noProtect: true,
+    forceDestroy: true,
+  });
+
+  // Not normally required, but use in this example so that `forceDestroy` can be specified for integration testing
+  const logsBucket = saws.bucket(ctx.prefix("logs"), {
+    objectOwnership: "BucketOwnerPreferred",
     forceDestroy: true,
   });
 
   const { url } = saws.staticSite(ctx, {
     bucket,
     domain,
+    logsBucket,
     adapter: saws.SPAAdapter(),
   });
 

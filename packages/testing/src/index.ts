@@ -4,7 +4,7 @@ import {
   LocalWorkspace,
   Stack,
 } from "@pulumi/pulumi/automation/index.js";
-import { fullyDeleteStack } from "./pulumi.js";
+import { fullyDeleteStack, unprotectAll } from "./pulumi.js";
 
 export interface RunIntegrationTestArgs {
   sourceStack: string;
@@ -42,6 +42,8 @@ export async function runIntegrationTest({
 
   try {
     if (!deleteOnly) {
+      await unprotectAll(stack);
+
       console.log("Creating", stackName);
       await stack.up();
 

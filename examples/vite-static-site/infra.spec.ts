@@ -16,6 +16,10 @@ test(projectName, async () => {
     validate: async (stack) => {
       const outputs = await stack.outputs();
       const url = outputs.url.value;
+      const domain = await stack.getConfig(`${projectName}:domain`);
+
+      assert.equal(url, `https://${domain.value}`);
+
       const response = await fetch(url);
 
       assert.equal(response.status, 200);
