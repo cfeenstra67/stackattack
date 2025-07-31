@@ -18,15 +18,15 @@ test(projectName, async () => {
       const url = outputs.url.value;
       const domain = await stack.getConfig(`${projectName}:domain`);
 
-      assert.equal(url, `https://${domain.value}`);
+      assert.strictEqual(url, `https://${domain.value}`);
 
       const response = await fetch(url);
 
-      assert.equal(response.status, 200);
+      assert.strictEqual(response.status, 200);
 
       const text = await response.text();
 
-      assert.match(text, /Vite/);
+      assert(/Vite/.exec(text));
     },
   });
 });

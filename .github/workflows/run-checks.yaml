@@ -21,5 +21,7 @@ jobs:
           cache: pnpm
       - name: Set up dependencies
         run: pnpm install
+      - name: Run typechecks
+        run: pnpm -r typecheck
       - name: Run builds
         run: pnpm -r build
