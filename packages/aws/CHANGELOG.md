@@ -1,5 +1,12 @@
 # @stackattack/aws
 
+## 0.6.1
+
+### Patch Changes
+
+- 4dba46d: Import ID shortening w/ shortId()
+- f5001a0: Fixed issue w/ long names causing errors w/ instance role and database instance components. Added ECS managed tag to autoscaling group to avoid drift.
+
 ## 0.6.0
 
 ### Minor Changes
