@@ -41,11 +41,11 @@
  * The connector runs continuously to maintain the secure tunnel, so costs are predictable monthly charges rather than per-connection billing.
  */
 
-import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
-import { ClusterResourcesInput } from "./cluster.js";
+import type * as pulumi from "@pulumi/pulumi";
+import type { Context } from "../context.js";
+import type { ClusterResourcesInput } from "./cluster.js";
 import { service } from "./service.js";
-import { NetworkInput } from "./vpc.js";
+import type { NetworkInput } from "./vpc.js";
 
 /**
  * Configuration options for creating a Twingate connector.

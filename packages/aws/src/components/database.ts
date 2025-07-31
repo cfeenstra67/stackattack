@@ -90,9 +90,10 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { singlePortIngressSecurityGroup } from "../security-groups.js";
-import { Network } from "./vpc.js";
+import { shortId } from "../short-id.js";
+import type { Network } from "./vpc.js";
 
 /**
  * Configuration arguments for creating an RDS database instance.
@@ -136,14 +137,13 @@ export interface DatabaseOutput {
 
 /**
  * Creates an RDS database instance with security group, subnet group, and parameter group.
- * @param ctx - The context for resource naming and tagging
+ * @param baseCtx - The context for resource naming and tagging
  * @param args - Configuration arguments for the database
  * @returns Database output containing the instance and connection URL
  */
-export function database(ctx: Context, args: DatabaseArgs): DatabaseOutput {
-  if (!args.noPrefix) {
-    ctx = ctx.prefix("database");
-  }
+export function database(baseCtx: Context, args: DatabaseArgs): DatabaseOutput {
+  const ctx = args.noPrefix ? baseCtx : baseCtx.prefix("database");
+
   const port = args.port ?? 5432;
 
   const subnetGroup = new aws.rds.SubnetGroup(ctx.id("subnet-group"), {
@@ -208,7 +208,7 @@ export function database(ctx: Context, args: DatabaseArgs): DatabaseOutput {
   const instance = new aws.rds.Instance(ctx.id(), {
     // Pulumi adds a 27 character postfix and identifers may not be greater than 63 characters
     // https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html
-    identifierPrefix: ctx.id().slice(0, 63 - 27),
+    identifierPrefix: shortId(baseCtx, "database", 63 - 27),
     allocatedStorage: 30,
     applyImmediately: true,
     availabilityZone,

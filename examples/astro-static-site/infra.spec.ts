@@ -6,7 +6,6 @@ const projectName = "stackattack-astro";
 
 test(projectName, async () => {
   await runIntegrationTest({
-    idLength: 2,
     sourceStacks: ["prod"],
     config: (configs, stacks) => {
       const domain = configs.prod[`${projectName}:domain`].value;

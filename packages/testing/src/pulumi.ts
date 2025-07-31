@@ -1,6 +1,6 @@
 import * as childProcess from "node:child_process";
 import * as util from "node:util";
-import { Stack } from "@pulumi/pulumi/automation/stack.js";
+import type { Stack } from "@pulumi/pulumi/automation/stack.js";
 
 const execFile = util.promisify(childProcess.execFile);
 

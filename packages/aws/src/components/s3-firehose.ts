@@ -75,9 +75,9 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import { glueCatalogArn, glueDatabaseArn, s3BucketArn } from "../arns.js";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
-import { BucketInput, bucket, getBucketId } from "./bucket.js";
+import { type BucketInput, bucket, getBucketId } from "./bucket.js";
 
 /**
  * Arguments for creating IAM policy for S3 Firehose access.
@@ -294,8 +294,8 @@ export function s3Firehose(ctx: Context, args: S3FirehoseArgs) {
     errorOutputPrefix = pulumi.interpolate`${errorOutputPrefix}!{firehose:error-output-type}/`;
   }
 
-  let glueDatabaseName: pulumi.Input<string> | undefined = undefined;
-  let glueTableName: pulumi.Input<string> | undefined = undefined;
+  let glueDatabaseName: pulumi.Input<string> | undefined;
+  let glueTableName: pulumi.Input<string> | undefined;
   if (args.glueParquetTableArn) {
     const arn = aws.getArnOutput({ arn: args.glueParquetTableArn });
     glueDatabaseName = arn.resource.apply((r) => r.split("/")[1]);

@@ -97,9 +97,10 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
-import { BucketInput, bucket, getBucketAttributes } from "./bucket.js";
+import { shortId } from "../short-id.js";
+import { type BucketInput, bucket, getBucketAttributes } from "./bucket.js";
 import { certificate, getZoneFromDomain } from "./certificate.js";
 
 /**
@@ -263,6 +264,8 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
   const bucketAttrs = getBucketAttributes(args.bucket);
 
   const lambdaExecutionRole = new aws.iam.Role(ctx.id("lambda-exec-role"), {
+    // Name prefixes can be at most 38 characters
+    namePrefix: shortId(ctx, "lambda-exec-role", 38),
     assumeRolePolicy: serviceAssumeRolePolicy("lambda", "edgelambda").json,
     inlinePolicies: [
       {
@@ -296,7 +299,8 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     const redirectDomains = pulumi.all(args.redirectDomains ?? []);
 
     const edgeFunction = new aws.lambda.CallbackFunction(
-      ctx.id("lambda-function"),
+      // Max length is 64 chars, pulumi adds 7
+      shortId(ctx, "lambda-function", 64 - 7),
       {
         role: lambdaExecutionRole,
         // The `async` is important here, it significantly changes the generated
@@ -394,7 +398,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     }
   }
 
-  let defaultHeadersPolicyId: pulumi.Input<string> | undefined = undefined;
+  let defaultHeadersPolicyId: pulumi.Input<string> | undefined;
   if (defaultHeaders.length > 0) {
     const defaultHeadersPolicy = new aws.cloudfront.ResponseHeadersPolicy(
       ctx.id("response-headers"),
@@ -408,7 +412,8 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
   }
 
   const accessControl = new aws.cloudfront.OriginAccessControl(
-    ctx.id("access-control"),
+    // Max name length is 64, pulumi adds 7 characters
+    shortId(ctx, "access-control", 64 - 7),
     {
       description: pulumi.interpolate`${domain} access control`,
       originAccessControlOriginType: "s3",
@@ -450,7 +455,7 @@ export function staticSite(ctx: Context, args: StaticSiteArgs) {
     });
   }
 
-  let logsBucketDomain: pulumi.Input<string> | undefined = undefined;
+  let logsBucketDomain: pulumi.Input<string> | undefined;
   if (args.logsBucket === undefined) {
     logsBucketDomain = bucket(ctx.prefix("logs"), {
       objectOwnership: "BucketOwnerPreferred",

@@ -180,7 +180,7 @@ export function defaultContextPrefix(): string {
 /**
  * Creates a new Context for consistent resource naming and tagging.
  * @param opts - Optional configuration for prefix and tags
- * @returns A Context instance with id, shortId, tags, prefix, and withTags methods
+ * @returns A Context instance
  */
 export function context(opts?: ContextOpts): Context {
   let prefix: string | null;

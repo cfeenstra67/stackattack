@@ -53,7 +53,7 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 
 /**
  * Retrieves the Route53 hosted zone ID for a given domain by extracting the root domain.

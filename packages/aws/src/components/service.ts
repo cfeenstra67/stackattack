@@ -67,25 +67,29 @@ import * as aws from "@pulumi/aws";
 import * as awsNative from "@pulumi/aws-native";
 import * as pulumi from "@pulumi/pulumi";
 import { ecsClusterArn, ecsServiceArn } from "../arns.js";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { getZoneFromDomain } from "./certificate.js";
 import {
-  ClusterResourcesInput,
+  type ClusterResourcesInput,
   getCapacityProviderId,
   getClusterAttributes,
   getPrivateDnsNamespaceAttributes,
 } from "./cluster.js";
 import {
-  LoadBalancerWithListener,
   getListenerAttributes,
   getListenerId,
   getLoadBalancerAttributes,
+  type LoadBalancerWithListener,
 } from "./load-balancer.js";
 import {
-  ServiceAutoScalingArgs,
+  type ServiceAutoScalingArgs,
   serviceAutoScaling,
 } from "./service-autoscaling.js";
-import { NetworkInput, getVpcDefaultSecurityGroup, getVpcId } from "./vpc.js";
+import {
+  getVpcDefaultSecurityGroup,
+  getVpcId,
+  type NetworkInput,
+} from "./vpc.js";
 
 export type ServiceInput = string | aws.ecs.Service | ServiceOutput;
 
@@ -203,7 +207,7 @@ export function taskDefinition(ctx: Context, args: TaskDefinitionArgs) {
 
   let healthCheck:
     | awsNative.types.input.ecs.TaskDefinitionHealthCheckArgs
-    | undefined = undefined;
+    | undefined;
   const healthInterval = args.healthcheck?.interval ?? 10;
   const healthStartPeriod = args.healthcheck?.startPeriod ?? 30;
   const healthRetries = args.healthcheck?.retries ?? 3;
@@ -432,7 +436,7 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
   if (args.domain && !args.loadBalancer) {
     throw new Error("loadBalancer must be specified with domain");
   }
-  let url: pulumi.Output<string> | undefined = undefined;
+  let url: pulumi.Output<string> | undefined;
   if (args.domain) {
     const targetGroup = new aws.lb.TargetGroup(ctx.id("target-group"), {
       namePrefix: pulumi.output(args.name).apply((name) => name.slice(0, 6)),
@@ -507,8 +511,8 @@ export function service(ctx: Context, args: ServiceArgs): ServiceOutput {
     dependsOn.push(rule);
   }
 
-  let serviceDiscovery: aws.servicediscovery.Service | undefined = undefined;
-  let internalUrl: pulumi.Output<string> | undefined = undefined;
+  let serviceDiscovery: aws.servicediscovery.Service | undefined;
+  let internalUrl: pulumi.Output<string> | undefined;
   if (cluster.privateNamespace && port) {
     const namespace = pulumi.output(cluster.privateNamespace).apply((ns) => {
       if (!ns) {

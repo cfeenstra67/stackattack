@@ -1,11 +1,11 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import {
-  VpcInput,
   getVpcAttributes,
   getVpcDefaultSecurityGroup,
+  type VpcInput,
 } from "./components/vpc.js";
-import { Context } from "./context.js";
+import type { Context } from "./context.js";
 
 /**
  * Configuration arguments for creating a security group with single port ingress access.

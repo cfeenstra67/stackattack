@@ -64,9 +64,9 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
-import { LogGroupInput, getLogGroupId } from "./logs.js";
+import { getLogGroupId, type LogGroupInput } from "./logs.js";
 
 /**
  * Union type representing various VPC input formats.

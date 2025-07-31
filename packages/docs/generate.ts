@@ -2,10 +2,10 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
   Application,
-  DeclarationReflection,
-  ParameterReflection,
+  type DeclarationReflection,
+  type ParameterReflection,
   ReflectionKind,
-  SignatureReflection,
+  type SignatureReflection,
 } from "typedoc";
 
 // Helper function to format TypeDoc comments

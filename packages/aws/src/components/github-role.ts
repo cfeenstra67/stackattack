@@ -56,7 +56,7 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 
 /**
  * Configuration arguments for creating a GitHub assume role policy.

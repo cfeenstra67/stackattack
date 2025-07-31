@@ -2,7 +2,7 @@ import * as crypto from "node:crypto";
 import {
   type ConfigMap,
   LocalWorkspace,
-  Stack,
+  type Stack,
 } from "@pulumi/pulumi/automation/index.js";
 import { fullyDeleteStack, unprotectAll } from "./pulumi.js";
 

@@ -1,6 +1,6 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { BucketInput, getBucketId } from "./components/bucket.js";
+import { type BucketInput, getBucketId } from "./components/bucket.js";
 
 /**
  * Arguments for building an S3 bucket ARN.

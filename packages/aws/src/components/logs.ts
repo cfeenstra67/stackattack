@@ -5,7 +5,7 @@
  * This file contains helper functions and should not appear in component documentation.
  */
 
-import * as aws from "@pulumi/aws";
+import type * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 /**

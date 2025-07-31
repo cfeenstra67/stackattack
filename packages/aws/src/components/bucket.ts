@@ -63,7 +63,7 @@ import aws from "@pulumi/aws";
 import pulumi from "@pulumi/pulumi";
 import * as mime from "mime-types";
 import { s3BucketArn } from "../arns.js";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { walkFiles } from "../functions/walk-files.js";
 
 /**

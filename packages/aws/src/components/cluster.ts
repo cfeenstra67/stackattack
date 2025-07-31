@@ -61,15 +61,16 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { getEc2InstanceConnectCidr } from "../functions/ec2-instance-connect-cidr.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
+import { shortId } from "../short-id.js";
 import {
-  NetworkInput,
-  VpcInput,
   getVpcAttributes,
   getVpcDefaultSecurityGroup,
   getVpcId,
+  type NetworkInput,
+  type VpcInput,
 } from "./vpc.js";
 
 /**
@@ -228,20 +229,19 @@ export interface ClusterInstanceRoleArgs {
 
 /**
  * Creates an IAM role for ECS cluster instances with necessary policies attached.
- * @param ctx - The context for resource naming and tagging
+ * @param baseCtx - The context for resource naming and tagging
  * @param args - Optional arguments for role configuration
  * @returns The created IAM role
  */
 export function clusterInstanceRole(
-  ctx: Context,
+  baseCtx: Context,
   args?: ClusterInstanceRoleArgs,
 ) {
-  if (!args?.noPrefix) {
-    ctx = ctx.prefix("instance-role");
-  }
+  const ctx = args?.noPrefix ? baseCtx : baseCtx.prefix("instance-role");
+
   const ecsInstanceRole = new aws.iam.Role(ctx.id(), {
     // Name prefixes can be at most 38 characters
-    namePrefix: ctx.id().slice(0, 38),
+    namePrefix: shortId(baseCtx, "instance-role", 38),
     assumeRolePolicy: serviceAssumeRolePolicy("ec2").json,
     tags: ctx.tags(),
   });
@@ -554,10 +554,10 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
   };
 
   let architecture: pulumi.Input<string>;
-  let instanceType: pulumi.Input<string> | undefined = undefined;
+  let instanceType: pulumi.Input<string> | undefined;
   let instanceRequirements:
     | aws.types.input.ec2.LaunchTemplateInstanceRequirements
-    | undefined = undefined;
+    | undefined;
   if ("type" in instances) {
     instanceType = instances.type;
     architecture = getInstanceTypeArchitecture(instances.type);
@@ -675,7 +675,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
           onDemandBaseCapacity: args.onDemandBase,
           onDemandPercentageAboveBaseCapacity: args.noSpot
             ? 100
-            : args.onDemandPercentage ?? 0,
+            : (args.onDemandPercentage ?? 0),
           spotAllocationStrategy:
             args.spotAllocationStrategy ?? "capacity-optimized",
         },

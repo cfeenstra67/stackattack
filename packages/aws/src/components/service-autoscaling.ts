@@ -67,8 +67,8 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
-import { ServiceInput, getServiceId } from "./service.js";
+import type { Context } from "../context.js";
+import { getServiceId, type ServiceInput } from "./service.js";
 
 /**
  * Extracts service and cluster dimensions from an ECS service for CloudWatch metrics.

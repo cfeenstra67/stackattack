@@ -89,13 +89,13 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import {
-  NetworkInput,
-  VpcInput,
   getVpcAttributes,
   getVpcDefaultSecurityGroup,
   getVpcId,
+  type NetworkInput,
+  type VpcInput,
 } from "./vpc.js";
 
 /**

@@ -80,9 +80,9 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { singlePortIngressSecurityGroup } from "../security-groups.js";
-import { Network } from "./vpc.js";
+import type { Network } from "./vpc.js";
 
 /**
  * Configuration arguments for creating an ElastiCache Redis cluster.

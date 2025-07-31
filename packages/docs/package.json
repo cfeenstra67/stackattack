@@ -11,7 +11,7 @@
     "build": "pnpm generate && pnpm build-only",
     "preview": "astro preview",
     "generate": "rm -r src/content/docs/{components,utilities,concepts,components.md} || true && tsx generate.ts",
-    "check": "biome check --apply src *.ts"
+    "check": "biome check --write src *.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +21,7 @@
     "astro": "^5.10.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.5.0",
+    "@biomejs/biome": "^2.1.3",
     "@pulumi/aws": "^6.73.0",
     "@pulumi/pulumi": "^3.181.0",
     "@stackattack/aws": "workspace:*",

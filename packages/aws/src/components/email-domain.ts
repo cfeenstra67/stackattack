@@ -105,10 +105,10 @@
 
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type { Context } from "../context.js";
 import { serviceAssumeRolePolicy } from "../policies.js";
 import { getZoneFromDomain } from "./certificate.js";
-import { S3FirehoseArgs, s3Firehose } from "./s3-firehose.js";
+import { type S3FirehoseArgs, s3Firehose } from "./s3-firehose.js";
 import { topicWebhook } from "./topic-webhook.js";
 
 /**

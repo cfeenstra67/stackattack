@@ -1,43 +1,42 @@
 /* Import IBM Plex Mono and Inter */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap");
 
 /* Dark mode colors. */
 :root {
-	--sl-color-accent-low: #401400;
-	--sl-color-accent: #ad4400;
-	--sl-color-accent-high: #f3b9a1;
-	--sl-color-white: #ffffff;
-	--sl-color-gray-1: #eaedfd;
-	--sl-color-gray-2: #bec1d4;
-	--sl-color-gray-3: #8488ad;
-	--sl-color-gray-4: #515577;
-	--sl-color-gray-5: #323554;
-	--sl-color-gray-6: #212341;
-	--sl-color-black: #151725;
+  --sl-color-accent-low: #401400;
+  --sl-color-accent: #ad4400;
+  --sl-color-accent-high: #f3b9a1;
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #eaedfd;
+  --sl-color-gray-2: #bec1d4;
+  --sl-color-gray-3: #8488ad;
+  --sl-color-gray-4: #515577;
+  --sl-color-gray-5: #323554;
+  --sl-color-gray-6: #212341;
+  --sl-color-black: #151725;
 
-  
   /* Typography - IBM Plex Mono for everything */
   --sl-font-system: "IBM Plex Mono", monospace;
   --sl-font-system-mono: "IBM Plex Mono", monospace;
-  
+
   /* Spacing */
   --sl-nav-height: 4rem;
-  
+
   /* Border radius for that subtle retro feel */
   --sl-border-radius: 0.125rem;
 }
 /* Light mode colors. */
-:root[data-theme='light'] {
-	--sl-color-accent-low: #f8ccb9;
-	--sl-color-accent: #b04500;
-	--sl-color-accent-high: #571e00;
-	--sl-color-white: #151725;
-	--sl-color-gray-1: #212341;
-	--sl-color-gray-2: #323554;
-	--sl-color-gray-3: #515577;
-	--sl-color-gray-4: #8488ad;
-	--sl-color-gray-5: #bec1d4;
-	--sl-color-gray-6: #eaedfd;
-	--sl-color-gray-7: #f4f6fe;
-	--sl-color-black: #ffffff;
+:root[data-theme="light"] {
+  --sl-color-accent-low: #f8ccb9;
+  --sl-color-accent: #b04500;
+  --sl-color-accent-high: #571e00;
+  --sl-color-white: #151725;
+  --sl-color-gray-1: #212341;
+  --sl-color-gray-2: #323554;
+  --sl-color-gray-3: #515577;
+  --sl-color-gray-4: #8488ad;
+  --sl-color-gray-5: #bec1d4;
+  --sl-color-gray-6: #eaedfd;
+  --sl-color-gray-7: #f4f6fe;
+  --sl-color-black: #ffffff;
 }

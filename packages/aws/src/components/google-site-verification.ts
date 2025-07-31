@@ -34,8 +34,8 @@
  * The costs associated with setting up a single DNS record are minimal. You'll need a Route53 hosted zone, which costs ~$0.50/month, and DNS queries are billed at $0.40/million. Google only needs one DNS query to verify the domain, though they recommend you keep the site verification record indefinitely to ensure that they can continue to verify ownership.
  */
 import * as aws from "@pulumi/aws";
-import * as pulumi from "@pulumi/pulumi";
-import { Context } from "../context.js";
+import type * as pulumi from "@pulumi/pulumi";
+import type { Context } from "../context.js";
 import { getZoneFromDomain } from "./certificate.js";
 
 /**
