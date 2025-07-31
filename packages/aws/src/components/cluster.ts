@@ -240,6 +240,8 @@ export function clusterInstanceRole(
     ctx = ctx.prefix("instance-role");
   }
   const ecsInstanceRole = new aws.iam.Role(ctx.id(), {
+    // Name prefixes can be at most 38 characters
+    namePrefix: ctx.id().slice(0, 38),
     assumeRolePolicy: serviceAssumeRolePolicy("ec2").json,
     tags: ctx.tags(),
   });
@@ -637,7 +639,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
           ebs: {
             deleteOnTermination: "true",
             encrypted: "true",
-            volumeSize: args.diskSize ?? 25,
+            volumeSize: args.diskSize ?? 30,
           },
         },
       ],
@@ -694,11 +696,20 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
         "GroupInServiceInstances",
         "GroupTerminatingInstances",
       ],
-      tags: Object.entries(ctx.tags()).map(([key, value]) => ({
-        key,
-        value,
-        propagateAtLaunch: true,
-      })),
+      tags: [
+        // ECS will always add this tag, adding it manually eliminates drift in plans
+        {
+          key: "AmazonECSManaged",
+          value: "",
+          propagateAtLaunch: true,
+        },
+      ].concat(
+        Object.entries(ctx.tags()).map(([key, value]) => ({
+          key,
+          value,
+          propagateAtLaunch: true,
+        })),
+      ),
     },
     {
       ignoreChanges: ["desiredCapacity"],

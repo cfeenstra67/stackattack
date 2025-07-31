@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-ENV_STACK=env
+ENV_STACK=${ENV_STACK:-env}
 
 ACCOUNT_ID=$(aws sts get-caller-identity | jq -r .Account)
 REGION=$(pulumi -s $ENV_STACK config get aws:region)

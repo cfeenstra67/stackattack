@@ -8,12 +8,12 @@ test(projectName, async () => {
   await runIntegrationTest({
     idLength: 2,
     sourceStacks: ["prod"],
-    config: (_, config, stackName) => {
-      const domain = config[`${projectName}:domain`].value;
+    config: (configs, stacks) => {
+      const domain = configs.prod[`${projectName}:domain`].value;
 
-      return { domain: { value: `${stackName}.${domain}` } };
+      return { domain: { value: `${stacks.prod}.${domain}` } };
     },
-    validate: async (_, stack) => {
+    validate: async (stack) => {
       const outputs = await stack.outputs();
       const url = outputs.url.value;
       const response = await fetch(url);

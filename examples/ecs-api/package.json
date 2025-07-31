@@ -9,10 +9,12 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.build.json --noEmit",
-    "check": "biome check --apply src",
+    "check": "biome check --apply src *.ts",
     "start": "node dist/index.js",
     "generate": "drizzle-kit generate --config drizzle.config.ts",
-    "migrate": "drizzle-kit migrate --config drizzle.config.ts"
+    "migrate": "drizzle-kit migrate --config drizzle.config.ts",
+    "test": "pnpm node:test *.spec.ts",
+    "node:test": "node --loader ts-node/esm --no-warnings --test"
   },
   "keywords": [
     "aws",
@@ -29,10 +31,12 @@
     "pg": "^8.15.6"
   },
   "devDependencies": {
+    "@aws-sdk/client-ecr": "^3.857.0",
     "@biomejs/biome": "^1.5.0",
     "@pulumi/aws": "^6.83.0",
     "@pulumi/pulumi": "^3.181.0",
     "@stackattack/aws": "workspace:*",
+    "@stackattack/testing": "workspace:*",
     "@types/node": "^20.19.9",
     "@types/pg": "^8.11.14",
     "ts-node": "^10.9.2",
