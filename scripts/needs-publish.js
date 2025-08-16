@@ -62,4 +62,4 @@ for (const p of pkgs) {
 }
 
 // expose for GitHub Actions and print for humans
-console.log(`needs_publish=${needsPublish}`);
+console.log(`needs-publish=${needsPublish}`);
