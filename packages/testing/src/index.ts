@@ -70,25 +70,39 @@ export async function runIntegrationTest<T extends string>({
     stacks.push([sourceStack, stack]);
   }
 
+  let step = "";
+  let targetStack = "";
   try {
     if (!deleteOnly) {
       for (const [sourceStack, stack] of stacks) {
+        targetStack = stack.name;
+        step = "unprotecting existing resources";
         await unprotectAll(stack);
 
+        step = "creating";
         console.log("Creating", stack.name);
         await stack.up();
 
+        step = "refreshing";
         await stack.refresh();
 
+        step = "confirming no drift";
         await stack.preview({ expectNoChanges: true });
 
         if (validate) {
+          step = "validating";
           console.log("Validating", stack.name);
           await validate(stack, sourceStack);
           console.log("Validation succeeded for", stack.name);
         }
       }
     }
+  } catch (error) {
+    console.error(
+      `Error on step "${step}" for "${targetStack}": ${error}`,
+      (error as Error).stack,
+    );
+    throw error;
   } finally {
     if (!skipDelete) {
       for (const [, stack] of stacks.reverse()) {

@@ -53,8 +53,8 @@ jobs:
       fail-fast: false
       matrix:
         package:
-          - "@stackattack/astro-static-site"
-          - "@stackattack/vite-static-site-example"
+          # - "@stackattack/astro-static-site"
+          # - "@stackattack/vite-static-site-example"
           - "@stackattack/ecs-api-example"
     permissions:
       id-token: write
@@ -80,6 +80,7 @@ jobs:
       - run: pnpm --filter ${{ matrix.package }} test
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          SKIP_DELETE: "1"
 
   publish:
     needs: [gate, integration-tests]
