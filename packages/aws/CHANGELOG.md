@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.6.2
+
+### Patch Changes
+
+- Fix invalid patch version
+
 ## 0.6.1
 
 ### Patch Changes
