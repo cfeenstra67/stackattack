@@ -78,6 +78,8 @@ jobs:
       - run: pnpm install --frozen-lockfile --filter ${{ matrix.package }}...
       - run: pnpm --filter ${{ matrix.package }}... build
       - run: pnpm --filter ${{ matrix.package }} test
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   publish:
     needs: [gate, integration-tests]
