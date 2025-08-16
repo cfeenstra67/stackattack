@@ -56,6 +56,9 @@ jobs:
           - "@stackattack/astro-static-site"
           - "@stackattack/vite-static-site-example"
           # - "@stackattack/ecs-api-example"
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Configure AWS Credentials
