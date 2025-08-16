@@ -208,7 +208,7 @@ export function database(baseCtx: Context, args: DatabaseArgs): DatabaseOutput {
   const instance = new aws.rds.Instance(ctx.id(), {
     // Pulumi adds a 27 character postfix and identifers may not be greater than 63 characters
     // https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html
-    identifierPrefix: shortId(baseCtx, "database", 63 - 27),
+    identifierPrefix: `${shortId(baseCtx, "database", 63 - 28)}-`,
     allocatedStorage: 30,
     applyImmediately: true,
     availabilityZone,
