@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.6.5-dev.1
+
+### Patch Changes
+
+- Bump version for integration testing
+
 ## 0.6.5-dev.0
 
 ### Patch Changes
