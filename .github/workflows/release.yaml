@@ -33,7 +33,7 @@ jobs:
       - id: cs
         uses: changesets/action@v1
         with:
-          publish: bash -c 'echo "should-publish=true" >> $GITHUB_OUTPUT'
+          publish: echo bash -c 'echo "should-publish=true" >> $GITHUB_OUTPUT'
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
