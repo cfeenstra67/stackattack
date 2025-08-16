@@ -77,10 +77,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile --filter ${{ matrix.package }}...
       - run: pnpm --filter ${{ matrix.package }}... build
+      - name: Set up Docker Buildx
+        if: matrix.package == "@stackattack/ecs-api-example"
+        uses: docker/setup-buildx-action@v3
       - run: pnpm --filter ${{ matrix.package }} test
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           SKIP_DELETE: "1"
+          RUN_ID: "33a9943d"
 
   publish:
     needs: [gate, integration-tests]
