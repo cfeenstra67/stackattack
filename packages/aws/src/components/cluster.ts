@@ -647,6 +647,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
         httpEndpoint: "enabled",
         httpTokens: "required",
       },
+      updateDefaultVersion: true,
       tags: ctx.tags(),
     },
     {
@@ -682,7 +683,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
         launchTemplate: {
           launchTemplateSpecification: {
             launchTemplateId: launchTemplate.id,
-            version: "$Latest",
+            version: pulumi.interpolate`${launchTemplate.latestVersion}`,
           },
         },
       },

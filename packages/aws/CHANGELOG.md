@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.6.3
+
+### Patch Changes
+
+- Fix autoscaling group not updating when launch template is updated
+
 ## 0.6.2
 
 ### Patch Changes
