@@ -77,8 +77,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile --filter ${{ matrix.package }}...
       - run: pnpm --filter ${{ matrix.package }}... build
-      - run: echo "Running integration tests for ${{ matrix.package }}"
-      # - run: pnpm --filter ${{ matrix.package }} test
+      - run: pnpm --filter ${{ matrix.package }} test
 
   publish:
     needs: [gate, integration-tests]
