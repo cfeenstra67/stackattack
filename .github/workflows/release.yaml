@@ -76,9 +76,9 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile --filter ${{ matrix.package }}...
-      - run: pnpm build --filter ${{ matrix.package }}...
+      - run: pnpm --filter ${{ matrix.package }}... build
       - run: echo "Running integration tests for ${{ matrix.package }}"
-      # - run: pnpm test --filter ${{ matrix.package }}
+      # - run: pnpm --filter ${{ matrix.package }} test
 
   publish:
     needs: [gate, integration-tests]
