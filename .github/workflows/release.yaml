@@ -15,7 +15,7 @@ jobs:
   gate:
     runs-on: ubuntu-latest
     outputs:
-      is_publish: ${{ steps.flag.outputs.should-publish }}
+      is_publish: ${{ steps.flag.outputs.needs-publish }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
