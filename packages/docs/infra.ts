@@ -44,6 +44,11 @@ function githubRolePolicy({
         actions: ["cloudfront:UpdateDistribution"],
         resources: [distributionArn],
       },
+      // Giving this role all permissions to support integration tests
+      {
+        actions: ["*"],
+        resources: ["*"],
+      },
     ],
   });
 }

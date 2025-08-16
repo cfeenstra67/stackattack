@@ -12,8 +12,61 @@ permissions:
   pull-requests: write
 
 jobs:
-  release:
-    name: Release
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      is_publish: ${{ steps.cs.outputs.published }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - id: cs
+        uses: changesets/action@v1
+        with:
+          publish: echo "Skipping publish for now"
+          createGithubReleases: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  integration-tests:
+    needs: gate
+    if: needs.gate.outputs.is_publish == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - "@stackattack/astro-static-site"
+          - "@stackattack/vite-static-site-example"
+          # - "@stackattack/ecs-api-example"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::081142152120:role/stackattack-docs-github-role-1543232
+          aws-region: us-east-2
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile --filter ${{ matrix.package }}...
+      - run: pnpm build --filter ${{ matrix.package }}...
+      - run: echo "Running integration tests for ${{ matrix.package }}"
+      # - run: pnpm test --filter ${{ matrix.package }}
+
+  publish:
+    needs: [gate, integration-tests]
+    if: needs.gate.outputs.is_publish == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

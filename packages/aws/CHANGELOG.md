@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.6.5-dev.0
+
+### Patch Changes
+
+- Add integration tests to release pipeline
+
 ## 0.6.4
 
 ### Patch Changes

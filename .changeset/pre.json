@@ -1,0 +1,15 @@
+{
+  "mode": "pre",
+  "tag": "dev",
+  "initialVersions": {
+    "@stackattack/astro-static-site": "0.0.1",
+    "@stackattack/ecs-api-example": "1.0.1",
+    "@stackattack/vite-static-site-example": "0.0.0",
+    "@stackattack/aws": "0.6.4",
+    "@stackattack/docs": "0.1.0",
+    "@stackattack/testing": "0.0.0"
+  },
+  "changesets": [
+    "thick-donkeys-matter"
+  ]
+}
