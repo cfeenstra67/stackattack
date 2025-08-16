@@ -33,13 +33,13 @@ jobs:
       - id: cs
         uses: changesets/action@v1
         with:
-          publish: echo "should-publish=true" >> $GITHUB_OUTPUT
+          publish: bash -c 'echo "should-publish=true" >> $GITHUB_OUTPUT'
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: |
-          echo "Published: ${{ steps.cs.outputs.published }}"
+          echo "Published: ${{ steps.cs.outputs.should-publish }}"
 
   integration-tests:
     needs: gate
