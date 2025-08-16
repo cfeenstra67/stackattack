@@ -15,7 +15,7 @@ jobs:
   gate:
     runs-on: ubuntu-latest
     outputs:
-      is_publish: ${{ steps.cs.outputs.should-publish }}
+      is_publish: ${{ steps.flag.outputs.should-publish }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,16 +30,20 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - id: cs
-        uses: changesets/action@v1
+      - uses: changesets/action@v1
         with:
-          publish: echo bash -c 'echo "should-publish=true" >> $GITHUB_OUTPUT'
+          publish: touch .cs-publish
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: |
-          echo "Published: ${{ steps.cs.outputs.should-publish }}"
+      - id: flag
+        run: |
+          if [[ -f .cs-publish ]]; then
+            echo "should-publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "should-publish=false" >> $GITHUB_OUTPUT
+          fi
 
   integration-tests:
     needs: gate
