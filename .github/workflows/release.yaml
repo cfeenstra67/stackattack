@@ -15,7 +15,7 @@ jobs:
   gate:
     runs-on: ubuntu-latest
     outputs:
-      is_publish: ${{ steps.cs.outputs.published }}
+      is_publish: ${{ steps.cs.outputs.should-publish }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
       - id: cs
         uses: changesets/action@v1
         with:
-          publish: echo "Skipping publish for now"
+          publish: echo "should-publish=true" >> $GITHUB_OUTPUT
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
