@@ -3,4 +3,4 @@
 set -eo pipefail
 pnpm -r build
 pnpm changeset publish
-git push --follow-tags
+git push origin main --follow-tags
