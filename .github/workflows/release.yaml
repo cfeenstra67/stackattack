@@ -66,8 +66,15 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::081142152120:role/stackattack-docs-github-role-1543232
           aws-region: us-east-2
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
       - run: pnpm install --frozen-lockfile --filter ${{ matrix.package }}...
       - run: pnpm build --filter ${{ matrix.package }}...
       - run: echo "Running integration tests for ${{ matrix.package }}"
