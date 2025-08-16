@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "scripts": {
     "build": "pnpm -r build",
-    "check": "biome check --write *.json && pnpm -r check",
+    "check": "biome check --write *.json scripts && pnpm -r check",
     "build-and-push": "scripts/build-and-push.sh",
     "prerelease-enter": "changeset pre enter dev",
     "prerelease-exit": "changeset pre exit",

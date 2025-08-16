@@ -31,19 +31,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - uses: changesets/action@v1
-        with:
-          publish: touch .cs-publish
-          createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - id: flag
-        run: |
-          if [[ -f .cs-publish ]]; then
-            echo "should-publish=true" >> $GITHUB_OUTPUT
-          else
-            echo "should-publish=false" >> $GITHUB_OUTPUT
-          fi
+        run: node scripts/needs-publish.js >> $GITHUB_OUTPUT
 
   integration-tests:
     needs: gate
@@ -83,7 +74,6 @@ jobs:
       - run: pnpm --filter ${{ matrix.package }} test
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          SKIP_DELETE: "1"
           RUN_ID: "33a9943d"
 
   publish:
