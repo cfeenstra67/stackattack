@@ -1,5 +1,11 @@
 # @stackattack/aws
 
+## 0.6.5-dev.2
+
+### Patch Changes
+
+- 06bde48: Change default spot instance allocation setting to price-capacity-optimized
+
 ## 0.6.5-dev.1
 
 ### Patch Changes
