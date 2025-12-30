@@ -30,7 +30,8 @@ jobs:
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - uses: changesets/action@v1
+      - name: Create Release Pull Request
+        uses: changesets/action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - id: flag
@@ -97,7 +98,7 @@ jobs:
         run: pnpm -r build
       - name: Copy root README to aws
         run: cp README.md packages/aws/README.md
-      - name: Create Release Pull Request
+      - name: Publish Packages
         uses: changesets/action@v1
         with:
           publish: pnpm release

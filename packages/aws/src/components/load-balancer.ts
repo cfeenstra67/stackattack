@@ -7,9 +7,9 @@
  * import * as saws from "@stackattack/aws";
  *
  * const ctx = saws.context();
- * const network = saws.vpc(ctx);
+ * const vpc = saws.vpc(ctx);
  * const lb = saws.loadBalancer(ctx, {
- *   network: network.network("public")
+ *   network: vpc.network("public")
  * });
  *
  * export const loadBalancerUrl = lb.url;
@@ -90,6 +90,7 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import type { Context } from "../context.js";
+import { type BucketInput, bucket, getBucketId } from "./bucket.js";
 import {
   getVpcAttributes,
   getVpcDefaultSecurityGroup,
@@ -416,6 +417,14 @@ export interface LoadBalancerArgs {
   certificate?: pulumi.Input<string>;
   /** Connection idle timeout in seconds */
   idleTimeout?: pulumi.Input<number>;
+  /** Specify a bucket where access logs should be stored. If not passed, a new bucket will be created. If `null` is passed, no access logs will be stored. */
+  accessLogsBucket?: null | pulumi.Input<BucketInput>;
+  /** Prefix for load balancer access logs within the S3 bucket */
+  accessLogsPrefix?: pulumi.Input<string>;
+  /** Name of the Athena table to create to query access logs. If not passed, no table will be created. */
+  accessLogsTable?: pulumi.Input<string>;
+  /** Name of the Athena database to create the access logs table in. Only relevant if `accessLogsTable` is passed. If not passed, the default database will be used. */
+  accessLogsDatabase?: pulumi.Input<string>;
   /** Whether to skip adding a prefix to the context */
   noPrefix?: boolean;
 }
@@ -474,13 +483,31 @@ export function loadBalancer(
     vpc: args.network.vpc,
   });
 
+  let accessLogsBucket: pulumi.Input<string> | undefined;
+  if (args.accessLogsBucket) {
+    accessLogsBucket = getBucketId(args.accessLogsBucket);
+  } else if (args.accessLogsBucket === undefined) {
+    accessLogsBucket = bucket(ctx).bucket;
+  }
+
   const loadBalancer = new aws.lb.LoadBalancer(ctx.id(), {
     namePrefix: "lb-",
     subnets: args.network.subnetIds,
     securityGroups: [securityGroup.id],
     idleTimeout: args.idleTimeout,
+    accessLogs:
+      accessLogsBucket === undefined
+        ? undefined
+        : {
+            enabled: true,
+            bucket: accessLogsBucket,
+            prefix: args.accessLogsPrefix,
+          },
     tags: ctx.tags(),
   });
+
+  if (args.accessLogsTable) {
+  }
 
   const { listener } = loadBalancerListener(ctx, {
     loadBalancer,

@@ -478,7 +478,7 @@ export interface ClusterCapacityConfig {
   onDemandBase?: number;
   /** Percentage of on-demand instances above base capacity */
   onDemandPercentage?: number;
-  /** Strategy for allocating spot instances */
+  /** Strategy for allocating spot instances; defaults to `price-capacity-optimized`. */
   spotAllocationStrategy?: string;
   /** Security group ID that should be allowed SSH access to the instances */
   sourceSecurityGroupId?: pulumi.Input<string>;
@@ -670,6 +670,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
     {
       vpcZoneIdentifiers: args.network.subnetIds,
       minSize: sizes.min,
+      desiredCapacity: sizes.min,
       maxSize: sizes.max,
       mixedInstancesPolicy: {
         instancesDistribution: {
@@ -678,7 +679,7 @@ export function clusterCapacity(ctx: Context, args: ClusterCapacityArgs) {
             ? 100
             : (args.onDemandPercentage ?? 0),
           spotAllocationStrategy:
-            args.spotAllocationStrategy ?? "capacity-optimized",
+            args.spotAllocationStrategy ?? "price-capacity-optimized",
         },
         launchTemplate: {
           launchTemplateSpecification: {
